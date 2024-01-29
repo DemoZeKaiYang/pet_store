@@ -1,0 +1,92 @@
+/* 水平间距 */
+/* 水平间距 */
+/*每个页面公共css */
+.myaddress[data-v-eda7be84] {
+  padding: 0.3125rem 4%;
+  padding-bottom: 4.375rem;
+  margin-top: 0.3125rem;
+}
+.order_address[data-v-eda7be84] {
+  height: 5.625rem;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 0.3125rem;
+  position: relative;
+  box-shadow: 0 0 0.3125rem #ddd;
+  margin-bottom: 0.625rem;
+}
+.order_address uni-image[data-v-eda7be84] {
+  width: 100%;
+  height: 100%;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+.address_box[data-v-eda7be84] {
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 10;
+  box-sizing: border-box;
+  padding: 0.625rem;
+  display: flex;
+  align-items: center;
+}
+.weizhi_icon uni-text[data-v-eda7be84] {
+  font-size: 1.25rem;
+  margin-left: 0.3125rem;
+}
+.address_box .center[data-v-eda7be84] {
+  margin-left: 0.625rem;
+}
+.address_box .center .name[data-v-eda7be84] {
+  height: 1.875rem;
+  line-height: 1.875rem;
+}
+.address_box .center .name .text1[data-v-eda7be84] {
+  font-size: 0.8125rem;
+  font-weight: bold;
+  color: #333;
+  display: inline-block;
+  margin-right: 0.625rem;
+}
+.phones[data-v-eda7be84] {
+  font-size: 0.75rem;
+  color: #999;
+  z-index: 0;
+}
+.address_box .address_name[data-v-eda7be84] {
+  font-size: 0.8125rem;
+  font-weight: bold;
+  color: #333;
+}
+.noaddress[data-v-eda7be84] {
+  margin-left: 1.25rem;
+  font-weight: bold;
+  color: #333;
+  font-size: 0.8125rem;
+}
+.caozuo[data-v-eda7be84] {
+  position: absolute;
+  right: 0.625rem;
+  display: flex;
+  top: 0.625rem;
+}
+.caozuo uni-view[data-v-eda7be84] {
+  font-size: 0.75rem;
+  color: #666;
+  margin-left: 0.9375rem;
+}
+.caozuo uni-view uni-text[data-v-eda7be84] {
+  font-size: 0.75rem;
+}
+.moren[data-v-eda7be84] {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.moren uni-text[data-v-eda7be84] {
+  font-size: 1.875rem;
+}

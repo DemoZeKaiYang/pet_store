@@ -1,41 +1,157 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
-		{
-			"path": "pages/index/index",
-			"style": {
-				"navigationBarTitleText": "uni-app"
-			}
-		},
-      
+  "easycom": {
+    "autoscan": true
+
+  },
+  "pages": [
     {
-      "path":"pages/test1/index",
+      "path": "pages/my/index",
       "style": {
-      	"navigationBarTitleText": "uni-app"
+        "navigationBarTitleText": "个人中心"
+      }
+    },
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationBarTitleText": "首页",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path" : "pages/messages/index",
+      "style" : 
+      {
+        "navigationBarTitleText" : "消息",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/shop/index",
+      "style" : 
+      {
+        "navigationBarTitleText" : "商城",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/category/index",
+      "style" : 
+      {
+        "navigationBarTitleText" : "全部分类",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/category/categoryproductlist",
+      "style" : 
+      {
+        "navigationBarTitleText" : "详细分类",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/category/productdetail",
+      "style" : 
+      {
+        "enablePullDownRefresh" : false,
+        "navigationBarTitleText": "详细商品",
+        "navigationStyle": "custom",
+        "titleNView": false //禁用原生导航栏
+      }
+    },
+    {
+      "path" : "pages/cat/cat",
+      "style" : 
+      {
+        "navigationBarTitleText" : "购物车",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/my/Address",
+      "style" : 
+      {
+        "navigationBarTitleText" : "地址",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/my/EditAddress",
+      "style" : 
+      {
+        "navigationBarTitleText" : "编辑地址",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/my/EditPerson",
+      "style" : 
+      {
+        "navigationBarTitleText" : "",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/home/DetailService",
+      "style" : 
+      {
+        "navigationBarTitleText" : "",
+        "enablePullDownRefresh" : false
       }
     }
-	],
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#ff533c",
-		"backgroundColor": "#F8F8F8"
-	},
-	"uniIdRouter": {},
+
+
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "宠物家园",
+    "navigationBarBackgroundColor": "#2979ff",
+    "backgroundColor": "#2979ff",
+    "app-plus": {
+      "background": "#efeff4"
+    }
+  },
   "tabBar": {
-    "color": "#000",
-    "selectedColor": "#f00",
-    "list": [
-      {
-        "text": "首页",
-        "pagePath": "pages/index/index",
-        "iconPath": "static/logo.png",
-        "selectedIconPath": "static/logo.png"
+    "color": "#7A7E83",
+    "selectedColor": "#2979ff",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [{
+      "iconPath": "static/image/chongwushouye.png",
+      "selectedIconPath": "static/image/chongwushouye-selected.png",
+        "pagePath": "pages/home/index",
+        "text": "主页"
       },
       {
-        "text": "个人",
-        "pagePath": "pages/test1/index",
-        "iconPath": "static/logo.png",
-        "selectedIconPath": "static/logo.png"
+        "text": "商城",
+        "pagePath": "pages/shop/index",
+        "iconPath": "static/image/shouye.png",
+        "selectedIconPath": "static/image/shouye-selected.png"
+      },
+      {
+        "iconPath": "static/image/xiaoxi.png",
+        "selectedIconPath": "static/image/xiaoxi-selected.png",
+        "pagePath": "pages/messages/index",
+        "text": "消息"
+      },
+  
+      {
+        "iconPath": "static/image/icon7.png",
+        "selectedIconPath": "static/image/icon7-selected.png",
+        "pagePath": "pages/my/index",
+        "text": "我的"
+      }
+
+
+    ]
+  },
+  "condition" : { //模式配置，仅开发期间生效
+    "current": 0, //当前激活的模式(list 的索引项)
+    "list": [
+      {
+        "name": "", //模式名称
+        "path": "", //启动页面，必选
+        "query": "" //启动参数，在页面的onLoad函数里面得到
       }
     ]
   }

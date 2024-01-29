@@ -4,7 +4,7 @@
     "iPhone",
     "iPad"
   ],
-  "id": "",
+  "id": "__UNI__EA811D3",
   "name": "pet-front-end",
   "version": {
     "name": "1.0.0",
@@ -37,9 +37,14 @@
       "id": "1",
       "kernel": "WKWebview"
     },
+    "statusbar": {
+      "immersed": "supportedDevice",
+      "style": "light",
+      "background": "#2979ff"
+    },
     "usingComponents": true,
+    "nvueCompiler": "uni-app",
     "nvueStyleCompiler": "uni-app",
-    "compilerVersion": 3,
     "distribute": {
       "google": {
         "permissions": [
@@ -69,17 +74,10 @@
         }
       }
     },
-    "statusbar": {
-      "immersed": "supportedDevice",
-      "style": "dark",
-      "background": "#ff533c"
-    },
-    "uniStatistics": {
-      "enable": false
-    },
+    "arguments": "{\"path\":\"pages/home/DetailService\"}",
     "allowsInlineMediaPlayback": true,
     "safearea": {
-      "background": "#FFFFFF",
+      "background": "#ffffff",
       "bottom": {
         "offset": "auto"
       }
@@ -87,7 +85,7 @@
     "uni-app": {
       "control": "uni-v3",
       "vueVersion": "3",
-      "compilerVersion": "3.98",
+      "compilerVersion": "3.99",
       "nvueCompiler": "uni-app",
       "renderer": "auto",
       "nvue": {
@@ -100,34 +98,43 @@
     },
     "tabBar": {
       "position": "bottom",
-      "color": "#000",
-      "selectedColor": "#f00",
+      "color": "#7A7E83",
+      "selectedColor": "#2979ff",
       "borderStyle": "rgba(0,0,0,0.4)",
       "blurEffect": "none",
       "fontSize": "10px",
       "iconWidth": "24px",
       "spacing": "3px",
       "height": "50px",
+      "backgroundColor": "#ffffff",
       "list": [
         {
-          "text": "首页",
-          "pagePath": "pages/index/index",
-          "iconPath": "/static/logo.png",
-          "selectedIconPath": "/static/logo.png"
+          "iconPath": "/static/image/chongwushouye.png",
+          "selectedIconPath": "/static/image/chongwushouye-selected.png",
+          "pagePath": "pages/home/index",
+          "text": "主页"
         },
         {
-          "text": "个人",
-          "pagePath": "pages/test1/index",
-          "iconPath": "/static/logo.png",
-          "selectedIconPath": "/static/logo.png"
+          "text": "商城",
+          "pagePath": "pages/shop/index",
+          "iconPath": "/static/image/shouye.png",
+          "selectedIconPath": "/static/image/shouye-selected.png"
+        },
+        {
+          "iconPath": "/static/image/xiaoxi.png",
+          "selectedIconPath": "/static/image/xiaoxi-selected.png",
+          "pagePath": "pages/messages/index",
+          "text": "消息"
+        },
+        {
+          "iconPath": "/static/image/icon7.png",
+          "selectedIconPath": "/static/image/icon7-selected.png",
+          "pagePath": "pages/my/index",
+          "text": "我的"
         }
       ],
       "selectedIndex": 0,
-      "shown": true,
-      "child": [
-        "lauchwebview"
-      ],
-      "selected": 0
+      "shown": true
     }
   },
   "launch_path": "__uniappview.html"
