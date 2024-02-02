@@ -2,10 +2,10 @@
   <view>
     <uni-notice-bar show-icon scrollable text="uni-app 版正式发布，开发一次，同时发布iOS、Android、H5、微信小程序、支付宝小程序、百度小程序、头条小程序等7大平台。" />
     <view class="hot-service">
-      <ServiceSelect title="上门喂猫" bgColor="#2979FF"></ServiceSelect>
-      <ServiceSelect title="上门喂狗" bgColor="#2979FF"></ServiceSelect>
-      <ServiceSelect title="预约服务" bgColor="#2979FF"></ServiceSelect>
-      <ServiceSelect title="我要接单" bgColor="#2979FF"></ServiceSelect>
+      <ServiceSelect title="上门喂猫" bgColor="#2979FF" type="zhongyiguan" icColor="#fff"></ServiceSelect>
+      <ServiceSelect title="上门喂狗" bgColor="#2979FF"  type="liugou"  icColor="#fff"></ServiceSelect>
+      <ServiceSelect title="预约服务" bgColor="#2979FF" type="yuyuedingdan" icColor="#fff"></ServiceSelect>
+      <ServiceSelect title="领养宠物" bgColor="#2979FF" type="aixinlingyanghover"  icColor="#fff"></ServiceSelect>
     </view>
 
     <!-- 服务对象 -->
@@ -22,7 +22,7 @@
     <!-- 服务类型 -->
     <uni-section title="请选择服务宠物类型">
       <view class="type-service">
-          <SelectType></SelectType>
+          <SelectType @click="gotoDetailService"></SelectType>
           <SelectType></SelectType>
       </view>
     </uni-section>
@@ -36,6 +36,11 @@
   import ServiceSelect from './components/ServiceSelect.vue'
   import SelectItem from './components/SelectItem.vue'
   import SelectType from './components/SelectType.vue'
+  const gotoDetailService=()=>{
+    uni.navigateTo({
+      url:'/pages/home/DetailService'
+    })
+  }
 </script>
 
 <style lang="scss" scoped>

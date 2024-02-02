@@ -8,7 +8,7 @@
       <swiper-item>
         <uni-grid :showBorder="false" :column="4" :highlight="true" @change="change">
           <uni-grid-item v-for="(item, index) in arr" :index="index" :key="index">
-            <view class="grid-item-box" style="background-color: #fff;">
+            <view class="grid-item-box" style="background-color: #fff;" @click="gotoPet"> 
               <!-- <uni-icons type="image" :size="30" color="#777" /> -->
               <img :src="item" alt="" srcset="" />
               <text class="text">jerry</text>
@@ -49,6 +49,13 @@
   const arr = ref(['./static/image/cat1.jpg', './static/image/cat2.jpg', './static/image/cat3.jpg',
     './static/image/dog1.jpg'
   ])
+  
+  
+  const gotoPet=()=>{
+    uni.navigateTo({
+      url:'/pages/my/EditPet'
+    })
+  }
 </script>
 
 <style scoped lang="scss">

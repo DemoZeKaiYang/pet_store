@@ -1,7 +1,7 @@
 <template>
   
   <PersonInfo></PersonInfo>
-  <Order></Order>
+  <OrderList></OrderList>
   <MyPet></MyPet>
 <MoreFunction></MoreFunction>
 </template>
@@ -11,7 +11,7 @@
     ref
   } from 'vue'
   import PersonInfo from './components/PersonInfo.vue'
-  import Order from './components/Order.vue'
+  import OrderList from './components/OrderList.vue'
   import MyPet from './components/MyPet.vue'
   import MoreFunction from './components/MoreFunction.vue'
 </script>

@@ -120,6 +120,10 @@
           "selectedIconPath": "/static/image/shouye-selected.png"
         },
         {
+          "pagePath": "pages/community/index",
+          "text": "社区"
+        },
+        {
           "iconPath": "/static/image/xiaoxi.png",
           "selectedIconPath": "/static/image/xiaoxi-selected.png",
           "pagePath": "pages/messages/index",
@@ -137,7 +141,7 @@
       "child": [
         "lauchwebview"
       ],
-      "selected": 3
+      "selected": 4
     }
   },
   "launch_path": "__uniappview.html"

@@ -6,11 +6,11 @@
 
   <!-- 分类选项 -->
   <view class="category-select">
-    <CategorySelect bgColor="pink" type="dianzan" title="进口猫粮" icColor="#FB635E"></CategorySelect>
-    <CategorySelect bgColor="pink" type="dianzan" title="进口猫粮" icColor="#FB635E"></CategorySelect>
-    <CategorySelect bgColor="pink" type="dianzan" title="进口猫粮" icColor="#FB635E"></CategorySelect>
-    <CategorySelect bgColor="pink" type="dianzan" title="进口猫粮" icColor="#FB635E"></CategorySelect>
-    <CategorySelect bgColor="pink" type="dianzan" title="全部分类" icColor="#FB635E" @click="JumpCategory"></CategorySelect>
+    <CategorySelect bgColor="#2979FF" type="gouliang" title="狗狗主粮" icColor="#fff"></CategorySelect>
+    <CategorySelect bgColor="#2979FF" type="maoliang" title="猫咪主粮" icColor="#fff"></CategorySelect>
+    <CategorySelect bgColor="#2979FF" type="lingshi" title="肉类零食" icColor="#fff"></CategorySelect>
+    <CategorySelect bgColor="#2979FF" type="guantou" title="罐头湿粮" icColor="#fff"></CategorySelect>
+    <CategorySelect bgColor="#2979FF" type="fenleiorguangchangorqitatianchong" title="全部分类" icColor="#fff" @click="JumpCategory"></CategorySelect>
   </view>
   <!-- 商品列表 -->
   <ShopList></ShopList>

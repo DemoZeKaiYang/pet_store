@@ -12,7 +12,6 @@
   } from 'vue'
 
   const skuKey = ref(false)
-  
   const skuMode = ref(1)
   const goodsInfo = ref({
     "_id": "002",

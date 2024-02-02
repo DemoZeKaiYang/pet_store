@@ -1,0 +1,91 @@
+/* 水平间距 */
+/* 水平间距 */
+.base-btn[data-v-d3b50b6a] {
+  position: fixed;
+  width: 100%;
+  height: 50px;
+  bottom: var(--window-bottom);
+  left: 0;
+  justify-content: space-between;
+  background-color: #FFFFFF;
+}
+.base-con[data-v-d3b50b6a] {
+  margin-top: 7.5px;
+  display: flex;
+  height: inherit;
+  align-items: center;
+  justify-content: space-between;
+}
+.send-image[data-v-d3b50b6a] {
+  width: 35px;
+  line-height: 35px;
+  background-color: #2979FF;
+  border-radius: 50%;
+  text-align: center;
+  color: #FFFFFF;
+  font-size: 0.9375rem;
+}
+.input-text[data-v-d3b50b6a] {
+  width: 58%;
+  height: 35px;
+  background-color: #F2F2F2;
+  border-radius: 8px;
+  padding: 0 15px;
+}
+.send-input[data-v-d3b50b6a] {
+  width: 64px;
+  line-height: 35px;
+  text-align: center;
+  background-color: #2979FF;
+  border-radius: 8px;
+  color: #FFFFFF;
+}
+.scroll-view[data-v-d3b50b6a], .base-con[data-v-d3b50b6a] {
+  margin: 0 15px;
+}
+.avatar[data-v-d3b50b6a] {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  float: left;
+  margin-top: 20px;
+}
+.avatar-right[data-v-d3b50b6a] {
+  margin-right: 10px;
+}
+.message-box[data-v-d3b50b6a] {
+  max-width: 76%;
+  display: inline-block;
+  word-wrap: break-word;
+  /* 控制消息框换行 */
+}
+.message[data-v-d3b50b6a] {
+  font-size: 0.75rem;
+  background-color: #E6E6E6;
+  padding: 15px;
+  float: left;
+  border-radius: 8px;
+  overflow: hidden;
+  word-break: break-all;
+  white-space: pre-wrap;
+  margin-top: 20px;
+}
+.message-image[data-v-d3b50b6a] {
+  width: 80px;
+  height: 130px;
+  padding: 15px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.news-box[data-v-d3b50b6a]::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+.news-box:last-child .message[data-v-d3b50b6a] {
+  margin-bottom: 20px;
+}
+.is-me[data-v-d3b50b6a] {
+  float: right;
+  margin-left: 10px;
+}

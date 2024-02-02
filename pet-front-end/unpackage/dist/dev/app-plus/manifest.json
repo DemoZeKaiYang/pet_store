@@ -74,7 +74,7 @@
         }
       }
     },
-    "arguments": "{\"path\":\"pages/home/DetailService\"}",
+    "arguments": "{\"name\":\"\",\"path\":\"\",\"query\":\"\"}",
     "allowsInlineMediaPlayback": true,
     "safearea": {
       "background": "#ffffff",
@@ -117,8 +117,14 @@
         {
           "text": "商城",
           "pagePath": "pages/shop/index",
-          "iconPath": "/static/image/shouye.png",
-          "selectedIconPath": "/static/image/shouye-selected.png"
+          "iconPath": "/static/image/shangcheng.png",
+          "selectedIconPath": "/static/image/shangcheng-selected.png"
+        },
+        {
+          "iconPath": "/static/image/faxian.png",
+          "selectedIconPath": "/static/image/faxian-selected.png",
+          "pagePath": "pages/community/index",
+          "text": "发现"
         },
         {
           "iconPath": "/static/image/xiaoxi.png",
@@ -134,7 +140,11 @@
         }
       ],
       "selectedIndex": 0,
-      "shown": true
+      "shown": true,
+      "child": [
+        "lauchwebview"
+      ],
+      "selected": 4
     }
   },
   "launch_path": "__uniappview.html"
