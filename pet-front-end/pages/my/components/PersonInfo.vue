@@ -2,12 +2,12 @@
   <view class="my-infomation" @click="editPerson">
     <!-- 头像 -->
     <view class="my-avatar">
-      <img :src="`./static/touxiang.png`" alt="" />
+      <img :src="store.avatar" alt="" />
     </view>
     <!-- 个人信息 -->
     <view class="person">
-      <h3>张学友和刘德华最爱的人</h3>
-      <p>喜欢自己的猫狗</p>
+      <h3>{{store.user.user_name}}</h3>
+      <p>{{store.user.user_signature}}</p>
     </view>
     <!-- 图标 -->
     <view class="show-icon">
@@ -17,12 +17,16 @@
 </template>
 
 <script setup>
+  import {
+    useUserStore
+  } from '@/stores/user.js'
+  const store = useUserStore()
   const editPerson = () => {
     uni.navigateTo({
       url: '/pages/my/EditPerson',
-
     });
   }
+
 </script>
 <style lang="scss" scoped>
   .my-infomation {

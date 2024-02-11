@@ -31,6 +31,27 @@ if (uni.restoreGlobal) {
 }
 (function(vue, shared) {
   "use strict";
+  const ON_LOAD = "onLoad";
+  const ON_READY = "onReady";
+  const ON_PAGE_SCROLL = "onPageScroll";
+  const ON_REACH_BOTTOM = "onReachBottom";
+  function formatAppLog(type, filename, ...args) {
+    if (uni.__log__) {
+      uni.__log__(type, filename, ...args);
+    } else {
+      console[type].apply(console, [...args, filename]);
+    }
+  }
+  function resolveEasycom(component, easycom2) {
+    return shared.isString(component) ? easycom2 : component;
+  }
+  const createHook = (lifecycle) => (hook, target = vue.getCurrentInstance()) => {
+    !vue.isInSSRComponentSetup && vue.injectHook(lifecycle, hook, target);
+  };
+  const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
+  const onReady = /* @__PURE__ */ createHook(ON_READY);
+  const onPageScroll = /* @__PURE__ */ createHook(ON_PAGE_SCROLL);
+  const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
   const icons = {
     "id": "2852637",
     "name": "uniui图标库",
@@ -1213,7 +1234,7 @@ if (uni.restoreGlobal) {
     const reg = /^[0-9]*$/g;
     return typeof val === "number" || reg.test(val) ? val + "px" : val;
   };
-  const _sfc_main$13 = {
+  const _sfc_main$15 = {
     name: "UniIcons",
     emits: ["click"],
     props: {
@@ -1257,7 +1278,7 @@ if (uni.restoreGlobal) {
       }
     }
   };
-  function _sfc_render$I(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$F(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock(
       "text",
       {
@@ -1270,36 +1291,1696 @@ if (uni.restoreGlobal) {
       /* CLASS, STYLE */
     );
   }
-  const __easycom_0$c = /* @__PURE__ */ _export_sfc(_sfc_main$13, [["render", _sfc_render$I], ["__scopeId", "data-v-d31e1c47"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-icons/components/uni-icons/uni-icons.vue"]]);
-  const ON_LOAD = "onLoad";
-  const ON_PAGE_SCROLL = "onPageScroll";
-  const ON_REACH_BOTTOM = "onReachBottom";
-  function formatAppLog(type, filename, ...args) {
-    if (uni.__log__) {
-      uni.__log__(type, filename, ...args);
+  const __easycom_0$d = /* @__PURE__ */ _export_sfc(_sfc_main$15, [["render", _sfc_render$F], ["__scopeId", "data-v-d31e1c47"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-icons/components/uni-icons/uni-icons.vue"]]);
+  var isVue2 = false;
+  function set$1(target, key, val) {
+    if (Array.isArray(target)) {
+      target.length = Math.max(target.length, key);
+      target.splice(key, 1, val);
+      return val;
+    }
+    target[key] = val;
+    return val;
+  }
+  function del(target, key) {
+    if (Array.isArray(target)) {
+      target.splice(key, 1);
+      return;
+    }
+    delete target[key];
+  }
+  function getDevtoolsGlobalHook() {
+    return getTarget().__VUE_DEVTOOLS_GLOBAL_HOOK__;
+  }
+  function getTarget() {
+    return typeof navigator !== "undefined" && typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {};
+  }
+  const isProxyAvailable = typeof Proxy === "function";
+  const HOOK_SETUP = "devtools-plugin:setup";
+  const HOOK_PLUGIN_SETTINGS_SET = "plugin:settings:set";
+  let supported;
+  let perf;
+  function isPerformanceSupported() {
+    var _a;
+    if (supported !== void 0) {
+      return supported;
+    }
+    if (typeof window !== "undefined" && window.performance) {
+      supported = true;
+      perf = window.performance;
+    } else if (typeof global !== "undefined" && ((_a = global.perf_hooks) === null || _a === void 0 ? void 0 : _a.performance)) {
+      supported = true;
+      perf = global.perf_hooks.performance;
     } else {
-      console[type].apply(console, [...args, filename]);
+      supported = false;
+    }
+    return supported;
+  }
+  function now() {
+    return isPerformanceSupported() ? perf.now() : Date.now();
+  }
+  class ApiProxy {
+    constructor(plugin, hook) {
+      this.target = null;
+      this.targetQueue = [];
+      this.onQueue = [];
+      this.plugin = plugin;
+      this.hook = hook;
+      const defaultSettings = {};
+      if (plugin.settings) {
+        for (const id in plugin.settings) {
+          const item = plugin.settings[id];
+          defaultSettings[id] = item.defaultValue;
+        }
+      }
+      const localSettingsSaveId = `__vue-devtools-plugin-settings__${plugin.id}`;
+      let currentSettings = Object.assign({}, defaultSettings);
+      try {
+        const raw = localStorage.getItem(localSettingsSaveId);
+        const data = JSON.parse(raw);
+        Object.assign(currentSettings, data);
+      } catch (e2) {
+      }
+      this.fallbacks = {
+        getSettings() {
+          return currentSettings;
+        },
+        setSettings(value) {
+          try {
+            localStorage.setItem(localSettingsSaveId, JSON.stringify(value));
+          } catch (e2) {
+          }
+          currentSettings = value;
+        },
+        now() {
+          return now();
+        }
+      };
+      if (hook) {
+        hook.on(HOOK_PLUGIN_SETTINGS_SET, (pluginId, value) => {
+          if (pluginId === this.plugin.id) {
+            this.fallbacks.setSettings(value);
+          }
+        });
+      }
+      this.proxiedOn = new Proxy({}, {
+        get: (_target, prop) => {
+          if (this.target) {
+            return this.target.on[prop];
+          } else {
+            return (...args) => {
+              this.onQueue.push({
+                method: prop,
+                args
+              });
+            };
+          }
+        }
+      });
+      this.proxiedTarget = new Proxy({}, {
+        get: (_target, prop) => {
+          if (this.target) {
+            return this.target[prop];
+          } else if (prop === "on") {
+            return this.proxiedOn;
+          } else if (Object.keys(this.fallbacks).includes(prop)) {
+            return (...args) => {
+              this.targetQueue.push({
+                method: prop,
+                args,
+                resolve: () => {
+                }
+              });
+              return this.fallbacks[prop](...args);
+            };
+          } else {
+            return (...args) => {
+              return new Promise((resolve) => {
+                this.targetQueue.push({
+                  method: prop,
+                  args,
+                  resolve
+                });
+              });
+            };
+          }
+        }
+      });
+    }
+    async setRealTarget(target) {
+      this.target = target;
+      for (const item of this.onQueue) {
+        this.target.on[item.method](...item.args);
+      }
+      for (const item of this.targetQueue) {
+        item.resolve(await this.target[item.method](...item.args));
+      }
     }
   }
-  function resolveEasycom(component, easycom2) {
-    return shared.isString(component) ? easycom2 : component;
+  function setupDevtoolsPlugin(pluginDescriptor, setupFn) {
+    const descriptor = pluginDescriptor;
+    const target = getTarget();
+    const hook = getDevtoolsGlobalHook();
+    const enableProxy = isProxyAvailable && descriptor.enableEarlyProxy;
+    if (hook && (target.__VUE_DEVTOOLS_PLUGIN_API_AVAILABLE__ || !enableProxy)) {
+      hook.emit(HOOK_SETUP, pluginDescriptor, setupFn);
+    } else {
+      const proxy = enableProxy ? new ApiProxy(descriptor, hook) : null;
+      const list = target.__VUE_DEVTOOLS_PLUGINS__ = target.__VUE_DEVTOOLS_PLUGINS__ || [];
+      list.push({
+        pluginDescriptor: descriptor,
+        setupFn,
+        proxy
+      });
+      if (proxy)
+        setupFn(proxy.proxiedTarget);
+    }
   }
-  const createHook = (lifecycle) => (hook, target = vue.getCurrentInstance()) => {
-    !vue.isInSSRComponentSetup && vue.injectHook(lifecycle, hook, target);
+  /*!
+    * pinia v2.0.33
+    * (c) 2023 Eduardo San Martin Morote
+    * @license MIT
+    */
+  let activePinia;
+  const setActivePinia = (pinia) => activePinia = pinia;
+  const getActivePinia = () => vue.getCurrentInstance() && vue.inject(piniaSymbol) || activePinia;
+  const piniaSymbol = Symbol("pinia");
+  function isPlainObject(o2) {
+    return o2 && typeof o2 === "object" && Object.prototype.toString.call(o2) === "[object Object]" && typeof o2.toJSON !== "function";
+  }
+  var MutationType;
+  (function(MutationType2) {
+    MutationType2["direct"] = "direct";
+    MutationType2["patchObject"] = "patch object";
+    MutationType2["patchFunction"] = "patch function";
+  })(MutationType || (MutationType = {}));
+  const IS_CLIENT = typeof window !== "undefined";
+  const USE_DEVTOOLS = IS_CLIENT;
+  const _global = /* @__PURE__ */ (() => typeof window === "object" && window.window === window ? window : typeof self === "object" && self.self === self ? self : typeof global === "object" && global.global === global ? global : typeof globalThis === "object" ? globalThis : { HTMLElement: null })();
+  function bom(blob, { autoBom = false } = {}) {
+    if (autoBom && /^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
+      return new Blob([String.fromCharCode(65279), blob], { type: blob.type });
+    }
+    return blob;
+  }
+  function download(url, name, opts) {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url);
+    xhr.responseType = "blob";
+    xhr.onload = function() {
+      saveAs(xhr.response, name, opts);
+    };
+    xhr.onerror = function() {
+      console.error("could not download file");
+    };
+    xhr.send();
+  }
+  function corsEnabled(url) {
+    const xhr = new XMLHttpRequest();
+    xhr.open("HEAD", url, false);
+    try {
+      xhr.send();
+    } catch (e2) {
+    }
+    return xhr.status >= 200 && xhr.status <= 299;
+  }
+  function click(node) {
+    try {
+      node.dispatchEvent(new MouseEvent("click"));
+    } catch (e2) {
+      const evt = document.createEvent("MouseEvents");
+      evt.initMouseEvent("click", true, true, window, 0, 0, 0, 80, 20, false, false, false, false, 0, null);
+      node.dispatchEvent(evt);
+    }
+  }
+  const _navigator = typeof navigator === "object" ? navigator : { userAgent: "" };
+  const isMacOSWebView = /* @__PURE__ */ (() => /Macintosh/.test(_navigator.userAgent) && /AppleWebKit/.test(_navigator.userAgent) && !/Safari/.test(_navigator.userAgent))();
+  const saveAs = !IS_CLIENT ? () => {
+  } : (
+    // Use download attribute first if possible (#193 Lumia mobile) unless this is a macOS WebView or mini program
+    typeof HTMLAnchorElement !== "undefined" && "download" in HTMLAnchorElement.prototype && !isMacOSWebView ? downloadSaveAs : (
+      // Use msSaveOrOpenBlob as a second approach
+      "msSaveOrOpenBlob" in _navigator ? msSaveAs : (
+        // Fallback to using FileReader and a popup
+        fileSaverSaveAs
+      )
+    )
+  );
+  function downloadSaveAs(blob, name = "download", opts) {
+    const a2 = document.createElement("a");
+    a2.download = name;
+    a2.rel = "noopener";
+    if (typeof blob === "string") {
+      a2.href = blob;
+      if (a2.origin !== location.origin) {
+        if (corsEnabled(a2.href)) {
+          download(blob, name, opts);
+        } else {
+          a2.target = "_blank";
+          click(a2);
+        }
+      } else {
+        click(a2);
+      }
+    } else {
+      a2.href = URL.createObjectURL(blob);
+      setTimeout(function() {
+        URL.revokeObjectURL(a2.href);
+      }, 4e4);
+      setTimeout(function() {
+        click(a2);
+      }, 0);
+    }
+  }
+  function msSaveAs(blob, name = "download", opts) {
+    if (typeof blob === "string") {
+      if (corsEnabled(blob)) {
+        download(blob, name, opts);
+      } else {
+        const a2 = document.createElement("a");
+        a2.href = blob;
+        a2.target = "_blank";
+        setTimeout(function() {
+          click(a2);
+        });
+      }
+    } else {
+      navigator.msSaveOrOpenBlob(bom(blob, opts), name);
+    }
+  }
+  function fileSaverSaveAs(blob, name, opts, popup) {
+    popup = popup || open("", "_blank");
+    if (popup) {
+      popup.document.title = popup.document.body.innerText = "downloading...";
+    }
+    if (typeof blob === "string")
+      return download(blob, name, opts);
+    const force = blob.type === "application/octet-stream";
+    const isSafari = /constructor/i.test(String(_global.HTMLElement)) || "safari" in _global;
+    const isChromeIOS = /CriOS\/[\d]+/.test(navigator.userAgent);
+    if ((isChromeIOS || force && isSafari || isMacOSWebView) && typeof FileReader !== "undefined") {
+      const reader = new FileReader();
+      reader.onloadend = function() {
+        let url = reader.result;
+        if (typeof url !== "string") {
+          popup = null;
+          throw new Error("Wrong reader.result type");
+        }
+        url = isChromeIOS ? url : url.replace(/^data:[^;]*;/, "data:attachment/file;");
+        if (popup) {
+          popup.location.href = url;
+        } else {
+          location.assign(url);
+        }
+        popup = null;
+      };
+      reader.readAsDataURL(blob);
+    } else {
+      const url = URL.createObjectURL(blob);
+      if (popup)
+        popup.location.assign(url);
+      else
+        location.href = url;
+      popup = null;
+      setTimeout(function() {
+        URL.revokeObjectURL(url);
+      }, 4e4);
+    }
+  }
+  function toastMessage(message, type) {
+    const piniaMessage = "🍍 " + message;
+    if (typeof __VUE_DEVTOOLS_TOAST__ === "function") {
+      __VUE_DEVTOOLS_TOAST__(piniaMessage, type);
+    } else if (type === "error") {
+      console.error(piniaMessage);
+    } else if (type === "warn") {
+      console.warn(piniaMessage);
+    } else {
+      console.log(piniaMessage);
+    }
+  }
+  function isPinia(o2) {
+    return "_a" in o2 && "install" in o2;
+  }
+  function checkClipboardAccess() {
+    if (!("clipboard" in navigator)) {
+      toastMessage(`Your browser doesn't support the Clipboard API`, "error");
+      return true;
+    }
+  }
+  function checkNotFocusedError(error) {
+    if (error instanceof Error && error.message.toLowerCase().includes("document is not focused")) {
+      toastMessage('You need to activate the "Emulate a focused page" setting in the "Rendering" panel of devtools.', "warn");
+      return true;
+    }
+    return false;
+  }
+  async function actionGlobalCopyState(pinia) {
+    if (checkClipboardAccess())
+      return;
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(pinia.state.value));
+      toastMessage("Global state copied to clipboard.");
+    } catch (error) {
+      if (checkNotFocusedError(error))
+        return;
+      toastMessage(`Failed to serialize the state. Check the console for more details.`, "error");
+      console.error(error);
+    }
+  }
+  async function actionGlobalPasteState(pinia) {
+    if (checkClipboardAccess())
+      return;
+    try {
+      pinia.state.value = JSON.parse(await navigator.clipboard.readText());
+      toastMessage("Global state pasted from clipboard.");
+    } catch (error) {
+      if (checkNotFocusedError(error))
+        return;
+      toastMessage(`Failed to deserialize the state from clipboard. Check the console for more details.`, "error");
+      console.error(error);
+    }
+  }
+  async function actionGlobalSaveState(pinia) {
+    try {
+      saveAs(new Blob([JSON.stringify(pinia.state.value)], {
+        type: "text/plain;charset=utf-8"
+      }), "pinia-state.json");
+    } catch (error) {
+      toastMessage(`Failed to export the state as JSON. Check the console for more details.`, "error");
+      console.error(error);
+    }
+  }
+  let fileInput;
+  function getFileOpener() {
+    if (!fileInput) {
+      fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = ".json";
+    }
+    function openFile() {
+      return new Promise((resolve, reject) => {
+        fileInput.onchange = async () => {
+          const files = fileInput.files;
+          if (!files)
+            return resolve(null);
+          const file = files.item(0);
+          if (!file)
+            return resolve(null);
+          return resolve({ text: await file.text(), file });
+        };
+        fileInput.oncancel = () => resolve(null);
+        fileInput.onerror = reject;
+        fileInput.click();
+      });
+    }
+    return openFile;
+  }
+  async function actionGlobalOpenStateFile(pinia) {
+    try {
+      const open2 = await getFileOpener();
+      const result = await open2();
+      if (!result)
+        return;
+      const { text, file } = result;
+      pinia.state.value = JSON.parse(text);
+      toastMessage(`Global state imported from "${file.name}".`);
+    } catch (error) {
+      toastMessage(`Failed to export the state as JSON. Check the console for more details.`, "error");
+      console.error(error);
+    }
+  }
+  function formatDisplay(display) {
+    return {
+      _custom: {
+        display
+      }
+    };
+  }
+  const PINIA_ROOT_LABEL = "🍍 Pinia (root)";
+  const PINIA_ROOT_ID = "_root";
+  function formatStoreForInspectorTree(store) {
+    return isPinia(store) ? {
+      id: PINIA_ROOT_ID,
+      label: PINIA_ROOT_LABEL
+    } : {
+      id: store.$id,
+      label: store.$id
+    };
+  }
+  function formatStoreForInspectorState(store) {
+    if (isPinia(store)) {
+      const storeNames = Array.from(store._s.keys());
+      const storeMap = store._s;
+      const state2 = {
+        state: storeNames.map((storeId) => ({
+          editable: true,
+          key: storeId,
+          value: store.state.value[storeId]
+        })),
+        getters: storeNames.filter((id) => storeMap.get(id)._getters).map((id) => {
+          const store2 = storeMap.get(id);
+          return {
+            editable: false,
+            key: id,
+            value: store2._getters.reduce((getters, key) => {
+              getters[key] = store2[key];
+              return getters;
+            }, {})
+          };
+        })
+      };
+      return state2;
+    }
+    const state = {
+      state: Object.keys(store.$state).map((key) => ({
+        editable: true,
+        key,
+        value: store.$state[key]
+      }))
+    };
+    if (store._getters && store._getters.length) {
+      state.getters = store._getters.map((getterName) => ({
+        editable: false,
+        key: getterName,
+        value: store[getterName]
+      }));
+    }
+    if (store._customProperties.size) {
+      state.customProperties = Array.from(store._customProperties).map((key) => ({
+        editable: true,
+        key,
+        value: store[key]
+      }));
+    }
+    return state;
+  }
+  function formatEventData(events) {
+    if (!events)
+      return {};
+    if (Array.isArray(events)) {
+      return events.reduce((data, event) => {
+        data.keys.push(event.key);
+        data.operations.push(event.type);
+        data.oldValue[event.key] = event.oldValue;
+        data.newValue[event.key] = event.newValue;
+        return data;
+      }, {
+        oldValue: {},
+        keys: [],
+        operations: [],
+        newValue: {}
+      });
+    } else {
+      return {
+        operation: formatDisplay(events.type),
+        key: formatDisplay(events.key),
+        oldValue: events.oldValue,
+        newValue: events.newValue
+      };
+    }
+  }
+  function formatMutationType(type) {
+    switch (type) {
+      case MutationType.direct:
+        return "mutation";
+      case MutationType.patchFunction:
+        return "$patch";
+      case MutationType.patchObject:
+        return "$patch";
+      default:
+        return "unknown";
+    }
+  }
+  let isTimelineActive = true;
+  const componentStateTypes = [];
+  const MUTATIONS_LAYER_ID = "pinia:mutations";
+  const INSPECTOR_ID = "pinia";
+  const { assign: assign$1 } = Object;
+  const getStoreType = (id) => "🍍 " + id;
+  function registerPiniaDevtools(app, pinia) {
+    setupDevtoolsPlugin({
+      id: "dev.esm.pinia",
+      label: "Pinia 🍍",
+      logo: "https://pinia.vuejs.org/logo.svg",
+      packageName: "pinia",
+      homepage: "https://pinia.vuejs.org",
+      componentStateTypes,
+      app
+    }, (api) => {
+      if (typeof api.now !== "function") {
+        toastMessage("You seem to be using an outdated version of Vue Devtools. Are you still using the Beta release instead of the stable one? You can find the links at https://devtools.vuejs.org/guide/installation.html.");
+      }
+      api.addTimelineLayer({
+        id: MUTATIONS_LAYER_ID,
+        label: `Pinia 🍍`,
+        color: 15064968
+      });
+      api.addInspector({
+        id: INSPECTOR_ID,
+        label: "Pinia 🍍",
+        icon: "storage",
+        treeFilterPlaceholder: "Search stores",
+        actions: [
+          {
+            icon: "content_copy",
+            action: () => {
+              actionGlobalCopyState(pinia);
+            },
+            tooltip: "Serialize and copy the state"
+          },
+          {
+            icon: "content_paste",
+            action: async () => {
+              await actionGlobalPasteState(pinia);
+              api.sendInspectorTree(INSPECTOR_ID);
+              api.sendInspectorState(INSPECTOR_ID);
+            },
+            tooltip: "Replace the state with the content of your clipboard"
+          },
+          {
+            icon: "save",
+            action: () => {
+              actionGlobalSaveState(pinia);
+            },
+            tooltip: "Save the state as a JSON file"
+          },
+          {
+            icon: "folder_open",
+            action: async () => {
+              await actionGlobalOpenStateFile(pinia);
+              api.sendInspectorTree(INSPECTOR_ID);
+              api.sendInspectorState(INSPECTOR_ID);
+            },
+            tooltip: "Import the state from a JSON file"
+          }
+        ],
+        nodeActions: [
+          {
+            icon: "restore",
+            tooltip: "Reset the state (option store only)",
+            action: (nodeId) => {
+              const store = pinia._s.get(nodeId);
+              if (!store) {
+                toastMessage(`Cannot reset "${nodeId}" store because it wasn't found.`, "warn");
+              } else if (!store._isOptionsAPI) {
+                toastMessage(`Cannot reset "${nodeId}" store because it's a setup store.`, "warn");
+              } else {
+                store.$reset();
+                toastMessage(`Store "${nodeId}" reset.`);
+              }
+            }
+          }
+        ]
+      });
+      api.on.inspectComponent((payload, ctx) => {
+        const proxy = payload.componentInstance && payload.componentInstance.proxy;
+        if (proxy && proxy._pStores) {
+          const piniaStores = payload.componentInstance.proxy._pStores;
+          Object.values(piniaStores).forEach((store) => {
+            payload.instanceData.state.push({
+              type: getStoreType(store.$id),
+              key: "state",
+              editable: true,
+              value: store._isOptionsAPI ? {
+                _custom: {
+                  value: vue.toRaw(store.$state),
+                  actions: [
+                    {
+                      icon: "restore",
+                      tooltip: "Reset the state of this store",
+                      action: () => store.$reset()
+                    }
+                  ]
+                }
+              } : (
+                // NOTE: workaround to unwrap transferred refs
+                Object.keys(store.$state).reduce((state, key) => {
+                  state[key] = store.$state[key];
+                  return state;
+                }, {})
+              )
+            });
+            if (store._getters && store._getters.length) {
+              payload.instanceData.state.push({
+                type: getStoreType(store.$id),
+                key: "getters",
+                editable: false,
+                value: store._getters.reduce((getters, key) => {
+                  try {
+                    getters[key] = store[key];
+                  } catch (error) {
+                    getters[key] = error;
+                  }
+                  return getters;
+                }, {})
+              });
+            }
+          });
+        }
+      });
+      api.on.getInspectorTree((payload) => {
+        if (payload.app === app && payload.inspectorId === INSPECTOR_ID) {
+          let stores = [pinia];
+          stores = stores.concat(Array.from(pinia._s.values()));
+          payload.rootNodes = (payload.filter ? stores.filter((store) => "$id" in store ? store.$id.toLowerCase().includes(payload.filter.toLowerCase()) : PINIA_ROOT_LABEL.toLowerCase().includes(payload.filter.toLowerCase())) : stores).map(formatStoreForInspectorTree);
+        }
+      });
+      api.on.getInspectorState((payload) => {
+        if (payload.app === app && payload.inspectorId === INSPECTOR_ID) {
+          const inspectedStore = payload.nodeId === PINIA_ROOT_ID ? pinia : pinia._s.get(payload.nodeId);
+          if (!inspectedStore) {
+            return;
+          }
+          if (inspectedStore) {
+            payload.state = formatStoreForInspectorState(inspectedStore);
+          }
+        }
+      });
+      api.on.editInspectorState((payload, ctx) => {
+        if (payload.app === app && payload.inspectorId === INSPECTOR_ID) {
+          const inspectedStore = payload.nodeId === PINIA_ROOT_ID ? pinia : pinia._s.get(payload.nodeId);
+          if (!inspectedStore) {
+            return toastMessage(`store "${payload.nodeId}" not found`, "error");
+          }
+          const { path } = payload;
+          if (!isPinia(inspectedStore)) {
+            if (path.length !== 1 || !inspectedStore._customProperties.has(path[0]) || path[0] in inspectedStore.$state) {
+              path.unshift("$state");
+            }
+          } else {
+            path.unshift("state");
+          }
+          isTimelineActive = false;
+          payload.set(inspectedStore, path, payload.state.value);
+          isTimelineActive = true;
+        }
+      });
+      api.on.editComponentState((payload) => {
+        if (payload.type.startsWith("🍍")) {
+          const storeId = payload.type.replace(/^🍍\s*/, "");
+          const store = pinia._s.get(storeId);
+          if (!store) {
+            return toastMessage(`store "${storeId}" not found`, "error");
+          }
+          const { path } = payload;
+          if (path[0] !== "state") {
+            return toastMessage(`Invalid path for store "${storeId}":
+${path}
+Only state can be modified.`);
+          }
+          path[0] = "$state";
+          isTimelineActive = false;
+          payload.set(store, path, payload.state.value);
+          isTimelineActive = true;
+        }
+      });
+    });
+  }
+  function addStoreToDevtools(app, store) {
+    if (!componentStateTypes.includes(getStoreType(store.$id))) {
+      componentStateTypes.push(getStoreType(store.$id));
+    }
+    setupDevtoolsPlugin({
+      id: "dev.esm.pinia",
+      label: "Pinia 🍍",
+      logo: "https://pinia.vuejs.org/logo.svg",
+      packageName: "pinia",
+      homepage: "https://pinia.vuejs.org",
+      componentStateTypes,
+      app,
+      settings: {
+        logStoreChanges: {
+          label: "Notify about new/deleted stores",
+          type: "boolean",
+          defaultValue: true
+        }
+        // useEmojis: {
+        //   label: 'Use emojis in messages ⚡️',
+        //   type: 'boolean',
+        //   defaultValue: true,
+        // },
+      }
+    }, (api) => {
+      const now2 = typeof api.now === "function" ? api.now.bind(api) : Date.now;
+      store.$onAction(({ after, onError, name, args }) => {
+        const groupId = runningActionId++;
+        api.addTimelineEvent({
+          layerId: MUTATIONS_LAYER_ID,
+          event: {
+            time: now2(),
+            title: "🛫 " + name,
+            subtitle: "start",
+            data: {
+              store: formatDisplay(store.$id),
+              action: formatDisplay(name),
+              args
+            },
+            groupId
+          }
+        });
+        after((result) => {
+          activeAction = void 0;
+          api.addTimelineEvent({
+            layerId: MUTATIONS_LAYER_ID,
+            event: {
+              time: now2(),
+              title: "🛬 " + name,
+              subtitle: "end",
+              data: {
+                store: formatDisplay(store.$id),
+                action: formatDisplay(name),
+                args,
+                result
+              },
+              groupId
+            }
+          });
+        });
+        onError((error) => {
+          activeAction = void 0;
+          api.addTimelineEvent({
+            layerId: MUTATIONS_LAYER_ID,
+            event: {
+              time: now2(),
+              logType: "error",
+              title: "💥 " + name,
+              subtitle: "end",
+              data: {
+                store: formatDisplay(store.$id),
+                action: formatDisplay(name),
+                args,
+                error
+              },
+              groupId
+            }
+          });
+        });
+      }, true);
+      store._customProperties.forEach((name) => {
+        vue.watch(() => vue.unref(store[name]), (newValue, oldValue) => {
+          api.notifyComponentUpdate();
+          api.sendInspectorState(INSPECTOR_ID);
+          if (isTimelineActive) {
+            api.addTimelineEvent({
+              layerId: MUTATIONS_LAYER_ID,
+              event: {
+                time: now2(),
+                title: "Change",
+                subtitle: name,
+                data: {
+                  newValue,
+                  oldValue
+                },
+                groupId: activeAction
+              }
+            });
+          }
+        }, { deep: true });
+      });
+      store.$subscribe(({ events, type }, state) => {
+        api.notifyComponentUpdate();
+        api.sendInspectorState(INSPECTOR_ID);
+        if (!isTimelineActive)
+          return;
+        const eventData = {
+          time: now2(),
+          title: formatMutationType(type),
+          data: assign$1({ store: formatDisplay(store.$id) }, formatEventData(events)),
+          groupId: activeAction
+        };
+        activeAction = void 0;
+        if (type === MutationType.patchFunction) {
+          eventData.subtitle = "⤵️";
+        } else if (type === MutationType.patchObject) {
+          eventData.subtitle = "🧩";
+        } else if (events && !Array.isArray(events)) {
+          eventData.subtitle = events.type;
+        }
+        if (events) {
+          eventData.data["rawEvent(s)"] = {
+            _custom: {
+              display: "DebuggerEvent",
+              type: "object",
+              tooltip: "raw DebuggerEvent[]",
+              value: events
+            }
+          };
+        }
+        api.addTimelineEvent({
+          layerId: MUTATIONS_LAYER_ID,
+          event: eventData
+        });
+      }, { detached: true, flush: "sync" });
+      const hotUpdate = store._hotUpdate;
+      store._hotUpdate = vue.markRaw((newStore) => {
+        hotUpdate(newStore);
+        api.addTimelineEvent({
+          layerId: MUTATIONS_LAYER_ID,
+          event: {
+            time: now2(),
+            title: "🔥 " + store.$id,
+            subtitle: "HMR update",
+            data: {
+              store: formatDisplay(store.$id),
+              info: formatDisplay(`HMR update`)
+            }
+          }
+        });
+        api.notifyComponentUpdate();
+        api.sendInspectorTree(INSPECTOR_ID);
+        api.sendInspectorState(INSPECTOR_ID);
+      });
+      const { $dispose } = store;
+      store.$dispose = () => {
+        $dispose();
+        api.notifyComponentUpdate();
+        api.sendInspectorTree(INSPECTOR_ID);
+        api.sendInspectorState(INSPECTOR_ID);
+        api.getSettings().logStoreChanges && toastMessage(`Disposed "${store.$id}" store 🗑`);
+      };
+      api.notifyComponentUpdate();
+      api.sendInspectorTree(INSPECTOR_ID);
+      api.sendInspectorState(INSPECTOR_ID);
+      api.getSettings().logStoreChanges && toastMessage(`"${store.$id}" store installed 🆕`);
+    });
+  }
+  let runningActionId = 0;
+  let activeAction;
+  function patchActionForGrouping(store, actionNames) {
+    const actions = actionNames.reduce((storeActions, actionName) => {
+      storeActions[actionName] = vue.toRaw(store)[actionName];
+      return storeActions;
+    }, {});
+    for (const actionName in actions) {
+      store[actionName] = function() {
+        const _actionId = runningActionId;
+        const trackedStore = new Proxy(store, {
+          get(...args) {
+            activeAction = _actionId;
+            return Reflect.get(...args);
+          },
+          set(...args) {
+            activeAction = _actionId;
+            return Reflect.set(...args);
+          }
+        });
+        return actions[actionName].apply(trackedStore, arguments);
+      };
+    }
+  }
+  function devtoolsPlugin({ app, store, options }) {
+    if (store.$id.startsWith("__hot:")) {
+      return;
+    }
+    if (options.state) {
+      store._isOptionsAPI = true;
+    }
+    if (typeof options.state === "function") {
+      patchActionForGrouping(
+        // @ts-expect-error: can cast the store...
+        store,
+        Object.keys(options.actions)
+      );
+      const originalHotUpdate = store._hotUpdate;
+      vue.toRaw(store)._hotUpdate = function(newStore) {
+        originalHotUpdate.apply(this, arguments);
+        patchActionForGrouping(store, Object.keys(newStore._hmrPayload.actions));
+      };
+    }
+    addStoreToDevtools(
+      app,
+      // FIXME: is there a way to allow the assignment from Store<Id, S, G, A> to StoreGeneric?
+      store
+    );
+  }
+  function createPinia() {
+    const scope = vue.effectScope(true);
+    const state = scope.run(() => vue.ref({}));
+    let _p = [];
+    let toBeInstalled = [];
+    const pinia = vue.markRaw({
+      install(app) {
+        setActivePinia(pinia);
+        {
+          pinia._a = app;
+          app.provide(piniaSymbol, pinia);
+          app.config.globalProperties.$pinia = pinia;
+          if (USE_DEVTOOLS) {
+            registerPiniaDevtools(app, pinia);
+          }
+          toBeInstalled.forEach((plugin) => _p.push(plugin));
+          toBeInstalled = [];
+        }
+      },
+      use(plugin) {
+        if (!this._a && !isVue2) {
+          toBeInstalled.push(plugin);
+        } else {
+          _p.push(plugin);
+        }
+        return this;
+      },
+      _p,
+      // it's actually undefined here
+      // @ts-expect-error
+      _a: null,
+      _e: scope,
+      _s: /* @__PURE__ */ new Map(),
+      state
+    });
+    if (USE_DEVTOOLS && typeof Proxy !== "undefined") {
+      pinia.use(devtoolsPlugin);
+    }
+    return pinia;
+  }
+  const isUseStore = (fn) => {
+    return typeof fn === "function" && typeof fn.$id === "string";
   };
-  const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
-  const onPageScroll = /* @__PURE__ */ createHook(ON_PAGE_SCROLL);
-  const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
-  const _sfc_main$12 = {
+  function patchObject(newState, oldState) {
+    for (const key in oldState) {
+      const subPatch = oldState[key];
+      if (!(key in newState)) {
+        continue;
+      }
+      const targetValue = newState[key];
+      if (isPlainObject(targetValue) && isPlainObject(subPatch) && !vue.isRef(subPatch) && !vue.isReactive(subPatch)) {
+        newState[key] = patchObject(targetValue, subPatch);
+      } else {
+        {
+          newState[key] = subPatch;
+        }
+      }
+    }
+    return newState;
+  }
+  function acceptHMRUpdate(initialUseStore, hot) {
+    return (newModule) => {
+      const pinia = hot.data.pinia || initialUseStore._pinia;
+      if (!pinia) {
+        return;
+      }
+      hot.data.pinia = pinia;
+      for (const exportName in newModule) {
+        const useStore = newModule[exportName];
+        if (isUseStore(useStore) && pinia._s.has(useStore.$id)) {
+          const id = useStore.$id;
+          if (id !== initialUseStore.$id) {
+            console.warn(`The id of the store changed from "${initialUseStore.$id}" to "${id}". Reloading.`);
+            return hot.invalidate();
+          }
+          const existingStore = pinia._s.get(id);
+          if (!existingStore) {
+            console.log(`[Pinia]: skipping hmr because store doesn't exist yet`);
+            return;
+          }
+          useStore(pinia, existingStore);
+        }
+      }
+    };
+  }
+  const noop = () => {
+  };
+  function addSubscription(subscriptions, callback, detached, onCleanup = noop) {
+    subscriptions.push(callback);
+    const removeSubscription = () => {
+      const idx = subscriptions.indexOf(callback);
+      if (idx > -1) {
+        subscriptions.splice(idx, 1);
+        onCleanup();
+      }
+    };
+    if (!detached && vue.getCurrentScope()) {
+      vue.onScopeDispose(removeSubscription);
+    }
+    return removeSubscription;
+  }
+  function triggerSubscriptions(subscriptions, ...args) {
+    subscriptions.slice().forEach((callback) => {
+      callback(...args);
+    });
+  }
+  function mergeReactiveObjects(target, patchToApply) {
+    if (target instanceof Map && patchToApply instanceof Map) {
+      patchToApply.forEach((value, key) => target.set(key, value));
+    }
+    if (target instanceof Set && patchToApply instanceof Set) {
+      patchToApply.forEach(target.add, target);
+    }
+    for (const key in patchToApply) {
+      if (!patchToApply.hasOwnProperty(key))
+        continue;
+      const subPatch = patchToApply[key];
+      const targetValue = target[key];
+      if (isPlainObject(targetValue) && isPlainObject(subPatch) && target.hasOwnProperty(key) && !vue.isRef(subPatch) && !vue.isReactive(subPatch)) {
+        target[key] = mergeReactiveObjects(targetValue, subPatch);
+      } else {
+        target[key] = subPatch;
+      }
+    }
+    return target;
+  }
+  const skipHydrateSymbol = Symbol("pinia:skipHydration");
+  function skipHydrate(obj) {
+    return Object.defineProperty(obj, skipHydrateSymbol, {});
+  }
+  function shouldHydrate(obj) {
+    return !isPlainObject(obj) || !obj.hasOwnProperty(skipHydrateSymbol);
+  }
+  const { assign } = Object;
+  function isComputed(o2) {
+    return !!(vue.isRef(o2) && o2.effect);
+  }
+  function createOptionsStore(id, options, pinia, hot) {
+    const { state, actions, getters } = options;
+    const initialState = pinia.state.value[id];
+    let store;
+    function setup() {
+      if (!initialState && !hot) {
+        {
+          pinia.state.value[id] = state ? state() : {};
+        }
+      }
+      const localState = hot ? (
+        // use ref() to unwrap refs inside state TODO: check if this is still necessary
+        vue.toRefs(vue.ref(state ? state() : {}).value)
+      ) : vue.toRefs(pinia.state.value[id]);
+      return assign(localState, actions, Object.keys(getters || {}).reduce((computedGetters, name) => {
+        if (name in localState) {
+          console.warn(`[🍍]: A getter cannot have the same name as another state property. Rename one of them. Found with "${name}" in store "${id}".`);
+        }
+        computedGetters[name] = vue.markRaw(vue.computed(() => {
+          setActivePinia(pinia);
+          const store2 = pinia._s.get(id);
+          return getters[name].call(store2, store2);
+        }));
+        return computedGetters;
+      }, {}));
+    }
+    store = createSetupStore(id, setup, options, pinia, hot, true);
+    return store;
+  }
+  function createSetupStore($id, setup, options = {}, pinia, hot, isOptionsStore) {
+    let scope;
+    const optionsForPlugin = assign({ actions: {} }, options);
+    if (!pinia._e.active) {
+      throw new Error("Pinia destroyed");
+    }
+    const $subscribeOptions = {
+      deep: true
+      // flush: 'post',
+    };
+    {
+      $subscribeOptions.onTrigger = (event) => {
+        if (isListening) {
+          debuggerEvents = event;
+        } else if (isListening == false && !store._hotUpdating) {
+          if (Array.isArray(debuggerEvents)) {
+            debuggerEvents.push(event);
+          } else {
+            console.error("🍍 debuggerEvents should be an array. This is most likely an internal Pinia bug.");
+          }
+        }
+      };
+    }
+    let isListening;
+    let isSyncListening;
+    let subscriptions = vue.markRaw([]);
+    let actionSubscriptions = vue.markRaw([]);
+    let debuggerEvents;
+    const initialState = pinia.state.value[$id];
+    if (!isOptionsStore && !initialState && !hot) {
+      {
+        pinia.state.value[$id] = {};
+      }
+    }
+    const hotState = vue.ref({});
+    let activeListener;
+    function $patch(partialStateOrMutator) {
+      let subscriptionMutation;
+      isListening = isSyncListening = false;
+      {
+        debuggerEvents = [];
+      }
+      if (typeof partialStateOrMutator === "function") {
+        partialStateOrMutator(pinia.state.value[$id]);
+        subscriptionMutation = {
+          type: MutationType.patchFunction,
+          storeId: $id,
+          events: debuggerEvents
+        };
+      } else {
+        mergeReactiveObjects(pinia.state.value[$id], partialStateOrMutator);
+        subscriptionMutation = {
+          type: MutationType.patchObject,
+          payload: partialStateOrMutator,
+          storeId: $id,
+          events: debuggerEvents
+        };
+      }
+      const myListenerId = activeListener = Symbol();
+      vue.nextTick().then(() => {
+        if (activeListener === myListenerId) {
+          isListening = true;
+        }
+      });
+      isSyncListening = true;
+      triggerSubscriptions(subscriptions, subscriptionMutation, pinia.state.value[$id]);
+    }
+    const $reset = isOptionsStore ? function $reset2() {
+      const { state } = options;
+      const newState = state ? state() : {};
+      this.$patch(($state) => {
+        assign($state, newState);
+      });
+    } : (
+      /* istanbul ignore next */
+      () => {
+        throw new Error(`🍍: Store "${$id}" is built using the setup syntax and does not implement $reset().`);
+      }
+    );
+    function $dispose() {
+      scope.stop();
+      subscriptions = [];
+      actionSubscriptions = [];
+      pinia._s.delete($id);
+    }
+    function wrapAction(name, action) {
+      return function() {
+        setActivePinia(pinia);
+        const args = Array.from(arguments);
+        const afterCallbackList = [];
+        const onErrorCallbackList = [];
+        function after(callback) {
+          afterCallbackList.push(callback);
+        }
+        function onError(callback) {
+          onErrorCallbackList.push(callback);
+        }
+        triggerSubscriptions(actionSubscriptions, {
+          args,
+          name,
+          store,
+          after,
+          onError
+        });
+        let ret;
+        try {
+          ret = action.apply(this && this.$id === $id ? this : store, args);
+        } catch (error) {
+          triggerSubscriptions(onErrorCallbackList, error);
+          throw error;
+        }
+        if (ret instanceof Promise) {
+          return ret.then((value) => {
+            triggerSubscriptions(afterCallbackList, value);
+            return value;
+          }).catch((error) => {
+            triggerSubscriptions(onErrorCallbackList, error);
+            return Promise.reject(error);
+          });
+        }
+        triggerSubscriptions(afterCallbackList, ret);
+        return ret;
+      };
+    }
+    const _hmrPayload = /* @__PURE__ */ vue.markRaw({
+      actions: {},
+      getters: {},
+      state: [],
+      hotState
+    });
+    const partialStore = {
+      _p: pinia,
+      // _s: scope,
+      $id,
+      $onAction: addSubscription.bind(null, actionSubscriptions),
+      $patch,
+      $reset,
+      $subscribe(callback, options2 = {}) {
+        const removeSubscription = addSubscription(subscriptions, callback, options2.detached, () => stopWatcher());
+        const stopWatcher = scope.run(() => vue.watch(() => pinia.state.value[$id], (state) => {
+          if (options2.flush === "sync" ? isSyncListening : isListening) {
+            callback({
+              storeId: $id,
+              type: MutationType.direct,
+              events: debuggerEvents
+            }, state);
+          }
+        }, assign({}, $subscribeOptions, options2)));
+        return removeSubscription;
+      },
+      $dispose
+    };
+    const store = vue.reactive(
+      assign(
+        {
+          _hmrPayload,
+          _customProperties: vue.markRaw(/* @__PURE__ */ new Set())
+          // devtools custom properties
+        },
+        partialStore
+        // must be added later
+        // setupStore
+      )
+    );
+    pinia._s.set($id, store);
+    const setupStore = pinia._e.run(() => {
+      scope = vue.effectScope();
+      return scope.run(() => setup());
+    });
+    for (const key in setupStore) {
+      const prop = setupStore[key];
+      if (vue.isRef(prop) && !isComputed(prop) || vue.isReactive(prop)) {
+        if (hot) {
+          set$1(hotState.value, key, vue.toRef(setupStore, key));
+        } else if (!isOptionsStore) {
+          if (initialState && shouldHydrate(prop)) {
+            if (vue.isRef(prop)) {
+              prop.value = initialState[key];
+            } else {
+              mergeReactiveObjects(prop, initialState[key]);
+            }
+          }
+          {
+            pinia.state.value[$id][key] = prop;
+          }
+        }
+        {
+          _hmrPayload.state.push(key);
+        }
+      } else if (typeof prop === "function") {
+        const actionValue = hot ? prop : wrapAction(key, prop);
+        {
+          setupStore[key] = actionValue;
+        }
+        {
+          _hmrPayload.actions[key] = prop;
+        }
+        optionsForPlugin.actions[key] = prop;
+      } else {
+        if (isComputed(prop)) {
+          _hmrPayload.getters[key] = isOptionsStore ? (
+            // @ts-expect-error
+            options.getters[key]
+          ) : prop;
+          if (IS_CLIENT) {
+            const getters = setupStore._getters || // @ts-expect-error: same
+            (setupStore._getters = vue.markRaw([]));
+            getters.push(key);
+          }
+        }
+      }
+    }
+    {
+      assign(store, setupStore);
+      assign(vue.toRaw(store), setupStore);
+    }
+    Object.defineProperty(store, "$state", {
+      get: () => hot ? hotState.value : pinia.state.value[$id],
+      set: (state) => {
+        if (hot) {
+          throw new Error("cannot set hotState");
+        }
+        $patch(($state) => {
+          assign($state, state);
+        });
+      }
+    });
+    {
+      store._hotUpdate = vue.markRaw((newStore) => {
+        store._hotUpdating = true;
+        newStore._hmrPayload.state.forEach((stateKey) => {
+          if (stateKey in store.$state) {
+            const newStateTarget = newStore.$state[stateKey];
+            const oldStateSource = store.$state[stateKey];
+            if (typeof newStateTarget === "object" && isPlainObject(newStateTarget) && isPlainObject(oldStateSource)) {
+              patchObject(newStateTarget, oldStateSource);
+            } else {
+              newStore.$state[stateKey] = oldStateSource;
+            }
+          }
+          set$1(store, stateKey, vue.toRef(newStore.$state, stateKey));
+        });
+        Object.keys(store.$state).forEach((stateKey) => {
+          if (!(stateKey in newStore.$state)) {
+            del(store, stateKey);
+          }
+        });
+        isListening = false;
+        isSyncListening = false;
+        pinia.state.value[$id] = vue.toRef(newStore._hmrPayload, "hotState");
+        isSyncListening = true;
+        vue.nextTick().then(() => {
+          isListening = true;
+        });
+        for (const actionName in newStore._hmrPayload.actions) {
+          const action = newStore[actionName];
+          set$1(store, actionName, wrapAction(actionName, action));
+        }
+        for (const getterName in newStore._hmrPayload.getters) {
+          const getter = newStore._hmrPayload.getters[getterName];
+          const getterValue = isOptionsStore ? (
+            // special handling of options api
+            vue.computed(() => {
+              setActivePinia(pinia);
+              return getter.call(store, store);
+            })
+          ) : getter;
+          set$1(store, getterName, getterValue);
+        }
+        Object.keys(store._hmrPayload.getters).forEach((key) => {
+          if (!(key in newStore._hmrPayload.getters)) {
+            del(store, key);
+          }
+        });
+        Object.keys(store._hmrPayload.actions).forEach((key) => {
+          if (!(key in newStore._hmrPayload.actions)) {
+            del(store, key);
+          }
+        });
+        store._hmrPayload = newStore._hmrPayload;
+        store._getters = newStore._getters;
+        store._hotUpdating = false;
+      });
+    }
+    if (USE_DEVTOOLS) {
+      const nonEnumerable = {
+        writable: true,
+        configurable: true,
+        // avoid warning on devtools trying to display this property
+        enumerable: false
+      };
+      ["_p", "_hmrPayload", "_getters", "_customProperties"].forEach((p2) => {
+        Object.defineProperty(store, p2, assign({ value: store[p2] }, nonEnumerable));
+      });
+    }
+    pinia._p.forEach((extender) => {
+      if (USE_DEVTOOLS) {
+        const extensions = scope.run(() => extender({
+          store,
+          app: pinia._a,
+          pinia,
+          options: optionsForPlugin
+        }));
+        Object.keys(extensions || {}).forEach((key) => store._customProperties.add(key));
+        assign(store, extensions);
+      } else {
+        assign(store, scope.run(() => extender({
+          store,
+          app: pinia._a,
+          pinia,
+          options: optionsForPlugin
+        })));
+      }
+    });
+    if (store.$state && typeof store.$state === "object" && typeof store.$state.constructor === "function" && !store.$state.constructor.toString().includes("[native code]")) {
+      console.warn(`[🍍]: The "state" must be a plain object. It cannot be
+	state: () => new MyClass()
+Found in store "${store.$id}".`);
+    }
+    if (initialState && isOptionsStore && options.hydrate) {
+      options.hydrate(store.$state, initialState);
+    }
+    isListening = true;
+    isSyncListening = true;
+    return store;
+  }
+  function defineStore(idOrOptions, setup, setupOptions) {
+    let id;
+    let options;
+    const isSetupStore = typeof setup === "function";
+    if (typeof idOrOptions === "string") {
+      id = idOrOptions;
+      options = isSetupStore ? setupOptions : setup;
+    } else {
+      options = idOrOptions;
+      id = idOrOptions.id;
+    }
+    function useStore(pinia, hot) {
+      const currentInstance = vue.getCurrentInstance();
+      pinia = // in test mode, ignore the argument provided as we can always retrieve a
+      // pinia instance with getActivePinia()
+      pinia || currentInstance && vue.inject(piniaSymbol, null);
+      if (pinia)
+        setActivePinia(pinia);
+      if (!activePinia) {
+        throw new Error(`[🍍]: getActivePinia was called with no active Pinia. Did you forget to install pinia?
+	const pinia = createPinia()
+	app.use(pinia)
+This will fail in production.`);
+      }
+      pinia = activePinia;
+      if (!pinia._s.has(id)) {
+        if (isSetupStore) {
+          createSetupStore(id, setup, options, pinia);
+        } else {
+          createOptionsStore(id, options, pinia);
+        }
+        {
+          useStore._pinia = pinia;
+        }
+      }
+      const store = pinia._s.get(id);
+      if (hot) {
+        const hotId = "__hot:" + id;
+        const newStore = isSetupStore ? createSetupStore(hotId, setup, options, pinia, true) : createOptionsStore(hotId, assign({}, options), pinia, true);
+        hot._hotUpdate(newStore);
+        delete pinia.state.value[hotId];
+        pinia._s.delete(hotId);
+      }
+      if (IS_CLIENT && currentInstance && currentInstance.proxy && // avoid adding stores that are just built for hot module replacement
+      !hot) {
+        const vm = currentInstance.proxy;
+        const cache = "_pStores" in vm ? vm._pStores : vm._pStores = {};
+        cache[id] = store;
+      }
+      return store;
+    }
+    useStore.$id = id;
+    return useStore;
+  }
+  let mapStoreSuffix = "Store";
+  function setMapStoreSuffix(suffix) {
+    mapStoreSuffix = suffix;
+  }
+  function mapStores(...stores) {
+    if (Array.isArray(stores[0])) {
+      console.warn(`[🍍]: Directly pass all stores to "mapStores()" without putting them in an array:
+Replace
+	mapStores([useAuthStore, useCartStore])
+with
+	mapStores(useAuthStore, useCartStore)
+This will fail in production if not fixed.`);
+      stores = stores[0];
+    }
+    return stores.reduce((reduced, useStore) => {
+      reduced[useStore.$id + mapStoreSuffix] = function() {
+        return useStore(this.$pinia);
+      };
+      return reduced;
+    }, {});
+  }
+  function mapState(useStore, keysOrMapper) {
+    return Array.isArray(keysOrMapper) ? keysOrMapper.reduce((reduced, key) => {
+      reduced[key] = function() {
+        return useStore(this.$pinia)[key];
+      };
+      return reduced;
+    }, {}) : Object.keys(keysOrMapper).reduce((reduced, key) => {
+      reduced[key] = function() {
+        const store = useStore(this.$pinia);
+        const storeKey = keysOrMapper[key];
+        return typeof storeKey === "function" ? storeKey.call(this, store) : store[storeKey];
+      };
+      return reduced;
+    }, {});
+  }
+  const mapGetters = mapState;
+  function mapActions(useStore, keysOrMapper) {
+    return Array.isArray(keysOrMapper) ? keysOrMapper.reduce((reduced, key) => {
+      reduced[key] = function(...args) {
+        return useStore(this.$pinia)[key](...args);
+      };
+      return reduced;
+    }, {}) : Object.keys(keysOrMapper).reduce((reduced, key) => {
+      reduced[key] = function(...args) {
+        return useStore(this.$pinia)[keysOrMapper[key]](...args);
+      };
+      return reduced;
+    }, {});
+  }
+  function mapWritableState(useStore, keysOrMapper) {
+    return Array.isArray(keysOrMapper) ? keysOrMapper.reduce((reduced, key) => {
+      reduced[key] = {
+        get() {
+          return useStore(this.$pinia)[key];
+        },
+        set(value) {
+          return useStore(this.$pinia)[key] = value;
+        }
+      };
+      return reduced;
+    }, {}) : Object.keys(keysOrMapper).reduce((reduced, key) => {
+      reduced[key] = {
+        get() {
+          return useStore(this.$pinia)[keysOrMapper[key]];
+        },
+        set(value) {
+          return useStore(this.$pinia)[keysOrMapper[key]] = value;
+        }
+      };
+      return reduced;
+    }, {});
+  }
+  function storeToRefs(store) {
+    {
+      store = vue.toRaw(store);
+      const refs = {};
+      for (const key in store) {
+        const value = store[key];
+        if (vue.isRef(value) || vue.isReactive(value)) {
+          refs[key] = // ---
+          vue.toRef(store, key);
+        }
+      }
+      return refs;
+    }
+  }
+  const PiniaVuePlugin = function(_Vue) {
+    _Vue.mixin({
+      beforeCreate() {
+        const options = this.$options;
+        if (options.pinia) {
+          const pinia = options.pinia;
+          if (!this._provided) {
+            const provideCache = {};
+            Object.defineProperty(this, "_provided", {
+              get: () => provideCache,
+              set: (v2) => Object.assign(provideCache, v2)
+            });
+          }
+          this._provided[piniaSymbol] = pinia;
+          if (!this.$pinia) {
+            this.$pinia = pinia;
+          }
+          pinia._a = this;
+          if (IS_CLIENT) {
+            setActivePinia(pinia);
+          }
+          if (USE_DEVTOOLS) {
+            registerPiniaDevtools(pinia._a, pinia);
+          }
+        } else if (!this.$pinia && options.parent && options.parent.$pinia) {
+          this.$pinia = options.parent.$pinia;
+        }
+      },
+      destroyed() {
+        delete this._pStores;
+      }
+    });
+  };
+  const Pinia = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+    __proto__: null,
+    get MutationType() {
+      return MutationType;
+    },
+    PiniaVuePlugin,
+    acceptHMRUpdate,
+    createPinia,
+    defineStore,
+    getActivePinia,
+    mapActions,
+    mapGetters,
+    mapState,
+    mapStores,
+    mapWritableState,
+    setActivePinia,
+    setMapStoreSuffix,
+    skipHydrate,
+    storeToRefs
+  }, Symbol.toStringTag, { value: "Module" }));
+  const baseUrl = "http://192.168.2.99:9000";
+  function request(path, params = {}, options = {}) {
+    let token = null;
+    token = uni.getStorageSync("token");
+    return new Promise((resolve, reject) => {
+      uni.request({
+        url: baseUrl + path,
+        method: options.method || "GET",
+        data: params,
+        header: {
+          "Authorization": token
+        },
+        sslVerify: false,
+        ...options,
+        // 其他请求配置
+        success: (res) => {
+          resolve(res.data);
+        },
+        fail: (err) => {
+          reject(err);
+        }
+      });
+    });
+  }
+  const useUserStore = defineStore("user", () => {
+    const user = vue.ref(uni.getStorageSync("user") || {});
+    const token = vue.ref(uni.getStorageSync("token") || "");
+    const avatar = vue.computed(() => {
+      return "http://192.168.2.99:9000/uploads/" + user.value.user_avatar;
+    });
+    function updateUser(newValue) {
+      user.value = newValue;
+      uni.setStorageSync("user", user.value);
+    }
+    function updateToken(newValue) {
+      token.value = newValue;
+      uni.setStorageSync("token", token.value);
+    }
+    function resetUser() {
+      user.value = {};
+    }
+    function updateDate(newValue) {
+      user.value.user_birthday = newValue;
+    }
+    function updateAvatar(newValue) {
+      user.value.user_avatar = newValue;
+    }
+    async function saveInfo() {
+      const result = await request("/user/update", user.value, {
+        method: "post"
+      });
+      if (result.code === 200) {
+        user.value = result.data;
+        uni.setStorageSync("user", user.value);
+        return true;
+      }
+      return false;
+    }
+    return {
+      user,
+      updateUser,
+      updateToken,
+      token,
+      resetUser,
+      updateDate,
+      avatar,
+      updateAvatar,
+      saveInfo
+    };
+  });
+  const _sfc_main$14 = {
     __name: "PersonInfo",
     setup(__props) {
+      const store = useUserStore();
       const editPerson = () => {
         uni.navigateTo({
           url: "/pages/my/EditPerson"
         });
       };
       return (_ctx, _cache) => {
-        const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+        const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
         return vue.openBlock(), vue.createElementBlock("view", {
           class: "my-infomation",
           onClick: editPerson
@@ -1307,14 +2988,26 @@ if (uni.restoreGlobal) {
           vue.createCommentVNode(" 头像 "),
           vue.createElementVNode("view", { class: "my-avatar" }, [
             vue.createElementVNode("img", {
-              src: `./static/touxiang.png`,
+              src: vue.unref(store).avatar,
               alt: ""
             }, null, 8, ["src"])
           ]),
           vue.createCommentVNode(" 个人信息 "),
           vue.createElementVNode("view", { class: "person" }, [
-            vue.createElementVNode("h3", null, "张学友和刘德华最爱的人"),
-            vue.createElementVNode("p", null, "喜欢自己的猫狗")
+            vue.createElementVNode(
+              "h3",
+              null,
+              vue.toDisplayString(vue.unref(store).user.user_name),
+              1
+              /* TEXT */
+            ),
+            vue.createElementVNode(
+              "p",
+              null,
+              vue.toDisplayString(vue.unref(store).user.user_signature),
+              1
+              /* TEXT */
+            )
           ]),
           vue.createCommentVNode(" 图标 "),
           vue.createElementVNode("view", { class: "show-icon" }, [
@@ -1328,8 +3021,8 @@ if (uni.restoreGlobal) {
       };
     }
   };
-  const PersonInfo = /* @__PURE__ */ _export_sfc(_sfc_main$12, [["__scopeId", "data-v-a476a3a8"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/PersonInfo.vue"]]);
-  const _sfc_main$11 = {
+  const PersonInfo = /* @__PURE__ */ _export_sfc(_sfc_main$14, [["__scopeId", "data-v-a476a3a8"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/PersonInfo.vue"]]);
+  const _sfc_main$13 = {
     __name: "icon-base",
     props: ["type", "size", "color"],
     setup(__props) {
@@ -1351,8 +3044,8 @@ if (uni.restoreGlobal) {
       };
     }
   };
-  const __easycom_0$b = /* @__PURE__ */ _export_sfc(_sfc_main$11, [["__file", "D:/graduationProject/pet-front-end/components/icon-base/icon-base.vue"]]);
-  const _sfc_main$10 = {
+  const __easycom_0$c = /* @__PURE__ */ _export_sfc(_sfc_main$13, [["__file", "D:/graduationProject/pet-front-end/components/icon-base/icon-base.vue"]]);
+  const _sfc_main$12 = {
     name: "UniGridItem",
     inject: ["grid"],
     props: {
@@ -1402,7 +3095,7 @@ if (uni.restoreGlobal) {
       }
     }
   };
-  function _sfc_render$H(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$E(_ctx, _cache, $props, $setup, $data, $options) {
     return $data.width ? (vue.openBlock(), vue.createElementBlock(
       "view",
       {
@@ -1429,8 +3122,8 @@ if (uni.restoreGlobal) {
       /* STYLE */
     )) : vue.createCommentVNode("v-if", true);
   }
-  const __easycom_1$6 = /* @__PURE__ */ _export_sfc(_sfc_main$10, [["render", _sfc_render$H], ["__scopeId", "data-v-7a807eb7"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-grid/components/uni-grid-item/uni-grid-item.vue"]]);
-  const _sfc_main$$ = {
+  const __easycom_1$6 = /* @__PURE__ */ _export_sfc(_sfc_main$12, [["render", _sfc_render$E], ["__scopeId", "data-v-7a807eb7"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-grid/components/uni-grid-item/uni-grid-item.vue"]]);
+  const _sfc_main$11 = {
     name: "UniGrid",
     emits: ["change"],
     props: {
@@ -1500,7 +3193,7 @@ if (uni.restoreGlobal) {
       }
     }
   };
-  function _sfc_render$G(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$D(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-grid-wrap" }, [
       vue.createElementVNode("view", {
         id: $data.elId,
@@ -1512,8 +3205,8 @@ if (uni.restoreGlobal) {
       ], 14, ["id"])
     ]);
   }
-  const __easycom_2$1 = /* @__PURE__ */ _export_sfc(_sfc_main$$, [["render", _sfc_render$G], ["__scopeId", "data-v-07acefee"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-grid/components/uni-grid/uni-grid.vue"]]);
-  const _sfc_main$_ = {
+  const __easycom_2$1 = /* @__PURE__ */ _export_sfc(_sfc_main$11, [["render", _sfc_render$D], ["__scopeId", "data-v-07acefee"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-grid/components/uni-grid/uni-grid.vue"]]);
+  const _sfc_main$10 = {
     name: "UniSection",
     emits: ["click"],
     props: {
@@ -1572,7 +3265,7 @@ if (uni.restoreGlobal) {
       }
     }
   };
-  function _sfc_render$F(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$C(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-section" }, [
       vue.createElementVNode("view", {
         class: "uni-section-header",
@@ -1629,8 +3322,8 @@ if (uni.restoreGlobal) {
       )
     ]);
   }
-  const __easycom_1$5 = /* @__PURE__ */ _export_sfc(_sfc_main$_, [["render", _sfc_render$F], ["__scopeId", "data-v-637fd36b"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-section/components/uni-section/uni-section.vue"]]);
-  const _sfc_main$Z = {
+  const __easycom_1$5 = /* @__PURE__ */ _export_sfc(_sfc_main$10, [["render", _sfc_render$C], ["__scopeId", "data-v-637fd36b"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-section/components/uni-section/uni-section.vue"]]);
+  const _sfc_main$$ = {
     __name: "OrderList",
     setup(__props) {
       const gotoOrderDetail = () => {
@@ -1639,7 +3332,7 @@ if (uni.restoreGlobal) {
         });
       };
       return (_ctx, _cache) => {
-        const _component_icon_base = resolveEasycom(vue.resolveDynamicComponent("icon-base"), __easycom_0$b);
+        const _component_icon_base = resolveEasycom(vue.resolveDynamicComponent("icon-base"), __easycom_0$c);
         const _component_uni_grid_item = resolveEasycom(vue.resolveDynamicComponent("uni-grid-item"), __easycom_1$6);
         const _component_uni_grid = resolveEasycom(vue.resolveDynamicComponent("uni-grid"), __easycom_2$1);
         const _component_uni_section = resolveEasycom(vue.resolveDynamicComponent("uni-section"), __easycom_1$5);
@@ -1684,7 +3377,7 @@ if (uni.restoreGlobal) {
                       vue.createVNode(_component_icon_base, {
                         type: "fukuan",
                         icColor: "#2979FF",
-                        size: "60"
+                        size: "50"
                       }),
                       vue.createElementVNode("text", { class: "text" }, "待付款")
                     ])
@@ -1737,8 +3430,8 @@ if (uni.restoreGlobal) {
       };
     }
   };
-  const OrderList = /* @__PURE__ */ _export_sfc(_sfc_main$Z, [["__scopeId", "data-v-98ac0607"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/OrderList.vue"]]);
-  const _sfc_main$Y = {
+  const OrderList = /* @__PURE__ */ _export_sfc(_sfc_main$$, [["__scopeId", "data-v-98ac0607"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/OrderList.vue"]]);
+  const _sfc_main$_ = {
     __name: "MyPet",
     setup(__props) {
       const arr = vue.ref([
@@ -1753,7 +3446,7 @@ if (uni.restoreGlobal) {
         });
       };
       return (_ctx, _cache) => {
-        const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+        const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
         const _component_uni_grid_item = resolveEasycom(vue.resolveDynamicComponent("uni-grid-item"), __easycom_1$6);
         const _component_uni_grid = resolveEasycom(vue.resolveDynamicComponent("uni-grid"), __easycom_2$1);
         const _component_uni_section = resolveEasycom(vue.resolveDynamicComponent("uni-section"), __easycom_1$5);
@@ -1906,8 +3599,8 @@ if (uni.restoreGlobal) {
       };
     }
   };
-  const MyPet = /* @__PURE__ */ _export_sfc(_sfc_main$Y, [["__scopeId", "data-v-bfd5e8ec"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/MyPet.vue"]]);
-  const _sfc_main$X = {
+  const MyPet = /* @__PURE__ */ _export_sfc(_sfc_main$_, [["__scopeId", "data-v-bfd5e8ec"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/MyPet.vue"]]);
+  const _sfc_main$Z = {
     name: "UniBadge",
     emits: ["click"],
     props: {
@@ -1983,7 +3676,7 @@ if (uni.restoreGlobal) {
         }
         const x = `${-w2 + this.offset[0]}px`;
         const y2 = `${-h2 + this.offset[1]}px`;
-        const whiteList = {
+        const whiteList2 = {
           rightTop: {
             right: x,
             top: y2
@@ -2001,8 +3694,8 @@ if (uni.restoreGlobal) {
             top: y2
           }
         };
-        const match = whiteList[this.absolute];
-        return match ? match : whiteList["rightTop"];
+        const match = whiteList2[this.absolute];
+        return match ? match : whiteList2["rightTop"];
       },
       dotStyle() {
         if (!this.isDot)
@@ -2030,7 +3723,7 @@ if (uni.restoreGlobal) {
       }
     }
   };
-  function _sfc_render$E(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$B(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-badge--x" }, [
       vue.renderSlot(_ctx.$slots, "default", {}, void 0, true),
       $props.text ? (vue.openBlock(), vue.createElementBlock(
@@ -2047,8 +3740,8 @@ if (uni.restoreGlobal) {
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_1$4 = /* @__PURE__ */ _export_sfc(_sfc_main$X, [["render", _sfc_render$E], ["__scopeId", "data-v-c97cb896"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-badge/components/uni-badge/uni-badge.vue"]]);
-  const _sfc_main$W = {
+  const __easycom_1$4 = /* @__PURE__ */ _export_sfc(_sfc_main$Z, [["render", _sfc_render$B], ["__scopeId", "data-v-c97cb896"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-badge/components/uni-badge/uni-badge.vue"]]);
+  const _sfc_main$Y = {
     name: "UniListItem",
     emits: ["click", "switchChange"],
     props: {
@@ -2285,8 +3978,8 @@ if (uni.restoreGlobal) {
       }
     }
   };
-  function _sfc_render$D(_ctx, _cache, $props, $setup, $data, $options) {
-    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+  function _sfc_render$A(_ctx, _cache, $props, $setup, $data, $options) {
+    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     const _component_uni_badge = resolveEasycom(vue.resolveDynamicComponent("uni-badge"), __easycom_1$4);
     return vue.openBlock(), vue.createElementBlock("view", {
       class: vue.normalizeClass([{ "uni-list-item--disabled": $props.disabled }, "uni-list-item"]),
@@ -2414,8 +4107,8 @@ if (uni.restoreGlobal) {
       })) : vue.createCommentVNode("v-if", true)
     ], 14, ["hover-class"]);
   }
-  const __easycom_0$a = /* @__PURE__ */ _export_sfc(_sfc_main$W, [["render", _sfc_render$D], ["__scopeId", "data-v-c7524739"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list-item/uni-list-item.vue"]]);
-  const _sfc_main$V = {
+  const __easycom_0$b = /* @__PURE__ */ _export_sfc(_sfc_main$Y, [["render", _sfc_render$A], ["__scopeId", "data-v-c7524739"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list-item/uni-list-item.vue"]]);
+  const _sfc_main$X = {
     name: "uniList",
     "mp-weixin": {
       options: {
@@ -2461,7 +4154,7 @@ if (uni.restoreGlobal) {
       }
     }
   };
-  function _sfc_render$C(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$z(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-list uni-border-top-bottom" }, [
       $props.border ? (vue.openBlock(), vue.createElementBlock("view", {
         key: 0,
@@ -2474,12 +4167,12 @@ if (uni.restoreGlobal) {
       })) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_1$3 = /* @__PURE__ */ _export_sfc(_sfc_main$V, [["render", _sfc_render$C], ["__scopeId", "data-v-c2f1266a"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list/uni-list.vue"]]);
-  const _sfc_main$U = {
+  const __easycom_1$3 = /* @__PURE__ */ _export_sfc(_sfc_main$X, [["render", _sfc_render$z], ["__scopeId", "data-v-c2f1266a"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list/uni-list.vue"]]);
+  const _sfc_main$W = {
     __name: "MoreFunction",
     setup(__props) {
       return (_ctx, _cache) => {
-        const _component_uni_list_item = resolveEasycom(vue.resolveDynamicComponent("uni-list-item"), __easycom_0$a);
+        const _component_uni_list_item = resolveEasycom(vue.resolveDynamicComponent("uni-list-item"), __easycom_0$b);
         const _component_uni_list = resolveEasycom(vue.resolveDynamicComponent("uni-list"), __easycom_1$3);
         const _component_uni_section = resolveEasycom(vue.resolveDynamicComponent("uni-section"), __easycom_1$5);
         return vue.openBlock(), vue.createBlock(_component_uni_section, {
@@ -2534,10 +4227,23 @@ if (uni.restoreGlobal) {
       };
     }
   };
-  const MoreFunction = /* @__PURE__ */ _export_sfc(_sfc_main$U, [["__file", "D:/graduationProject/pet-front-end/pages/my/components/MoreFunction.vue"]]);
-  const _sfc_main$T = {
+  const MoreFunction = /* @__PURE__ */ _export_sfc(_sfc_main$W, [["__file", "D:/graduationProject/pet-front-end/pages/my/components/MoreFunction.vue"]]);
+  const _sfc_main$V = {
     __name: "index",
     setup(__props) {
+      const store = useUserStore();
+      const loginOut = () => {
+        store.resetUser();
+        try {
+          uni.removeStorageSync("token");
+          uni.removeStorageSync("user");
+        } catch (e2) {
+          formatAppLog("log", "at pages/my/index.vue:31", e2);
+        }
+        uni.switchTab({
+          url: "/pages/home/index"
+        });
+      };
       return (_ctx, _cache) => {
         return vue.openBlock(), vue.createElementBlock(
           vue.Fragment,
@@ -2546,7 +4252,12 @@ if (uni.restoreGlobal) {
             vue.createVNode(PersonInfo),
             vue.createVNode(OrderList),
             vue.createVNode(MyPet),
-            vue.createVNode(MoreFunction)
+            vue.createVNode(MoreFunction),
+            vue.createElementVNode("button", {
+              type: "primary",
+              class: "loginout",
+              onClick: loginOut
+            }, "退出登录")
           ],
           64
           /* STABLE_FRAGMENT */
@@ -2554,8 +4265,8 @@ if (uni.restoreGlobal) {
       };
     }
   };
-  const PagesMyIndex = /* @__PURE__ */ _export_sfc(_sfc_main$T, [["__file", "D:/graduationProject/pet-front-end/pages/my/index.vue"]]);
-  const _sfc_main$S = {
+  const PagesMyIndex = /* @__PURE__ */ _export_sfc(_sfc_main$V, [["__scopeId", "data-v-f97bc692"], ["__file", "D:/graduationProject/pet-front-end/pages/my/index.vue"]]);
+  const _sfc_main$U = {
     name: "UniNoticeBar",
     emits: ["click", "getmore", "close"],
     props: {
@@ -2693,8 +4404,8 @@ if (uni.restoreGlobal) {
       }
     }
   };
-  function _sfc_render$B(_ctx, _cache, $props, $setup, $data, $options) {
-    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+  function _sfc_render$y(_ctx, _cache, $props, $setup, $data, $options) {
+    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return $data.show ? (vue.openBlock(), vue.createElementBlock(
       "view",
       {
@@ -2791,8 +4502,8 @@ if (uni.restoreGlobal) {
       /* STYLE */
     )) : vue.createCommentVNode("v-if", true);
   }
-  const __easycom_0$9 = /* @__PURE__ */ _export_sfc(_sfc_main$S, [["render", _sfc_render$B], ["__scopeId", "data-v-c3453ea3"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-notice-bar/components/uni-notice-bar/uni-notice-bar.vue"]]);
-  const _sfc_main$R = {
+  const __easycom_0$a = /* @__PURE__ */ _export_sfc(_sfc_main$U, [["render", _sfc_render$y], ["__scopeId", "data-v-c3453ea3"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-notice-bar/components/uni-notice-bar/uni-notice-bar.vue"]]);
+  const _sfc_main$T = {
     __name: "ServiceSelect",
     props: {
       title: String,
@@ -2802,7 +4513,7 @@ if (uni.restoreGlobal) {
     },
     setup(__props) {
       return (_ctx, _cache) => {
-        const _component_icon_base = resolveEasycom(vue.resolveDynamicComponent("icon-base"), __easycom_0$b);
+        const _component_icon_base = resolveEasycom(vue.resolveDynamicComponent("icon-base"), __easycom_0$c);
         return vue.openBlock(), vue.createElementBlock("view", { class: "com-base" }, [
           vue.createCommentVNode(" 上方的展示 "),
           vue.createElementVNode(
@@ -2832,8 +4543,8 @@ if (uni.restoreGlobal) {
       };
     }
   };
-  const ServiceSelect = /* @__PURE__ */ _export_sfc(_sfc_main$R, [["__scopeId", "data-v-fbb6c4ac"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/ServiceSelect.vue"]]);
-  const _sfc_main$Q = {
+  const ServiceSelect = /* @__PURE__ */ _export_sfc(_sfc_main$T, [["__scopeId", "data-v-fbb6c4ac"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/ServiceSelect.vue"]]);
+  const _sfc_main$S = {
     __name: "SelectItem",
     props: {
       title: String
@@ -2850,9 +4561,9 @@ if (uni.restoreGlobal) {
       };
     }
   };
-  const SelectItem = /* @__PURE__ */ _export_sfc(_sfc_main$Q, [["__scopeId", "data-v-72203b0b"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/SelectItem.vue"]]);
-  const _sfc_main$P = {};
-  function _sfc_render$A(_ctx, _cache) {
+  const SelectItem = /* @__PURE__ */ _export_sfc(_sfc_main$S, [["__scopeId", "data-v-72203b0b"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/SelectItem.vue"]]);
+  const _sfc_main$R = {};
+  function _sfc_render$x(_ctx, _cache) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "main" }, [
       vue.createCommentVNode(" 图片图标 "),
       vue.createElementVNode("view", { class: "left" }, [
@@ -2865,8 +4576,8 @@ if (uni.restoreGlobal) {
       vue.createElementVNode("view", { class: "right" }, " 上门喂猫1 ")
     ]);
   }
-  const SelectType = /* @__PURE__ */ _export_sfc(_sfc_main$P, [["render", _sfc_render$A], ["__scopeId", "data-v-9e8eefd2"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/SelectType.vue"]]);
-  const _sfc_main$O = {
+  const SelectType = /* @__PURE__ */ _export_sfc(_sfc_main$R, [["render", _sfc_render$x], ["__scopeId", "data-v-9e8eefd2"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/SelectType.vue"]]);
+  const _sfc_main$Q = {
     __name: "index",
     setup(__props) {
       const gotoDetailService = () => {
@@ -2875,7 +4586,7 @@ if (uni.restoreGlobal) {
         });
       };
       return (_ctx, _cache) => {
-        const _component_uni_notice_bar = resolveEasycom(vue.resolveDynamicComponent("uni-notice-bar"), __easycom_0$9);
+        const _component_uni_notice_bar = resolveEasycom(vue.resolveDynamicComponent("uni-notice-bar"), __easycom_0$a);
         const _component_uni_section = resolveEasycom(vue.resolveDynamicComponent("uni-section"), __easycom_1$5);
         return vue.openBlock(), vue.createElementBlock("view", null, [
           vue.createVNode(_component_uni_notice_bar, {
@@ -2938,7 +4649,7 @@ if (uni.restoreGlobal) {
       };
     }
   };
-  const PagesHomeIndex = /* @__PURE__ */ _export_sfc(_sfc_main$O, [["__scopeId", "data-v-4978fed5"], ["__file", "D:/graduationProject/pet-front-end/pages/home/index.vue"]]);
+  const PagesHomeIndex = /* @__PURE__ */ _export_sfc(_sfc_main$Q, [["__scopeId", "data-v-4978fed5"], ["__file", "D:/graduationProject/pet-front-end/pages/home/index.vue"]]);
   const easycom = {
     autoscan: true
   };
@@ -3017,21 +4728,21 @@ if (uni.restoreGlobal) {
     {
       path: "pages/my/EditPerson",
       style: {
-        navigationBarTitleText: "",
+        navigationBarTitleText: "编辑个人信息",
         enablePullDownRefresh: false
       }
     },
     {
       path: "pages/home/DetailService",
       style: {
-        navigationBarTitleText: "",
+        navigationBarTitleText: "详细服务",
         enablePullDownRefresh: false
       }
     },
     {
       path: "pages/my/OrderDetail",
       style: {
-        navigationBarTitleText: "",
+        navigationBarTitleText: "详细订单",
         enablePullDownRefresh: false
       }
     },
@@ -3052,42 +4763,56 @@ if (uni.restoreGlobal) {
     {
       path: "pages/messages/Chat",
       style: {
-        navigationBarTitleText: "",
+        navigationBarTitleText: "聊天",
         enablePullDownRefresh: false
       }
     },
     {
       path: "pages/community/PublishContent",
       style: {
-        navigationBarTitleText: "",
+        navigationBarTitleText: "推送内容",
         enablePullDownRefresh: false
       }
     },
     {
       path: "pages/cat/ConfirmAddress",
       style: {
-        navigationBarTitleText: "",
+        navigationBarTitleText: "确认地址",
         enablePullDownRefresh: false
       }
     },
     {
       path: "pages/my/EditPet",
       style: {
-        navigationBarTitleText: "",
+        navigationBarTitleText: "编辑宠物",
         enablePullDownRefresh: false
       }
     },
     {
       path: "pages/home/OrderService",
       style: {
-        navigationBarTitleText: "",
+        navigationBarTitleText: "服务订单",
         enablePullDownRefresh: false
       }
     },
     {
       path: "pages/cat/ConfirmOrder",
       style: {
-        navigationBarTitleText: "",
+        navigationBarTitleText: "确认订单",
+        enablePullDownRefresh: false
+      }
+    },
+    {
+      path: "pages/login/login",
+      style: {
+        navigationBarTitleText: "登录",
+        enablePullDownRefresh: false
+      }
+    },
+    {
+      path: "pages/login/register",
+      style: {
+        navigationBarTitleText: "注册",
         enablePullDownRefresh: false
       }
     }
@@ -5840,7 +7565,7 @@ ${i3}
   })();
   var Ws = Bs;
   const avatarWidth = 45;
-  const _sfc_main$N = {
+  const _sfc_main$P = {
     name: "UniListChat",
     emits: ["click"],
     props: {
@@ -6023,7 +7748,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$z(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$w(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", {
       "hover-class": !$props.clickable && !$props.link ? "" : "uni-list-chat--hover",
       class: "uni-list-chat",
@@ -6168,12 +7893,12 @@ ${i3}
       ])
     ], 8, ["hover-class"]);
   }
-  const __easycom_0$8 = /* @__PURE__ */ _export_sfc(_sfc_main$N, [["render", _sfc_render$z], ["__scopeId", "data-v-20df4ef0"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list-chat/uni-list-chat.vue"]]);
-  const _sfc_main$M = {
+  const __easycom_0$9 = /* @__PURE__ */ _export_sfc(_sfc_main$P, [["render", _sfc_render$w], ["__scopeId", "data-v-20df4ef0"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list-chat/uni-list-chat.vue"]]);
+  const _sfc_main$O = {
     __name: "index",
     setup(__props) {
       return (_ctx, _cache) => {
-        const _component_uni_list_chat = resolveEasycom(vue.resolveDynamicComponent("uni-list-chat"), __easycom_0$8);
+        const _component_uni_list_chat = resolveEasycom(vue.resolveDynamicComponent("uni-list-chat"), __easycom_0$9);
         const _component_uni_list = resolveEasycom(vue.resolveDynamicComponent("uni-list"), __easycom_1$3);
         return vue.openBlock(), vue.createElementBlock(
           vue.Fragment,
@@ -6218,8 +7943,8 @@ ${i3}
       };
     }
   };
-  const PagesMessagesIndex = /* @__PURE__ */ _export_sfc(_sfc_main$M, [["__file", "D:/graduationProject/pet-front-end/pages/messages/index.vue"]]);
-  const isObject = (val) => val !== null && typeof val === "object";
+  const PagesMessagesIndex = /* @__PURE__ */ _export_sfc(_sfc_main$O, [["__file", "D:/graduationProject/pet-front-end/pages/messages/index.vue"]]);
+  const isObject$1 = (val) => val !== null && typeof val === "object";
   const defaultDelimiters = ["{", "}"];
   class BaseFormatter {
     constructor() {
@@ -6269,7 +7994,7 @@ ${i3}
   function compile(tokens, values) {
     const compiled = [];
     let index = 0;
-    const mode = Array.isArray(values) ? "list" : isObject(values) ? "named" : "unknown";
+    const mode = Array.isArray(values) ? "list" : isObject$1(values) ? "named" : "unknown";
     if (mode === "unknown") {
       return compiled;
     }
@@ -6523,7 +8248,7 @@ ${i3}
   const {
     t: t$4
   } = initVueI18n(messages$2);
-  const _sfc_main$L = {
+  const _sfc_main$N = {
     name: "UniSearchBar",
     emits: ["input", "update:modelValue", "clear", "cancel", "confirm", "blur", "focus"],
     props: {
@@ -6661,8 +8386,8 @@ ${i3}
       }
     }
   };
-  function _sfc_render$y(_ctx, _cache, $props, $setup, $data, $options) {
-    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+  function _sfc_render$v(_ctx, _cache, $props, $setup, $data, $options) {
+    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-searchbar" }, [
       vue.createElementVNode(
         "view",
@@ -6736,8 +8461,8 @@ ${i3}
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_0$7 = /* @__PURE__ */ _export_sfc(_sfc_main$L, [["render", _sfc_render$y], ["__scopeId", "data-v-f07ef577"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar.vue"]]);
-  const _sfc_main$K = {
+  const __easycom_0$8 = /* @__PURE__ */ _export_sfc(_sfc_main$N, [["render", _sfc_render$v], ["__scopeId", "data-v-f07ef577"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar.vue"]]);
+  const _sfc_main$M = {
     __name: "ShopList",
     setup(__props) {
       const goodsList = vue.ref([]);
@@ -6941,8 +8666,8 @@ ${i3}
       };
     }
   };
-  const ShopList = /* @__PURE__ */ _export_sfc(_sfc_main$K, [["__scopeId", "data-v-419b7e21"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/ShopList.vue"]]);
-  const _sfc_main$J = {
+  const ShopList = /* @__PURE__ */ _export_sfc(_sfc_main$M, [["__scopeId", "data-v-419b7e21"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/ShopList.vue"]]);
+  const _sfc_main$L = {
     __name: "CategorySelect",
     props: {
       title: String,
@@ -6952,7 +8677,7 @@ ${i3}
     },
     setup(__props) {
       return (_ctx, _cache) => {
-        const _component_icon_base = resolveEasycom(vue.resolveDynamicComponent("icon-base"), __easycom_0$b);
+        const _component_icon_base = resolveEasycom(vue.resolveDynamicComponent("icon-base"), __easycom_0$c);
         return vue.openBlock(), vue.createElementBlock("view", { class: "com-base" }, [
           vue.createCommentVNode(" 上方的展示 "),
           vue.createElementVNode(
@@ -6982,8 +8707,8 @@ ${i3}
       };
     }
   };
-  const CategorySelect = /* @__PURE__ */ _export_sfc(_sfc_main$J, [["__scopeId", "data-v-b536a4fa"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/CategorySelect.vue"]]);
-  const _sfc_main$I = {
+  const CategorySelect = /* @__PURE__ */ _export_sfc(_sfc_main$L, [["__scopeId", "data-v-b536a4fa"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/CategorySelect.vue"]]);
+  const _sfc_main$K = {
     __name: "index",
     setup(__props) {
       const searchValue = vue.ref("");
@@ -6993,7 +8718,7 @@ ${i3}
         });
       };
       return (_ctx, _cache) => {
-        const _component_uni_search_bar = resolveEasycom(vue.resolveDynamicComponent("uni-search-bar"), __easycom_0$7);
+        const _component_uni_search_bar = resolveEasycom(vue.resolveDynamicComponent("uni-search-bar"), __easycom_0$8);
         return vue.openBlock(), vue.createElementBlock(
           vue.Fragment,
           null,
@@ -7055,7 +8780,7 @@ ${i3}
       };
     }
   };
-  const PagesShopIndex = /* @__PURE__ */ _export_sfc(_sfc_main$I, [["__scopeId", "data-v-7db6cc15"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/index.vue"]]);
+  const PagesShopIndex = /* @__PURE__ */ _export_sfc(_sfc_main$K, [["__scopeId", "data-v-7db6cc15"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/index.vue"]]);
   const testData = [
     {
       cid: 1,
@@ -8075,7 +9800,7 @@ ${i3}
       ]
     }
   ];
-  const _sfc_main$H = {
+  const _sfc_main$J = {
     __name: "index",
     emits: ["itemClick"],
     setup(__props, { emit }) {
@@ -8207,8 +9932,8 @@ ${i3}
       };
     }
   };
-  const PagesCategoryIndex = /* @__PURE__ */ _export_sfc(_sfc_main$H, [["__file", "D:/graduationProject/pet-front-end/pages/category/index.vue"]]);
-  const _sfc_main$G = {
+  const PagesCategoryIndex = /* @__PURE__ */ _export_sfc(_sfc_main$J, [["__file", "D:/graduationProject/pet-front-end/pages/category/index.vue"]]);
+  const _sfc_main$I = {
     __name: "categoryproductlist",
     setup(__props) {
       const goodsList = vue.ref([]);
@@ -8409,8 +10134,8 @@ ${i3}
       };
     }
   };
-  const PagesCategoryCategoryproductlist = /* @__PURE__ */ _export_sfc(_sfc_main$G, [["__scopeId", "data-v-e66e2993"], ["__file", "D:/graduationProject/pet-front-end/pages/category/categoryproductlist.vue"]]);
-  const _sfc_main$F = {
+  const PagesCategoryCategoryproductlist = /* @__PURE__ */ _export_sfc(_sfc_main$I, [["__scopeId", "data-v-e66e2993"], ["__file", "D:/graduationProject/pet-front-end/pages/category/categoryproductlist.vue"]]);
+  const _sfc_main$H = {
     name: "UniStatusBar",
     data() {
       return {
@@ -8418,7 +10143,7 @@ ${i3}
       };
     }
   };
-  function _sfc_render$x(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$u(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock(
       "view",
       {
@@ -8432,9 +10157,9 @@ ${i3}
       /* STYLE */
     );
   }
-  const statusBar = /* @__PURE__ */ _export_sfc(_sfc_main$F, [["render", _sfc_render$x], ["__scopeId", "data-v-7920e3e0"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-nav-bar/components/uni-nav-bar/uni-status-bar.vue"]]);
+  const statusBar = /* @__PURE__ */ _export_sfc(_sfc_main$H, [["render", _sfc_render$u], ["__scopeId", "data-v-7920e3e0"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-nav-bar/components/uni-nav-bar/uni-status-bar.vue"]]);
   const getVal = (val) => typeof val === "number" ? val + "px" : val;
-  const _sfc_main$E = {
+  const _sfc_main$G = {
     name: "UniNavBar",
     components: {
       statusBar
@@ -8554,9 +10279,9 @@ ${i3}
       }
     }
   };
-  function _sfc_render$w(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$t(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_status_bar = vue.resolveComponent("status-bar");
-    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock(
       "view",
       {
@@ -8709,7 +10434,7 @@ ${i3}
       /* CLASS */
     );
   }
-  const __easycom_0$6 = /* @__PURE__ */ _export_sfc(_sfc_main$E, [["render", _sfc_render$w], ["__scopeId", "data-v-26544265"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.vue"]]);
+  const __easycom_0$7 = /* @__PURE__ */ _export_sfc(_sfc_main$G, [["render", _sfc_render$t], ["__scopeId", "data-v-26544265"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.vue"]]);
   const en$2 = {
     "uni-goods-nav.options.shop": "shop",
     "uni-goods-nav.options.cart": "cart",
@@ -8734,7 +10459,7 @@ ${i3}
     "zh-Hant": zhHant$2
   };
   const { t: t$3 } = initVueI18n(messages$1);
-  const _sfc_main$D = {
+  const _sfc_main$F = {
     name: "UniGoodsNav",
     emits: ["click", "buttonClick"],
     props: {
@@ -8794,8 +10519,8 @@ ${i3}
       }
     }
   };
-  function _sfc_render$v(_ctx, _cache, $props, $setup, $data, $options) {
-    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+  function _sfc_render$s(_ctx, _cache, $props, $setup, $data, $options) {
+    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-goods-nav" }, [
       vue.createCommentVNode(" 底部占位 "),
       vue.createElementVNode("view", { class: "uni-tab__seat" }),
@@ -8885,8 +10610,8 @@ ${i3}
       ])
     ]);
   }
-  const __easycom_1$2 = /* @__PURE__ */ _export_sfc(_sfc_main$D, [["render", _sfc_render$v], ["__scopeId", "data-v-8226c5e1"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-goods-nav/components/uni-goods-nav/uni-goods-nav.vue"]]);
-  const _sfc_main$C = {
+  const __easycom_1$2 = /* @__PURE__ */ _export_sfc(_sfc_main$F, [["render", _sfc_render$s], ["__scopeId", "data-v-8226c5e1"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-goods-nav/components/uni-goods-nav/uni-goods-nav.vue"]]);
+  const _sfc_main$E = {
     __name: "productdetail",
     setup(__props) {
       const backLayer = () => {
@@ -8898,7 +10623,7 @@ ${i3}
         });
       };
       return (_ctx, _cache) => {
-        const _component_uni_nav_bar = resolveEasycom(vue.resolveDynamicComponent("uni-nav-bar"), __easycom_0$6);
+        const _component_uni_nav_bar = resolveEasycom(vue.resolveDynamicComponent("uni-nav-bar"), __easycom_0$7);
         const _component_uni_goods_nav = resolveEasycom(vue.resolveDynamicComponent("uni-goods-nav"), __easycom_1$2);
         return vue.openBlock(), vue.createElementBlock(
           vue.Fragment,
@@ -8980,8 +10705,8 @@ ${i3}
       };
     }
   };
-  const PagesCategoryProductdetail = /* @__PURE__ */ _export_sfc(_sfc_main$C, [["__file", "D:/graduationProject/pet-front-end/pages/category/productdetail.vue"]]);
-  const _sfc_main$B = {
+  const PagesCategoryProductdetail = /* @__PURE__ */ _export_sfc(_sfc_main$E, [["__file", "D:/graduationProject/pet-front-end/pages/category/productdetail.vue"]]);
+  const _sfc_main$D = {
     data() {
       return {
         carNum: 0,
@@ -9150,7 +10875,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$u(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$r(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_u_image = vue.resolveComponent("u-image");
     const _component_u_number_box = vue.resolveComponent("u-number-box");
     return vue.openBlock(), vue.createElementBlock("view", null, [
@@ -9299,150 +11024,6984 @@ ${i3}
       ])
     ]);
   }
-  const PagesCatCat = /* @__PURE__ */ _export_sfc(_sfc_main$B, [["render", _sfc_render$u], ["__file", "D:/graduationProject/pet-front-end/pages/cat/cat.vue"]]);
-  const _sfc_main$A = {
-    data() {
-      return {
-        colors: "#2979FF",
-        addressList: [{
-          name: "小明",
-          phone: "12345678915",
-          address: "佛山市南海区",
-          moreAddres: "桂城街道",
-          isdefult: 1,
-          id: 1
-        }, {
-          name: "小红",
-          phone: "12345678915",
-          address: "广州市海珠区",
-          moreAddres: "昌岗路15号",
-          isdefult: 0,
-          id: 2
-        }]
-      };
-    },
-    props: {
-      // colors: {
-      // 	type: String
-      // },
-      // addressList: {
-      // 	type: Array
-      // }
-    },
-    methods: {
-      editAddress(item) {
-        this.$emit("editClick", item);
+  const PagesCatCat = /* @__PURE__ */ _export_sfc(_sfc_main$D, [["render", _sfc_render$r], ["__file", "D:/graduationProject/pet-front-end/pages/cat/cat.vue"]]);
+  const _sfc_main$C = {
+    __name: "Address",
+    emits: ["editClick", "chooseClick"],
+    setup(__props, { emit }) {
+      const colors = vue.ref("#2979FF");
+      const store = useUserStore();
+      const addressList = vue.ref([]);
+      const editAddress = (item) => {
+        const targetPage = "/pages/my/EditAddress";
+        const queryString = Object.keys(item).map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(item[key])}`).join("&");
         uni.navigateTo({
-          url: "/pages/my/EditAddress"
+          url: `${targetPage}?${queryString}`
         });
-      },
-      //选择收货地址后 返回上一层路由
-      onsetAddress(item) {
-        this.$emit("chooseClick", item);
-      },
-      delAddress(item, index) {
+      };
+      const onSetAddress = (item) => {
+        emit("chooseClick", item);
+      };
+      const delAddress = (item, index) => {
         uni.showModal({
           title: "提示",
           content: "确认要删除该地址吗?",
           confirmText: "删除",
-          confirmColor: this.colors,
+          confirmColor: colors.value,
           success: (res) => {
             if (res.confirm) {
               uni.showToast({
                 title: "删除成功~",
                 icon: "none"
               });
-              this.addressList.splice(index, 1);
+              addressList.value.splice(index, 1);
             }
           }
         });
+      };
+      const addAddress = () => {
+        uni.navigateTo({
+          url: "/pages/my/EditAddress"
+        });
+      };
+      const getAddressData = async () => {
+        const result = await request("/address", {
+          user_id: store.user.user_id
+        });
+        if (result.code === 200) {
+          addressList.value = result.data;
+        }
+      };
+      vue.onMounted(() => {
+        getAddressData();
+      });
+      return (_ctx, _cache) => {
+        const _component_icon_base = resolveEasycom(vue.resolveDynamicComponent("icon-base"), __easycom_0$c);
+        return vue.openBlock(), vue.createElementBlock(
+          vue.Fragment,
+          null,
+          [
+            vue.createElementVNode("view", { class: "myaddress" }, [
+              (vue.openBlock(true), vue.createElementBlock(
+                vue.Fragment,
+                null,
+                vue.renderList(addressList.value, (item, index) => {
+                  return vue.openBlock(), vue.createElementBlock("view", {
+                    key: index,
+                    class: "order_address"
+                  }, [
+                    vue.createElementVNode("view", { class: "address_box" }, [
+                      vue.createElementVNode("view", { class: "weizhi_icon" }, [
+                        vue.createVNode(_component_icon_base, {
+                          type: "dizhiguanli",
+                          color: colors.value,
+                          size: 50
+                        }, null, 8, ["color"])
+                      ]),
+                      vue.createCommentVNode(" 编辑地址 "),
+                      vue.createElementVNode("view", {
+                        onClick: ($event) => onSetAddress(item)
+                      }, [
+                        vue.createElementVNode("view", { class: "center" }, [
+                          vue.createCommentVNode(" 默认 "),
+                          item.isdefult == 1 ? (vue.openBlock(), vue.createElementBlock("view", {
+                            key: 0,
+                            class: "moren"
+                          }, [
+                            vue.createVNode(_component_icon_base, {
+                              type: "moren",
+                              color: colors.value,
+                              size: 100
+                            }, null, 8, ["color"])
+                          ])) : vue.createCommentVNode("v-if", true),
+                          vue.createElementVNode("view", { class: "name" }, [
+                            vue.createElementVNode(
+                              "text",
+                              { class: "text1" },
+                              vue.toDisplayString(item.address_name),
+                              1
+                              /* TEXT */
+                            ),
+                            vue.createElementVNode(
+                              "text",
+                              { class: "phones" },
+                              vue.toDisplayString(item.address_phone),
+                              1
+                              /* TEXT */
+                            )
+                          ]),
+                          vue.createElementVNode(
+                            "view",
+                            { class: "address_name" },
+                            vue.toDisplayString(item.address_info),
+                            1
+                            /* TEXT */
+                          )
+                        ])
+                      ], 8, ["onClick"]),
+                      vue.createElementVNode("view", { class: "caozuo" }, [
+                        vue.createElementVNode("view", {
+                          class: "del",
+                          onClick: ($event) => delAddress(item, index)
+                        }, [
+                          vue.createElementVNode("text", { class: "iconfont icon-shanchu" }),
+                          vue.createTextVNode(" 删除 ")
+                        ], 8, ["onClick"]),
+                        vue.createElementVNode("view", {
+                          class: "edit",
+                          onClick: ($event) => editAddress(item)
+                        }, [
+                          vue.createElementVNode("text", { class: "iconfont icon-bianji" }),
+                          vue.createTextVNode(" 编辑 ")
+                        ], 8, ["onClick"])
+                      ])
+                    ])
+                  ]);
+                }),
+                128
+                /* KEYED_FRAGMENT */
+              ))
+            ]),
+            vue.createElementVNode("button", {
+              type: "primary",
+              class: "addAddress",
+              onClick: addAddress
+            }, "添加地址")
+          ],
+          64
+          /* STABLE_FRAGMENT */
+        );
+      };
+    }
+  };
+  const PagesMyAddress = /* @__PURE__ */ _export_sfc(_sfc_main$C, [["__scopeId", "data-v-eda7be84"], ["__file", "D:/graduationProject/pet-front-end/pages/my/Address.vue"]]);
+  const _sfc_main$B = {
+    name: "uniFormsItem",
+    options: {
+      virtualHost: true
+    },
+    provide() {
+      return {
+        uniFormItem: this
+      };
+    },
+    inject: {
+      form: {
+        from: "uniForm",
+        default: null
+      }
+    },
+    props: {
+      // 表单校验规则
+      rules: {
+        type: Array,
+        default() {
+          return null;
+        }
+      },
+      // 表单域的属性名，在使用校验规则时必填
+      name: {
+        type: [String, Array],
+        default: ""
+      },
+      required: {
+        type: Boolean,
+        default: false
+      },
+      label: {
+        type: String,
+        default: ""
+      },
+      // label的宽度 ，默认 80
+      labelWidth: {
+        type: [String, Number],
+        default: ""
+      },
+      // label 居中方式，默认 left 取值 left/center/right
+      labelAlign: {
+        type: String,
+        default: ""
+      },
+      // 强制显示错误信息
+      errorMessage: {
+        type: [String, Boolean],
+        default: ""
+      },
+      // 1.4.0 弃用，统一使用 form 的校验时机
+      // validateTrigger: {
+      // 	type: String,
+      // 	default: ''
+      // },
+      // 1.4.0 弃用，统一使用 form 的label 位置
+      // labelPosition: {
+      // 	type: String,
+      // 	default: ''
+      // },
+      // 1.4.0 以下属性已经废弃，请使用  #label 插槽代替
+      leftIcon: String,
+      iconColor: {
+        type: String,
+        default: "#606266"
+      }
+    },
+    data() {
+      return {
+        errMsg: "",
+        userRules: null,
+        localLabelAlign: "left",
+        localLabelWidth: "65px",
+        localLabelPos: "left",
+        border: false,
+        isFirstBorder: false
+      };
+    },
+    computed: {
+      // 处理错误信息
+      msg() {
+        return this.errorMessage || this.errMsg;
+      }
+    },
+    watch: {
+      // 规则发生变化通知子组件更新
+      "form.formRules"(val) {
+        this.init();
+      },
+      "form.labelWidth"(val) {
+        this.localLabelWidth = this._labelWidthUnit(val);
+      },
+      "form.labelPosition"(val) {
+        this.localLabelPos = this._labelPosition();
+      },
+      "form.labelAlign"(val) {
+      }
+    },
+    created() {
+      this.init(true);
+      if (this.name && this.form) {
+        this.$watch(
+          () => {
+            const val = this.form._getDataValue(this.name, this.form.localData);
+            return val;
+          },
+          (value, oldVal) => {
+            const isEqual2 = this.form._isEqual(value, oldVal);
+            if (!isEqual2) {
+              const val = this.itemSetValue(value);
+              this.onFieldChange(val, false);
+            }
+          },
+          {
+            immediate: false
+          }
+        );
+      }
+    },
+    unmounted() {
+      this.__isUnmounted = true;
+      this.unInit();
+    },
+    methods: {
+      /**
+       * 外部调用方法
+       * 设置规则 ，主要用于小程序自定义检验规则
+       * @param {Array} rules 规则源数据
+       */
+      setRules(rules2 = null) {
+        this.userRules = rules2;
+        this.init(false);
+      },
+      // 兼容老版本表单组件
+      setValue() {
+      },
+      /**
+       * 外部调用方法
+       * 校验数据
+       * @param {any} value 需要校验的数据
+       * @param {boolean} 是否立即校验
+       * @return {Array|null} 校验内容
+       */
+      async onFieldChange(value, formtrigger = true) {
+        const {
+          formData,
+          localData,
+          errShowType,
+          validateCheck,
+          validateTrigger,
+          _isRequiredField,
+          _realName
+        } = this.form;
+        const name = _realName(this.name);
+        if (!value) {
+          value = this.form.formData[name];
+        }
+        const ruleLen = this.itemRules.rules && this.itemRules.rules.length;
+        if (!this.validator || !ruleLen || ruleLen === 0)
+          return;
+        const isRequiredField2 = _isRequiredField(this.itemRules.rules || []);
+        let result = null;
+        if (validateTrigger === "bind" || formtrigger) {
+          result = await this.validator.validateUpdate(
+            {
+              [name]: value
+            },
+            formData
+          );
+          if (!isRequiredField2 && (value === void 0 || value === "")) {
+            result = null;
+          }
+          if (result && result.errorMessage) {
+            if (errShowType === "undertext") {
+              this.errMsg = !result ? "" : result.errorMessage;
+            }
+            if (errShowType === "toast") {
+              uni.showToast({
+                title: result.errorMessage || "校验错误",
+                icon: "none"
+              });
+            }
+            if (errShowType === "modal") {
+              uni.showModal({
+                title: "提示",
+                content: result.errorMessage || "校验错误"
+              });
+            }
+          } else {
+            this.errMsg = "";
+          }
+          validateCheck(result ? result : null);
+        } else {
+          this.errMsg = "";
+        }
+        return result ? result : null;
+      },
+      /**
+       * 初始组件数据
+       */
+      init(type = false) {
+        const {
+          validator,
+          formRules,
+          childrens,
+          formData,
+          localData,
+          _realName,
+          labelWidth,
+          _getDataValue,
+          _setDataValue
+        } = this.form || {};
+        this.localLabelAlign = this._justifyContent();
+        this.localLabelWidth = this._labelWidthUnit(labelWidth);
+        this.localLabelPos = this._labelPosition();
+        this.form && type && childrens.push(this);
+        if (!validator || !formRules)
+          return;
+        if (!this.form.isFirstBorder) {
+          this.form.isFirstBorder = true;
+          this.isFirstBorder = true;
+        }
+        if (this.group) {
+          if (!this.group.isFirstBorder) {
+            this.group.isFirstBorder = true;
+            this.isFirstBorder = true;
+          }
+        }
+        this.border = this.form.border;
+        const name = _realName(this.name);
+        const itemRule = this.userRules || this.rules;
+        if (typeof formRules === "object" && itemRule) {
+          formRules[name] = {
+            rules: itemRule
+          };
+          validator.updateSchema(formRules);
+        }
+        const itemRules = formRules[name] || {};
+        this.itemRules = itemRules;
+        this.validator = validator;
+        this.itemSetValue(_getDataValue(this.name, localData));
+      },
+      unInit() {
+        if (this.form) {
+          const {
+            childrens,
+            formData,
+            _realName
+          } = this.form;
+          childrens.forEach((item, index) => {
+            if (item === this) {
+              this.form.childrens.splice(index, 1);
+              delete formData[_realName(item.name)];
+            }
+          });
+        }
+      },
+      // 设置item 的值
+      itemSetValue(value) {
+        const name = this.form._realName(this.name);
+        const rules2 = this.itemRules.rules || [];
+        const val = this.form._getValue(name, value, rules2);
+        this.form._setDataValue(name, this.form.formData, val);
+        return val;
+      },
+      /**
+       * 移除该表单项的校验结果
+       */
+      clearValidate() {
+        this.errMsg = "";
+      },
+      // 是否显示星号
+      _isRequired() {
+        return this.required;
+      },
+      // 处理对齐方式
+      _justifyContent() {
+        if (this.form) {
+          const {
+            labelAlign
+          } = this.form;
+          let labelAli = this.labelAlign ? this.labelAlign : labelAlign;
+          if (labelAli === "left")
+            return "flex-start";
+          if (labelAli === "center")
+            return "center";
+          if (labelAli === "right")
+            return "flex-end";
+        }
+        return "flex-start";
+      },
+      // 处理 label宽度单位 ,继承父元素的值
+      _labelWidthUnit(labelWidth) {
+        return this.num2px(this.labelWidth ? this.labelWidth : labelWidth || (this.label ? 65 : "auto"));
+      },
+      // 处理 label 位置
+      _labelPosition() {
+        if (this.form)
+          return this.form.labelPosition || "left";
+        return "left";
+      },
+      /**
+       * 触发时机
+       * @param {Object} rule 当前规则内时机
+       * @param {Object} itemRlue 当前组件时机
+       * @param {Object} parentRule 父组件时机
+       */
+      isTrigger(rule, itemRlue, parentRule) {
+        if (rule === "submit" || !rule) {
+          if (rule === void 0) {
+            if (itemRlue !== "bind") {
+              if (!itemRlue) {
+                return parentRule === "" ? "bind" : "submit";
+              }
+              return "submit";
+            }
+            return "bind";
+          }
+          return "submit";
+        }
+        return "bind";
+      },
+      num2px(num) {
+        if (typeof num === "number") {
+          return `${num}px`;
+        }
+        return num;
       }
     }
   };
-  function _sfc_render$t(_ctx, _cache, $props, $setup, $data, $options) {
-    const _component_icon_base = resolveEasycom(vue.resolveDynamicComponent("icon-base"), __easycom_0$b);
-    return vue.openBlock(), vue.createElementBlock("view", { class: "myaddress" }, [
-      (vue.openBlock(true), vue.createElementBlock(
-        vue.Fragment,
-        null,
-        vue.renderList($data.addressList, (item, index) => {
-          return vue.openBlock(), vue.createElementBlock("view", {
-            key: index,
-            class: "order_address"
-          }, [
-            vue.createElementVNode("view", { class: "address_box" }, [
-              vue.createElementVNode("view", { class: "weizhi_icon" }, [
-                vue.createVNode(_component_icon_base, {
-                  type: "dizhiguanli",
-                  color: $data.colors,
-                  size: 50
-                }, null, 8, ["color"])
-              ]),
-              vue.createElementVNode("view", {
-                onClick: ($event) => $options.onsetAddress(item)
-              }, [
-                vue.createElementVNode("view", { class: "center" }, [
-                  item.isdefult == 1 ? (vue.openBlock(), vue.createElementBlock("view", {
-                    key: 0,
-                    class: "moren"
-                  }, [
-                    vue.createVNode(_component_icon_base, {
-                      type: "moren",
-                      color: $data.colors,
-                      size: 100
-                    }, null, 8, ["color"]),
-                    vue.createCommentVNode(` <text class="iconfont icon-moren" :style="'color:' + colors"></text> `)
-                  ])) : vue.createCommentVNode("v-if", true),
-                  vue.createElementVNode("view", { class: "name" }, [
-                    vue.createElementVNode(
-                      "text",
-                      { class: "text1" },
-                      vue.toDisplayString(item.name),
-                      1
-                      /* TEXT */
-                    ),
-                    vue.createElementVNode(
-                      "text",
-                      { class: "phones" },
-                      vue.toDisplayString(item.phone),
-                      1
-                      /* TEXT */
-                    )
-                  ]),
-                  vue.createElementVNode(
-                    "view",
-                    { class: "address_name" },
-                    vue.toDisplayString(item.address) + vue.toDisplayString(item.moreAddres),
-                    1
-                    /* TEXT */
-                  )
-                ])
-              ], 8, ["onClick"]),
-              vue.createElementVNode("view", { class: "caozuo" }, [
-                vue.createElementVNode("view", {
-                  class: "del",
-                  onClick: ($event) => $options.delAddress(item, index)
-                }, [
-                  vue.createElementVNode("text", { class: "iconfont icon-shanchu" }),
-                  vue.createTextVNode(" 删除 ")
-                ], 8, ["onClick"]),
-                vue.createElementVNode("view", {
-                  class: "edit",
-                  onClick: ($event) => $options.editAddress(item)
-                }, [
-                  vue.createElementVNode("text", { class: "iconfont icon-bianji" }),
-                  vue.createTextVNode(" 编辑 ")
-                ], 8, ["onClick"])
-              ])
-            ])
-          ]);
-        }),
-        128
-        /* KEYED_FRAGMENT */
-      ))
+  function _sfc_render$q(_ctx, _cache, $props, $setup, $data, $options) {
+    return vue.openBlock(), vue.createElementBlock(
+      "view",
+      {
+        class: vue.normalizeClass(["uni-forms-item", ["is-direction-" + $data.localLabelPos, $data.border ? "uni-forms-item--border" : "", $data.border && $data.isFirstBorder ? "is-first-border" : ""]])
+      },
+      [
+        vue.renderSlot(_ctx.$slots, "label", {}, () => [
+          vue.createElementVNode(
+            "view",
+            {
+              class: vue.normalizeClass(["uni-forms-item__label", { "no-label": !$props.label && !$props.required }]),
+              style: vue.normalizeStyle({ width: $data.localLabelWidth, justifyContent: $data.localLabelAlign })
+            },
+            [
+              $props.required ? (vue.openBlock(), vue.createElementBlock("text", {
+                key: 0,
+                class: "is-required"
+              }, "*")) : vue.createCommentVNode("v-if", true),
+              vue.createElementVNode(
+                "text",
+                null,
+                vue.toDisplayString($props.label),
+                1
+                /* TEXT */
+              )
+            ],
+            6
+            /* CLASS, STYLE */
+          )
+        ], true),
+        vue.createElementVNode("view", { class: "uni-forms-item__content" }, [
+          vue.renderSlot(_ctx.$slots, "default", {}, void 0, true),
+          vue.createElementVNode(
+            "view",
+            {
+              class: vue.normalizeClass(["uni-forms-item__error", { "msg--active": $options.msg }])
+            },
+            [
+              vue.createElementVNode(
+                "text",
+                null,
+                vue.toDisplayString($options.msg),
+                1
+                /* TEXT */
+              )
+            ],
+            2
+            /* CLASS */
+          )
+        ])
+      ],
+      2
+      /* CLASS */
+    );
+  }
+  const __easycom_0$6 = /* @__PURE__ */ _export_sfc(_sfc_main$B, [["render", _sfc_render$q], ["__scopeId", "data-v-462874dd"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.vue"]]);
+  var pattern = {
+    email: /^\S+?@\S+?\.\S+?$/,
+    idcard: /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/,
+    url: new RegExp(
+      "^(?!mailto:)(?:(?:http|https|ftp)://|//)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$",
+      "i"
+    )
+  };
+  const FORMAT_MAPPING = {
+    "int": "integer",
+    "bool": "boolean",
+    "double": "number",
+    "long": "number",
+    "password": "string"
+    // "fileurls": 'array'
+  };
+  function formatMessage(args, resources = "") {
+    var defaultMessage = ["label"];
+    defaultMessage.forEach((item) => {
+      if (args[item] === void 0) {
+        args[item] = "";
+      }
+    });
+    let str = resources;
+    for (let key in args) {
+      let reg = new RegExp("{" + key + "}");
+      str = str.replace(reg, args[key]);
+    }
+    return str;
+  }
+  function isEmptyValue(value, type) {
+    if (value === void 0 || value === null) {
+      return true;
+    }
+    if (typeof value === "string" && !value) {
+      return true;
+    }
+    if (Array.isArray(value) && !value.length) {
+      return true;
+    }
+    if (type === "object" && !Object.keys(value).length) {
+      return true;
+    }
+    return false;
+  }
+  const types = {
+    integer(value) {
+      return types.number(value) && parseInt(value, 10) === value;
+    },
+    string(value) {
+      return typeof value === "string";
+    },
+    number(value) {
+      if (isNaN(value)) {
+        return false;
+      }
+      return typeof value === "number";
+    },
+    "boolean": function(value) {
+      return typeof value === "boolean";
+    },
+    "float": function(value) {
+      return types.number(value) && !types.integer(value);
+    },
+    array(value) {
+      return Array.isArray(value);
+    },
+    object(value) {
+      return typeof value === "object" && !types.array(value);
+    },
+    date(value) {
+      return value instanceof Date;
+    },
+    timestamp(value) {
+      if (!this.integer(value) || Math.abs(value).toString().length > 16) {
+        return false;
+      }
+      return true;
+    },
+    file(value) {
+      return typeof value.url === "string";
+    },
+    email(value) {
+      return typeof value === "string" && !!value.match(pattern.email) && value.length < 255;
+    },
+    url(value) {
+      return typeof value === "string" && !!value.match(pattern.url);
+    },
+    pattern(reg, value) {
+      try {
+        return new RegExp(reg).test(value);
+      } catch (e2) {
+        return false;
+      }
+    },
+    method(value) {
+      return typeof value === "function";
+    },
+    idcard(value) {
+      return typeof value === "string" && !!value.match(pattern.idcard);
+    },
+    "url-https"(value) {
+      return this.url(value) && value.startsWith("https://");
+    },
+    "url-scheme"(value) {
+      return value.startsWith("://");
+    },
+    "url-web"(value) {
+      return false;
+    }
+  };
+  class RuleValidator {
+    constructor(message) {
+      this._message = message;
+    }
+    async validateRule(fieldKey, fieldValue, value, data, allData) {
+      var result = null;
+      let rules2 = fieldValue.rules;
+      let hasRequired = rules2.findIndex((item) => {
+        return item.required;
+      });
+      if (hasRequired < 0) {
+        if (value === null || value === void 0) {
+          return result;
+        }
+        if (typeof value === "string" && !value.length) {
+          return result;
+        }
+      }
+      var message = this._message;
+      if (rules2 === void 0) {
+        return message["default"];
+      }
+      for (var i2 = 0; i2 < rules2.length; i2++) {
+        let rule = rules2[i2];
+        let vt2 = this._getValidateType(rule);
+        Object.assign(rule, {
+          label: fieldValue.label || `["${fieldKey}"]`
+        });
+        if (RuleValidatorHelper[vt2]) {
+          result = RuleValidatorHelper[vt2](rule, value, message);
+          if (result != null) {
+            break;
+          }
+        }
+        if (rule.validateExpr) {
+          let now2 = Date.now();
+          let resultExpr = rule.validateExpr(value, allData, now2);
+          if (resultExpr === false) {
+            result = this._getMessage(rule, rule.errorMessage || this._message["default"]);
+            break;
+          }
+        }
+        if (rule.validateFunction) {
+          result = await this.validateFunction(rule, value, data, allData, vt2);
+          if (result !== null) {
+            break;
+          }
+        }
+      }
+      if (result !== null) {
+        result = message.TAG + result;
+      }
+      return result;
+    }
+    async validateFunction(rule, value, data, allData, vt2) {
+      let result = null;
+      try {
+        let callbackMessage = null;
+        const res = await rule.validateFunction(rule, value, allData || data, (message) => {
+          callbackMessage = message;
+        });
+        if (callbackMessage || typeof res === "string" && res || res === false) {
+          result = this._getMessage(rule, callbackMessage || res, vt2);
+        }
+      } catch (e2) {
+        result = this._getMessage(rule, e2.message, vt2);
+      }
+      return result;
+    }
+    _getMessage(rule, message, vt2) {
+      return formatMessage(rule, message || rule.errorMessage || this._message[vt2] || message["default"]);
+    }
+    _getValidateType(rule) {
+      var result = "";
+      if (rule.required) {
+        result = "required";
+      } else if (rule.format) {
+        result = "format";
+      } else if (rule.arrayType) {
+        result = "arrayTypeFormat";
+      } else if (rule.range) {
+        result = "range";
+      } else if (rule.maximum !== void 0 || rule.minimum !== void 0) {
+        result = "rangeNumber";
+      } else if (rule.maxLength !== void 0 || rule.minLength !== void 0) {
+        result = "rangeLength";
+      } else if (rule.pattern) {
+        result = "pattern";
+      } else if (rule.validateFunction) {
+        result = "validateFunction";
+      }
+      return result;
+    }
+  }
+  const RuleValidatorHelper = {
+    required(rule, value, message) {
+      if (rule.required && isEmptyValue(value, rule.format || typeof value)) {
+        return formatMessage(rule, rule.errorMessage || message.required);
+      }
+      return null;
+    },
+    range(rule, value, message) {
+      const {
+        range,
+        errorMessage
+      } = rule;
+      let list = new Array(range.length);
+      for (let i2 = 0; i2 < range.length; i2++) {
+        const item = range[i2];
+        if (types.object(item) && item.value !== void 0) {
+          list[i2] = item.value;
+        } else {
+          list[i2] = item;
+        }
+      }
+      let result = false;
+      if (Array.isArray(value)) {
+        result = new Set(value.concat(list)).size === list.length;
+      } else {
+        if (list.indexOf(value) > -1) {
+          result = true;
+        }
+      }
+      if (!result) {
+        return formatMessage(rule, errorMessage || message["enum"]);
+      }
+      return null;
+    },
+    rangeNumber(rule, value, message) {
+      if (!types.number(value)) {
+        return formatMessage(rule, rule.errorMessage || message.pattern.mismatch);
+      }
+      let {
+        minimum,
+        maximum,
+        exclusiveMinimum,
+        exclusiveMaximum
+      } = rule;
+      let min = exclusiveMinimum ? value <= minimum : value < minimum;
+      let max = exclusiveMaximum ? value >= maximum : value > maximum;
+      if (minimum !== void 0 && min) {
+        return formatMessage(rule, rule.errorMessage || message["number"][exclusiveMinimum ? "exclusiveMinimum" : "minimum"]);
+      } else if (maximum !== void 0 && max) {
+        return formatMessage(rule, rule.errorMessage || message["number"][exclusiveMaximum ? "exclusiveMaximum" : "maximum"]);
+      } else if (minimum !== void 0 && maximum !== void 0 && (min || max)) {
+        return formatMessage(rule, rule.errorMessage || message["number"].range);
+      }
+      return null;
+    },
+    rangeLength(rule, value, message) {
+      if (!types.string(value) && !types.array(value)) {
+        return formatMessage(rule, rule.errorMessage || message.pattern.mismatch);
+      }
+      let min = rule.minLength;
+      let max = rule.maxLength;
+      let val = value.length;
+      if (min !== void 0 && val < min) {
+        return formatMessage(rule, rule.errorMessage || message["length"].minLength);
+      } else if (max !== void 0 && val > max) {
+        return formatMessage(rule, rule.errorMessage || message["length"].maxLength);
+      } else if (min !== void 0 && max !== void 0 && (val < min || val > max)) {
+        return formatMessage(rule, rule.errorMessage || message["length"].range);
+      }
+      return null;
+    },
+    pattern(rule, value, message) {
+      if (!types["pattern"](rule.pattern, value)) {
+        return formatMessage(rule, rule.errorMessage || message.pattern.mismatch);
+      }
+      return null;
+    },
+    format(rule, value, message) {
+      var customTypes = Object.keys(types);
+      var format = FORMAT_MAPPING[rule.format] ? FORMAT_MAPPING[rule.format] : rule.format || rule.arrayType;
+      if (customTypes.indexOf(format) > -1) {
+        if (!types[format](value)) {
+          return formatMessage(rule, rule.errorMessage || message.typeError);
+        }
+      }
+      return null;
+    },
+    arrayTypeFormat(rule, value, message) {
+      if (!Array.isArray(value)) {
+        return formatMessage(rule, rule.errorMessage || message.typeError);
+      }
+      for (let i2 = 0; i2 < value.length; i2++) {
+        const element = value[i2];
+        let formatResult = this.format(rule, element, message);
+        if (formatResult !== null) {
+          return formatResult;
+        }
+      }
+      return null;
+    }
+  };
+  class SchemaValidator extends RuleValidator {
+    constructor(schema, options) {
+      super(SchemaValidator.message);
+      this._schema = schema;
+      this._options = options || null;
+    }
+    updateSchema(schema) {
+      this._schema = schema;
+    }
+    async validate(data, allData) {
+      let result = this._checkFieldInSchema(data);
+      if (!result) {
+        result = await this.invokeValidate(data, false, allData);
+      }
+      return result.length ? result[0] : null;
+    }
+    async validateAll(data, allData) {
+      let result = this._checkFieldInSchema(data);
+      if (!result) {
+        result = await this.invokeValidate(data, true, allData);
+      }
+      return result;
+    }
+    async validateUpdate(data, allData) {
+      let result = this._checkFieldInSchema(data);
+      if (!result) {
+        result = await this.invokeValidateUpdate(data, false, allData);
+      }
+      return result.length ? result[0] : null;
+    }
+    async invokeValidate(data, all, allData) {
+      let result = [];
+      let schema = this._schema;
+      for (let key in schema) {
+        let value = schema[key];
+        let errorMessage = await this.validateRule(key, value, data[key], data, allData);
+        if (errorMessage != null) {
+          result.push({
+            key,
+            errorMessage
+          });
+          if (!all)
+            break;
+        }
+      }
+      return result;
+    }
+    async invokeValidateUpdate(data, all, allData) {
+      let result = [];
+      for (let key in data) {
+        let errorMessage = await this.validateRule(key, this._schema[key], data[key], data, allData);
+        if (errorMessage != null) {
+          result.push({
+            key,
+            errorMessage
+          });
+          if (!all)
+            break;
+        }
+      }
+      return result;
+    }
+    _checkFieldInSchema(data) {
+      var keys = Object.keys(data);
+      var keys2 = Object.keys(this._schema);
+      if (new Set(keys.concat(keys2)).size === keys2.length) {
+        return "";
+      }
+      var noExistFields = keys.filter((key) => {
+        return keys2.indexOf(key) < 0;
+      });
+      var errorMessage = formatMessage({
+        field: JSON.stringify(noExistFields)
+      }, SchemaValidator.message.TAG + SchemaValidator.message["defaultInvalid"]);
+      return [{
+        key: "invalid",
+        errorMessage
+      }];
+    }
+  }
+  function Message() {
+    return {
+      TAG: "",
+      default: "验证错误",
+      defaultInvalid: "提交的字段{field}在数据库中并不存在",
+      validateFunction: "验证无效",
+      required: "{label}必填",
+      "enum": "{label}超出范围",
+      timestamp: "{label}格式无效",
+      whitespace: "{label}不能为空",
+      typeError: "{label}类型无效",
+      date: {
+        format: "{label}日期{value}格式无效",
+        parse: "{label}日期无法解析,{value}无效",
+        invalid: "{label}日期{value}无效"
+      },
+      length: {
+        minLength: "{label}长度不能少于{minLength}",
+        maxLength: "{label}长度不能超过{maxLength}",
+        range: "{label}必须介于{minLength}和{maxLength}之间"
+      },
+      number: {
+        minimum: "{label}不能小于{minimum}",
+        maximum: "{label}不能大于{maximum}",
+        exclusiveMinimum: "{label}不能小于等于{minimum}",
+        exclusiveMaximum: "{label}不能大于等于{maximum}",
+        range: "{label}必须介于{minimum}and{maximum}之间"
+      },
+      pattern: {
+        mismatch: "{label}格式不匹配"
+      }
+    };
+  }
+  SchemaValidator.message = new Message();
+  const deepCopy = (val) => {
+    return JSON.parse(JSON.stringify(val));
+  };
+  const typeFilter = (format) => {
+    return format === "int" || format === "double" || format === "number" || format === "timestamp";
+  };
+  const getValue = (key, value, rules2) => {
+    const isRuleNumType = rules2.find((val) => val.format && typeFilter(val.format));
+    const isRuleBoolType = rules2.find((val) => val.format && val.format === "boolean" || val.format === "bool");
+    if (!!isRuleNumType) {
+      if (!value && value !== 0) {
+        value = null;
+      } else {
+        value = isNumber(Number(value)) ? Number(value) : value;
+      }
+    }
+    if (!!isRuleBoolType) {
+      value = isBoolean(value) ? value : false;
+    }
+    return value;
+  };
+  const setDataValue = (field, formdata, value) => {
+    formdata[field] = value;
+    return value || "";
+  };
+  const getDataValue = (field, data) => {
+    return objGet(data, field);
+  };
+  const realName = (name, data = {}) => {
+    const base_name = _basePath(name);
+    if (typeof base_name === "object" && Array.isArray(base_name) && base_name.length > 1) {
+      const realname = base_name.reduce((a2, b2) => a2 += `#${b2}`, "_formdata_");
+      return realname;
+    }
+    return base_name[0] || name;
+  };
+  const isRealName = (name) => {
+    const reg = /^_formdata_#*/;
+    return reg.test(name);
+  };
+  const rawData = (object = {}, name) => {
+    let newData = JSON.parse(JSON.stringify(object));
+    let formData = {};
+    for (let i2 in newData) {
+      let path = name2arr(i2);
+      objSet(formData, path, newData[i2]);
+    }
+    return formData;
+  };
+  const name2arr = (name) => {
+    let field = name.replace("_formdata_#", "");
+    field = field.split("#").map((v2) => isNumber(v2) ? Number(v2) : v2);
+    return field;
+  };
+  const objSet = (object, path, value) => {
+    if (typeof object !== "object")
+      return object;
+    _basePath(path).reduce((o2, k, i2, _2) => {
+      if (i2 === _2.length - 1) {
+        o2[k] = value;
+        return null;
+      } else if (k in o2) {
+        return o2[k];
+      } else {
+        o2[k] = /^[0-9]{1,}$/.test(_2[i2 + 1]) ? [] : {};
+        return o2[k];
+      }
+    }, object);
+    return object;
+  };
+  function _basePath(path) {
+    if (Array.isArray(path))
+      return path;
+    return path.replace(/\[/g, ".").replace(/\]/g, "").split(".");
+  }
+  const objGet = (object, path, defaultVal = "undefined") => {
+    let newPath = _basePath(path);
+    let val = newPath.reduce((o2, k) => {
+      return (o2 || {})[k];
+    }, object);
+    return !val || val !== void 0 ? val : defaultVal;
+  };
+  const isNumber = (num) => {
+    return !isNaN(Number(num));
+  };
+  const isBoolean = (bool) => {
+    return typeof bool === "boolean";
+  };
+  const isRequiredField = (rules2) => {
+    let isNoField = false;
+    for (let i2 = 0; i2 < rules2.length; i2++) {
+      const ruleData = rules2[i2];
+      if (ruleData.required) {
+        isNoField = true;
+        break;
+      }
+    }
+    return isNoField;
+  };
+  const isEqual = (a2, b2) => {
+    if (a2 === b2) {
+      return a2 !== 0 || 1 / a2 === 1 / b2;
+    }
+    if (a2 == null || b2 == null) {
+      return a2 === b2;
+    }
+    var classNameA = toString.call(a2), classNameB = toString.call(b2);
+    if (classNameA !== classNameB) {
+      return false;
+    }
+    switch (classNameA) {
+      case "[object RegExp]":
+      case "[object String]":
+        return "" + a2 === "" + b2;
+      case "[object Number]":
+        if (+a2 !== +a2) {
+          return +b2 !== +b2;
+        }
+        return +a2 === 0 ? 1 / +a2 === 1 / b2 : +a2 === +b2;
+      case "[object Date]":
+      case "[object Boolean]":
+        return +a2 === +b2;
+    }
+    if (classNameA == "[object Object]") {
+      var propsA = Object.getOwnPropertyNames(a2), propsB = Object.getOwnPropertyNames(b2);
+      if (propsA.length != propsB.length) {
+        return false;
+      }
+      for (var i2 = 0; i2 < propsA.length; i2++) {
+        var propName = propsA[i2];
+        if (a2[propName] !== b2[propName]) {
+          return false;
+        }
+      }
+      return true;
+    }
+    if (classNameA == "[object Array]") {
+      if (a2.toString() == b2.toString()) {
+        return true;
+      }
+      return false;
+    }
+  };
+  const _sfc_main$A = {
+    name: "uniForms",
+    emits: ["validate", "submit"],
+    options: {
+      virtualHost: true
+    },
+    props: {
+      // 即将弃用
+      value: {
+        type: Object,
+        default() {
+          return null;
+        }
+      },
+      // vue3 替换 value 属性
+      modelValue: {
+        type: Object,
+        default() {
+          return null;
+        }
+      },
+      // 1.4.0 开始将不支持 v-model ，且废弃 value 和 modelValue
+      model: {
+        type: Object,
+        default() {
+          return null;
+        }
+      },
+      // 表单校验规则
+      rules: {
+        type: Object,
+        default() {
+          return {};
+        }
+      },
+      //校验错误信息提示方式 默认 undertext 取值 [undertext|toast|modal]
+      errShowType: {
+        type: String,
+        default: "undertext"
+      },
+      // 校验触发器方式 默认 bind 取值 [bind|submit]
+      validateTrigger: {
+        type: String,
+        default: "submit"
+      },
+      // label 位置，默认 left 取值  top/left
+      labelPosition: {
+        type: String,
+        default: "left"
+      },
+      // label 宽度
+      labelWidth: {
+        type: [String, Number],
+        default: ""
+      },
+      // label 居中方式，默认 left 取值 left/center/right
+      labelAlign: {
+        type: String,
+        default: "left"
+      },
+      border: {
+        type: Boolean,
+        default: false
+      }
+    },
+    provide() {
+      return {
+        uniForm: this
+      };
+    },
+    data() {
+      return {
+        // 表单本地值的记录，不应该与传如的值进行关联
+        formData: {},
+        formRules: {}
+      };
+    },
+    computed: {
+      // 计算数据源变化的
+      localData() {
+        const localVal = this.model || this.modelValue || this.value;
+        if (localVal) {
+          return deepCopy(localVal);
+        }
+        return {};
+      }
+    },
+    watch: {
+      // 监听数据变化 ,暂时不使用，需要单独赋值
+      // localData: {},
+      // 监听规则变化
+      rules: {
+        handler: function(val, oldVal) {
+          this.setRules(val);
+        },
+        deep: true,
+        immediate: true
+      }
+    },
+    created() {
+      let getbinddata = getApp().$vm.$.appContext.config.globalProperties.binddata;
+      if (!getbinddata) {
+        getApp().$vm.$.appContext.config.globalProperties.binddata = function(name, value, formName) {
+          if (formName) {
+            this.$refs[formName].setValue(name, value);
+          } else {
+            let formVm;
+            for (let i2 in this.$refs) {
+              const vm = this.$refs[i2];
+              if (vm && vm.$options && vm.$options.name === "uniForms") {
+                formVm = vm;
+                break;
+              }
+            }
+            if (!formVm)
+              return formatAppLog("error", "at uni_modules/uni-forms/components/uni-forms/uni-forms.vue:182", "当前 uni-froms 组件缺少 ref 属性");
+            formVm.setValue(name, value);
+          }
+        };
+      }
+      this.childrens = [];
+      this.inputChildrens = [];
+      this.setRules(this.rules);
+    },
+    methods: {
+      /**
+       * 外部调用方法
+       * 设置规则 ，主要用于小程序自定义检验规则
+       * @param {Array} rules 规则源数据
+       */
+      setRules(rules2) {
+        this.formRules = Object.assign({}, this.formRules, rules2);
+        this.validator = new SchemaValidator(rules2);
+      },
+      /**
+       * 外部调用方法
+       * 设置数据，用于设置表单数据，公开给用户使用 ， 不支持在动态表单中使用
+       * @param {Object} key
+       * @param {Object} value
+       */
+      setValue(key, value) {
+        let example = this.childrens.find((child) => child.name === key);
+        if (!example)
+          return null;
+        this.formData[key] = getValue(key, value, this.formRules[key] && this.formRules[key].rules || []);
+        return example.onFieldChange(this.formData[key]);
+      },
+      /**
+       * 外部调用方法
+       * 手动提交校验表单
+       * 对整个表单进行校验的方法，参数为一个回调函数。
+       * @param {Array} keepitem 保留不参与校验的字段
+       * @param {type} callback 方法回调
+       */
+      validate(keepitem, callback) {
+        return this.checkAll(this.formData, keepitem, callback);
+      },
+      /**
+       * 外部调用方法
+       * 部分表单校验
+       * @param {Array|String} props 需要校验的字段
+       * @param {Function} 回调函数
+       */
+      validateField(props = [], callback) {
+        props = [].concat(props);
+        let invalidFields = {};
+        this.childrens.forEach((item) => {
+          const name = realName(item.name);
+          if (props.indexOf(name) !== -1) {
+            invalidFields = Object.assign({}, invalidFields, {
+              [name]: this.formData[name]
+            });
+          }
+        });
+        return this.checkAll(invalidFields, [], callback);
+      },
+      /**
+       * 外部调用方法
+       * 移除表单项的校验结果。传入待移除的表单项的 prop 属性或者 prop 组成的数组，如不传则移除整个表单的校验结果
+       * @param {Array|String} props 需要移除校验的字段 ，不填为所有
+       */
+      clearValidate(props = []) {
+        props = [].concat(props);
+        this.childrens.forEach((item) => {
+          if (props.length === 0) {
+            item.errMsg = "";
+          } else {
+            const name = realName(item.name);
+            if (props.indexOf(name) !== -1) {
+              item.errMsg = "";
+            }
+          }
+        });
+      },
+      /**
+       * 外部调用方法 ，即将废弃
+       * 手动提交校验表单
+       * 对整个表单进行校验的方法，参数为一个回调函数。
+       * @param {Array} keepitem 保留不参与校验的字段
+       * @param {type} callback 方法回调
+       */
+      submit(keepitem, callback, type) {
+        for (let i2 in this.dataValue) {
+          const itemData = this.childrens.find((v2) => v2.name === i2);
+          if (itemData) {
+            if (this.formData[i2] === void 0) {
+              this.formData[i2] = this._getValue(i2, this.dataValue[i2]);
+            }
+          }
+        }
+        if (!type) {
+          formatAppLog("warn", "at uni_modules/uni-forms/components/uni-forms/uni-forms.vue:289", "submit 方法即将废弃，请使用validate方法代替！");
+        }
+        return this.checkAll(this.formData, keepitem, callback, "submit");
+      },
+      // 校验所有
+      async checkAll(invalidFields, keepitem, callback, type) {
+        if (!this.validator)
+          return;
+        let childrens = [];
+        for (let i2 in invalidFields) {
+          const item = this.childrens.find((v2) => realName(v2.name) === i2);
+          if (item) {
+            childrens.push(item);
+          }
+        }
+        if (!callback && typeof keepitem === "function") {
+          callback = keepitem;
+        }
+        let promise;
+        if (!callback && typeof callback !== "function" && Promise) {
+          promise = new Promise((resolve, reject) => {
+            callback = function(valid, invalidFields2) {
+              !valid ? resolve(invalidFields2) : reject(valid);
+            };
+          });
+        }
+        let results = [];
+        let tempFormData = JSON.parse(JSON.stringify(invalidFields));
+        for (let i2 in childrens) {
+          const child = childrens[i2];
+          let name = realName(child.name);
+          const result = await child.onFieldChange(tempFormData[name]);
+          if (result) {
+            results.push(result);
+            if (this.errShowType === "toast" || this.errShowType === "modal")
+              break;
+          }
+        }
+        if (Array.isArray(results)) {
+          if (results.length === 0)
+            results = null;
+        }
+        if (Array.isArray(keepitem)) {
+          keepitem.forEach((v2) => {
+            let vName = realName(v2);
+            let value = getDataValue(v2, this.localData);
+            if (value !== void 0) {
+              tempFormData[vName] = value;
+            }
+          });
+        }
+        if (type === "submit") {
+          this.$emit("submit", {
+            detail: {
+              value: tempFormData,
+              errors: results
+            }
+          });
+        } else {
+          this.$emit("validate", results);
+        }
+        let resetFormData = {};
+        resetFormData = rawData(tempFormData, this.name);
+        callback && typeof callback === "function" && callback(results, resetFormData);
+        if (promise && callback) {
+          return promise;
+        } else {
+          return null;
+        }
+      },
+      /**
+       * 返回validate事件
+       * @param {Object} result
+       */
+      validateCheck(result) {
+        this.$emit("validate", result);
+      },
+      _getValue: getValue,
+      _isRequiredField: isRequiredField,
+      _setDataValue: setDataValue,
+      _getDataValue: getDataValue,
+      _realName: realName,
+      _isRealName: isRealName,
+      _isEqual: isEqual
+    }
+  };
+  function _sfc_render$p(_ctx, _cache, $props, $setup, $data, $options) {
+    return vue.openBlock(), vue.createElementBlock("view", { class: "uni-forms" }, [
+      vue.createElementVNode("form", null, [
+        vue.renderSlot(_ctx.$slots, "default", {}, void 0, true)
+      ])
     ]);
   }
-  const PagesMyAddress = /* @__PURE__ */ _export_sfc(_sfc_main$A, [["render", _sfc_render$t], ["__scopeId", "data-v-eda7be84"], ["__file", "D:/graduationProject/pet-front-end/pages/my/Address.vue"]]);
+  const __easycom_1$1 = /* @__PURE__ */ _export_sfc(_sfc_main$A, [["render", _sfc_render$p], ["__scopeId", "data-v-9a1e3c32"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-forms/components/uni-forms/uni-forms.vue"]]);
+  let AreaJson = [
+    {
+      "name": "北京市",
+      "city": [
+        {
+          "name": "北京市",
+          "area": [
+            "东城区",
+            "西城区",
+            "海淀区",
+            "朝阳区",
+            "丰台区",
+            "石景山区",
+            "门头沟区",
+            "通州区",
+            "顺义区",
+            "房山区",
+            "大兴区",
+            "昌平区",
+            "怀柔区",
+            "平谷区",
+            "密云区",
+            "延庆区"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "上海市",
+      "city": [
+        {
+          "name": "上海市",
+          "area": [
+            "黄浦区",
+            "浦东新区",
+            "徐汇区",
+            "长宁区",
+            "静安区",
+            "普陀区",
+            "虹口区",
+            "杨浦区",
+            "闵行区",
+            "宝山区",
+            "嘉定区",
+            "金山区",
+            "松江区",
+            "青浦区",
+            "奉贤区",
+            "崇明区"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "天津市",
+      "city": [
+        {
+          "name": "天津市",
+          "area": [
+            "和平区",
+            "河西区",
+            "南开区",
+            "河东区",
+            "河北区",
+            "红桥区",
+            "滨海新区",
+            "东丽区",
+            "西青区",
+            "津南区",
+            "北辰区",
+            "武清区",
+            "宝坻区",
+            "宁河区",
+            "静海区",
+            "蓟州区"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "重庆市",
+      "city": [
+        {
+          "name": "重庆市",
+          "area": [
+            "渝中区",
+            "大渡口区",
+            "江北区",
+            "沙坪坝区",
+            "九龙坡区",
+            "南岸区",
+            "北碚区",
+            "渝北区",
+            "巴南区",
+            "涪陵区",
+            "綦江区",
+            "大足区",
+            "长寿区",
+            "江津区",
+            "合川区",
+            "永川区",
+            "南川区",
+            "璧山区",
+            "铜梁区",
+            "潼南区",
+            "荣昌区",
+            "万州区",
+            "梁平区",
+            "城口县",
+            "丰都县",
+            "垫江县",
+            "忠县",
+            "开州区",
+            "云阳县",
+            "奉节县",
+            "巫山县",
+            "巫溪县",
+            "黔江区",
+            "武隆区",
+            "石柱土家族自治县",
+            "秀山土家族苗族自治县",
+            "酉阳土家族苗族自治县",
+            "彭水苗族土家族自治县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "广东省",
+      "city": [
+        {
+          "name": "广州市",
+          "area": [
+            "越秀区",
+            "荔湾区",
+            "海珠区",
+            "天河区",
+            "白云区",
+            "黄埔区",
+            "番禺区",
+            "花都区",
+            "南沙区",
+            "增城区",
+            "从化区"
+          ]
+        },
+        {
+          "name": "深圳市",
+          "area": [
+            "福田区",
+            "罗湖区",
+            "南山区",
+            "盐田区",
+            "宝安区",
+            "龙岗区",
+            "坪山区",
+            "光明区",
+            "龙华区",
+            "大鹏新区"
+          ]
+        },
+        {
+          "name": "东莞市",
+          "area": [
+            "莞城区",
+            "南城区",
+            "东城区",
+            "万江区",
+            "石碣镇",
+            "石龙镇",
+            "茶山镇",
+            "石排镇",
+            "企石镇",
+            "横沥镇",
+            "桥头镇",
+            "谢岗镇",
+            "东坑镇",
+            "常平镇",
+            "寮步镇",
+            "大朗镇",
+            "麻涌镇",
+            "中堂镇",
+            "高埗镇",
+            "樟木头镇",
+            "大岭山镇",
+            "望牛墩镇",
+            "黄江镇",
+            "洪梅镇",
+            "清溪镇",
+            "沙田镇",
+            "道滘镇",
+            "塘厦镇",
+            "虎门镇",
+            "厚街镇",
+            "凤岗镇",
+            "长安镇"
+          ]
+        },
+        {
+          "name": "惠州市",
+          "area": [
+            "惠城区",
+            "惠阳区",
+            "惠东县",
+            "博罗县",
+            "龙门县"
+          ]
+        },
+        {
+          "name": "珠海市",
+          "area": [
+            "香洲区",
+            "金湾区",
+            "斗门区"
+          ]
+        },
+        {
+          "name": "佛山市",
+          "area": [
+            "禅城区",
+            "南海区",
+            "顺德区",
+            "三水区",
+            "高明区"
+          ]
+        },
+        {
+          "name": "中山市",
+          "area": [
+            "石岐区",
+            "东区",
+            "西区",
+            "南区",
+            "五桂山区",
+            "火炬开发区",
+            "黄圃镇",
+            "南头镇",
+            "东凤镇",
+            "阜沙镇",
+            "小榄镇",
+            "东升镇",
+            "古镇镇",
+            "横栏镇",
+            "三角镇",
+            "民众镇",
+            "南朗镇",
+            "港口镇",
+            "大涌镇",
+            "沙溪镇",
+            "三乡镇",
+            "板芙镇",
+            "神湾镇",
+            "坦洲镇"
+          ]
+        },
+        {
+          "name": "潮州市",
+          "area": [
+            "湘桥区",
+            "潮安区",
+            "饶平县"
+          ]
+        },
+        {
+          "name": "揭阳市",
+          "area": [
+            "榕城区",
+            "揭东县",
+            "揭西县",
+            "惠来县",
+            "普宁市"
+          ]
+        },
+        {
+          "name": "汕头市",
+          "area": [
+            "金平区",
+            "龙湖区",
+            "澄海区",
+            "濠江区",
+            "濠江区",
+            "潮南区",
+            "南澳县"
+          ]
+        },
+        {
+          "name": "汕尾市",
+          "area": [
+            "城区",
+            "陆丰市",
+            "海丰县",
+            "陆河县"
+          ]
+        },
+        {
+          "name": "清远市",
+          "area": [
+            "清城区",
+            "清新区",
+            "英德市",
+            "连州市",
+            "佛冈县",
+            "阳山县",
+            "连南瑶族自治县",
+            "连山壮族瑶族自治县"
+          ]
+        },
+        {
+          "name": "云浮市",
+          "area": [
+            "云城区",
+            "云安县",
+            "新兴县",
+            "郁南县",
+            "罗定市"
+          ]
+        },
+        {
+          "name": "韶关市",
+          "area": [
+            "浈江区",
+            "武江区",
+            "曲江区",
+            "乐昌市",
+            "南雄市",
+            "始兴县",
+            "仁化县",
+            "翁源县",
+            "新丰县",
+            "乳源瑶族自治县"
+          ]
+        },
+        {
+          "name": "江门市",
+          "area": [
+            "蓬江区",
+            "江海区",
+            "新会区",
+            "台山市",
+            "开平市",
+            "鹤山市",
+            "恩平市"
+          ]
+        },
+        {
+          "name": "湛江市",
+          "area": [
+            "赤坎区",
+            "霞山区",
+            "坡头区",
+            "麻章区",
+            "吴川市",
+            "雷州市",
+            "廉江市",
+            "遂溪县",
+            "徐闻县"
+          ]
+        },
+        {
+          "name": "茂名市",
+          "area": [
+            "茂南区",
+            "电白区",
+            "高州市",
+            "茂港区",
+            "化州市",
+            "信宜市"
+          ]
+        },
+        {
+          "name": "肇庆市",
+          "area": [
+            "端州区",
+            "鼎湖区",
+            "广宁县",
+            "怀集县",
+            "封开县",
+            "德庆县",
+            "高要区",
+            "四会市"
+          ]
+        },
+        {
+          "name": "河源市",
+          "area": [
+            "源城区",
+            "紫金县",
+            "龙川县",
+            "连平县",
+            "和平县",
+            "东源县"
+          ]
+        },
+        {
+          "name": "梅州市",
+          "area": [
+            "梅江区",
+            "梅县区",
+            "兴宁市",
+            "平远县",
+            "蕉岭县",
+            "大埔县",
+            "丰顺县",
+            "五华县"
+          ]
+        },
+        {
+          "name": "阳江市",
+          "area": [
+            "江城区",
+            "阳春市",
+            "阳东区",
+            "阳西县",
+            "海陵岛经济开发试验区",
+            "阳江高新技术产业开发区"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "江苏省",
+      "city": [
+        {
+          "name": "南京市",
+          "area": [
+            "玄武区",
+            "秦淮区",
+            "鼓楼区",
+            "建邺区",
+            "雨花台区",
+            "浦口区",
+            "六合区",
+            "栖霞区",
+            "江宁区",
+            "溧水区",
+            "高淳县"
+          ]
+        },
+        {
+          "name": "无锡市",
+          "area": [
+            "梁溪区",
+            "滨湖区",
+            "惠山区",
+            "锡山区",
+            "新吴区",
+            "江阴市",
+            "宜兴市"
+          ]
+        },
+        {
+          "name": "苏州市",
+          "area": [
+            "姑苏区",
+            "相城区",
+            "吴中区",
+            "虎丘区",
+            "吴江区",
+            "常熟市",
+            "昆山市",
+            "张家港市",
+            "太仓市"
+          ]
+        },
+        {
+          "name": "常州市",
+          "area": [
+            "金坛区",
+            "武进区",
+            "新北区",
+            "天宁区",
+            "钟楼区",
+            "溧阳市"
+          ]
+        },
+        {
+          "name": "镇江市",
+          "area": [
+            "京口区",
+            "润州区",
+            "丹徒区",
+            "丹阳市",
+            "扬中市",
+            "句容市",
+            "镇江新区",
+            "镇江高新区"
+          ]
+        },
+        {
+          "name": "南通市",
+          "area": [
+            "崇川区",
+            "港闸区",
+            "通州区",
+            "海安县",
+            "如东县",
+            "启东市",
+            "如皋市",
+            "海门市"
+          ]
+        },
+        {
+          "name": "泰州市",
+          "area": [
+            "海陵区",
+            "高港区",
+            "姜堰市",
+            "兴化市",
+            "泰兴市",
+            "靖江市"
+          ]
+        },
+        {
+          "name": "扬州市",
+          "area": [
+            "广陵区",
+            "邗江区",
+            "江都区",
+            "开发区",
+            "宝应县",
+            "仪征市",
+            "高邮市"
+          ]
+        },
+        {
+          "name": "盐城市",
+          "area": [
+            "亭湖区",
+            "盐都区",
+            "大丰区",
+            "建湖县",
+            "射阳县",
+            "阜宁县",
+            "滨海县",
+            "响水县",
+            "东台市"
+          ]
+        },
+        {
+          "name": "连云港市",
+          "area": [
+            "海州区",
+            "连云区",
+            "赣榆区",
+            "灌云县",
+            "东海县",
+            "灌南县"
+          ]
+        },
+        {
+          "name": "徐州市",
+          "area": [
+            "云龙区",
+            "鼓楼区",
+            "贾汪区",
+            "泉山区",
+            "铜山区",
+            "邳州市",
+            "新沂市",
+            "睢宁县",
+            "沛县",
+            "丰县"
+          ]
+        },
+        {
+          "name": "淮安市",
+          "area": [
+            "清江浦区",
+            "淮阴区",
+            "淮安区",
+            "洪泽区",
+            "涟水县",
+            "盱眙县",
+            "金湖县"
+          ]
+        },
+        {
+          "name": "宿迁市",
+          "area": [
+            "宿城区",
+            "宿豫区",
+            "沭阳县",
+            "泗阳县",
+            "泗洪县",
+            "洋河新区",
+            "湖滨新区",
+            "苏宿工业园区",
+            "经济开发区"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "山东省",
+      "city": [
+        {
+          "name": "济南市",
+          "area": [
+            "历下区",
+            "市中区",
+            "槐荫区",
+            "天桥区",
+            "历城区",
+            "长清区",
+            "章丘区",
+            "济阳区",
+            "莱芜区",
+            "钢城区",
+            "平阴县",
+            "商河县",
+            "高新技术产业开发区"
+          ]
+        },
+        {
+          "name": "青岛市",
+          "area": [
+            "市南区",
+            "市北区",
+            "黄岛区",
+            "崂山区",
+            "李沧区",
+            "城阳区",
+            "胶州市",
+            "即墨区",
+            "平度市",
+            "莱西市"
+          ]
+        },
+        {
+          "name": "淄博市",
+          "area": [
+            "张店区",
+            "淄川区",
+            "博山区",
+            "临淄区",
+            "桓台县",
+            "高青县",
+            "沂源县"
+          ]
+        },
+        {
+          "name": "枣庄市",
+          "area": [
+            "市中区",
+            "山亭区",
+            "台儿庄区",
+            "峄城区",
+            "薛城区",
+            "滕州市"
+          ]
+        },
+        {
+          "name": "东营市",
+          "area": [
+            "东营区",
+            "河口区",
+            "垦利区",
+            "利津县",
+            "广饶县"
+          ]
+        },
+        {
+          "name": "烟台市",
+          "area": [
+            "芝罘区",
+            "福山区",
+            "牟平区",
+            "莱山区",
+            "龙口市",
+            "莱阳市",
+            "莱州市",
+            "蓬莱区",
+            "招远市",
+            "栖霞市",
+            "海阳市",
+            "烟台经济技术开发区",
+            "烟台高新技术产业开发区"
+          ]
+        },
+        {
+          "name": "潍坊市",
+          "area": [
+            "潍城区",
+            "寒亭区",
+            "坊子区",
+            "奎文区",
+            "临朐县",
+            "昌乐县",
+            "青州市",
+            "诸城市",
+            "寿光市",
+            "安丘市",
+            "高密市",
+            "昌邑市"
+          ]
+        },
+        {
+          "name": "济宁市",
+          "area": [
+            "任城区",
+            "兖州区",
+            "微山县",
+            "鱼台县",
+            "金乡县",
+            "嘉祥县",
+            "汶上县",
+            "泗水县",
+            "梁山县",
+            "曲阜市",
+            "邹城市"
+          ]
+        },
+        {
+          "name": "泰安市",
+          "area": [
+            "泰山区",
+            "岱岳区",
+            "新泰市",
+            "肥城市",
+            "宁阳县",
+            "东平县"
+          ]
+        },
+        {
+          "name": "威海市",
+          "area": [
+            "环翠区",
+            "文登区",
+            "荣成市",
+            "乳山市",
+            "南海新区",
+            "经济技术开发区",
+            "火炬高技术产业开发区",
+            "进出口加工保税区",
+            "临港经济技术开发区"
+          ]
+        },
+        {
+          "name": "日照市",
+          "area": [
+            "东港区",
+            "岚山区",
+            "五莲县",
+            "莒县"
+          ]
+        },
+        {
+          "name": "莱芜市",
+          "area": [
+            "莱城区",
+            "钢城区"
+          ]
+        },
+        {
+          "name": "临沂市",
+          "area": [
+            "兰山区",
+            "罗庄区",
+            "河东区",
+            "郯城县",
+            "兰陵县",
+            "莒南县",
+            "沂水县",
+            "蒙阴县",
+            "平邑县",
+            "费县",
+            "沂南县",
+            "临沭县"
+          ]
+        },
+        {
+          "name": "德州市",
+          "area": [
+            "德城区",
+            "陵城区",
+            "宁津县",
+            "庆云县",
+            "临邑县",
+            "齐河县",
+            "平原县",
+            "夏津县",
+            "武城县",
+            "乐陵市",
+            "禹城市"
+          ]
+        },
+        {
+          "name": "聊城市",
+          "area": [
+            "东昌府区",
+            "茌平区",
+            "临清市",
+            "东阿县",
+            "冠县",
+            "高唐县",
+            "阳谷县",
+            "莘县"
+          ]
+        },
+        {
+          "name": "滨州市",
+          "area": [
+            "滨城区",
+            "沾化区",
+            "惠民县",
+            "阳信县",
+            "无棣县",
+            "博兴县",
+            "邹平市"
+          ]
+        },
+        {
+          "name": "菏泽市",
+          "area": [
+            "牡丹区",
+            "定陶县",
+            "巨野县",
+            "曹县",
+            "成武县",
+            "单县",
+            "郓城县",
+            "鄄城县",
+            "东明县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "浙江省",
+      "city": [
+        {
+          "name": "杭州市",
+          "area": [
+            "上城区",
+            "拱墅区",
+            "西湖区",
+            "滨江区",
+            "萧山区",
+            "余杭区",
+            "富阳区",
+            "临安区",
+            "临平区",
+            "钱塘区",
+            "建德市",
+            "桐庐县",
+            "淳安县"
+          ]
+        },
+        {
+          "name": "宁波市",
+          "area": [
+            "海曙区",
+            "江北区",
+            "北仑区",
+            "镇海区",
+            "鄞州区",
+            "奉化市",
+            "余姚市",
+            "慈溪市",
+            "象山县",
+            "宁海县"
+          ]
+        },
+        {
+          "name": "温州市",
+          "area": [
+            "鹿城区",
+            "龙湾区",
+            "瓯海区",
+            "洞头区",
+            "永嘉县",
+            "平阳县",
+            "苍南县",
+            "文成县",
+            "泰顺县",
+            "瑞安市",
+            "乐清市",
+            "龙港市"
+          ]
+        },
+        {
+          "name": "嘉兴市",
+          "area": [
+            "南湖区",
+            "秀洲区",
+            "嘉善县",
+            "海盐县",
+            "海宁市",
+            "平湖市",
+            "桐乡市"
+          ]
+        },
+        {
+          "name": "湖州市",
+          "area": [
+            "吴兴区",
+            "南浔区",
+            "德清县",
+            "长兴县",
+            "安吉县"
+          ]
+        },
+        {
+          "name": "绍兴市",
+          "area": [
+            "越城区",
+            "柯桥区",
+            "上虞区",
+            "新昌县",
+            "嵊州市",
+            "诸暨市"
+          ]
+        },
+        {
+          "name": "金华市",
+          "area": [
+            "婺城区",
+            "金东区",
+            "兰溪市",
+            "义乌市",
+            "东阳市",
+            "永康市",
+            "浦江县",
+            "武义县",
+            "磐安县"
+          ]
+        },
+        {
+          "name": "衢州市",
+          "area": [
+            "柯城区",
+            "衢江区",
+            "龙游县",
+            "江山市",
+            "常山县",
+            "开化县"
+          ]
+        },
+        {
+          "name": "舟山市",
+          "area": [
+            "定海区",
+            "普陀区",
+            "岱山县",
+            "嵊泗县"
+          ]
+        },
+        {
+          "name": "台州市",
+          "area": [
+            "椒江区",
+            "黄岩区",
+            "路桥区",
+            "临海市",
+            "温岭市",
+            "玉环市",
+            "天台县",
+            "仙居县",
+            "三门县"
+          ]
+        },
+        {
+          "name": "丽水市",
+          "area": [
+            "莲都区",
+            "龙泉市",
+            "青田县",
+            "云和县",
+            "庆元县",
+            "缙云县",
+            "遂昌县",
+            "松阳县",
+            "景宁畲族自治县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "河南省",
+      "city": [
+        {
+          "name": "郑州市",
+          "area": [
+            "中原区",
+            "二七区",
+            "管城回族区",
+            "金水区",
+            "上街区",
+            "惠济区",
+            "中牟县",
+            "巩义市",
+            "荥阳市",
+            "新密市",
+            "新郑市",
+            "登封市"
+          ]
+        },
+        {
+          "name": "开封市",
+          "area": [
+            "龙亭区",
+            "顺河回族区",
+            "鼓楼区",
+            "禹王台区",
+            "祥符区",
+            "杞县",
+            "通许县",
+            "尉氏县",
+            "兰考县"
+          ]
+        },
+        {
+          "name": "洛阳市",
+          "area": [
+            "老城区",
+            "西工区",
+            "瀍河回族区",
+            "涧西区",
+            "吉利区",
+            "洛龙区",
+            "孟津县",
+            "新安县",
+            "栾川县",
+            "嵩县",
+            "汝阳县",
+            "宜阳县",
+            "洛宁县",
+            "伊川县",
+            "偃师市"
+          ]
+        },
+        {
+          "name": "平顶山市",
+          "area": [
+            "新华区",
+            "卫东区",
+            "石龙区",
+            "湛河区",
+            "宝丰县",
+            "叶县",
+            "鲁山县",
+            "郏县",
+            "舞钢市",
+            "汝州市"
+          ]
+        },
+        {
+          "name": "安阳市",
+          "area": [
+            "文峰区",
+            "北关区",
+            "殷都区",
+            "龙安区",
+            "安阳县",
+            "汤阴县",
+            "滑县",
+            "内黄县",
+            "林州市"
+          ]
+        },
+        {
+          "name": "鹤壁市",
+          "area": [
+            "鹤山区",
+            "山城区",
+            "淇滨区",
+            "浚县",
+            "淇县"
+          ]
+        },
+        {
+          "name": "新乡市",
+          "area": [
+            "红旗区",
+            "卫滨区",
+            "凤泉区",
+            "牧野区",
+            "新乡县",
+            "获嘉县",
+            "原阳县",
+            "延津县",
+            "封丘县",
+            "卫辉市",
+            "辉县市",
+            "长垣市"
+          ]
+        },
+        {
+          "name": "焦作市",
+          "area": [
+            "解放区",
+            "中站区",
+            "马村区",
+            "山阳区",
+            "修武县",
+            "博爱县",
+            "武陟县",
+            "温县",
+            "沁阳市",
+            "孟州市"
+          ]
+        },
+        {
+          "name": "濮阳市",
+          "area": [
+            "华龙区",
+            "清丰县",
+            "南乐县",
+            "范县",
+            "台前县",
+            "濮阳县"
+          ]
+        },
+        {
+          "name": "许昌市",
+          "area": [
+            "魏都区",
+            "建安区",
+            "鄢陵县",
+            "襄城县",
+            "禹州市",
+            "长葛市"
+          ]
+        },
+        {
+          "name": "漯河市",
+          "area": [
+            "源汇区",
+            "郾城区",
+            "召陵区",
+            "舞阳县",
+            "临颍县"
+          ]
+        },
+        {
+          "name": "三门峡市",
+          "area": [
+            "湖滨区",
+            "陕州区",
+            "渑池县",
+            "卢氏县",
+            "义马市",
+            "灵宝市"
+          ]
+        },
+        {
+          "name": "南阳市",
+          "area": [
+            "宛城区",
+            "卧龙区",
+            "南召县",
+            "方城县",
+            "西峡县",
+            "镇平县",
+            "内乡县",
+            "淅川县",
+            "社旗县",
+            "唐河县",
+            "新野县",
+            "桐柏县",
+            "邓州市"
+          ]
+        },
+        {
+          "name": "商丘市",
+          "area": [
+            "梁园区",
+            "睢阳区",
+            "民权县",
+            "睢县",
+            "宁陵县",
+            "柘城县",
+            "虞城县",
+            "夏邑县",
+            "永城市"
+          ]
+        },
+        {
+          "name": "信阳市",
+          "area": [
+            "浉河区",
+            "平桥区",
+            "罗山县",
+            "光山县",
+            "新县",
+            "商城县",
+            "固始县",
+            "潢川县",
+            "淮滨县",
+            "息县"
+          ]
+        },
+        {
+          "name": "周口市",
+          "area": [
+            "川汇区",
+            "扶沟县",
+            "淮阳区",
+            "西华县",
+            "商水县",
+            "沈丘县",
+            "郸城县",
+            "太康县",
+            "鹿邑县",
+            "项城市"
+          ]
+        },
+        {
+          "name": "驻马店市",
+          "area": [
+            "驿城区",
+            "西平县",
+            "上蔡县",
+            "平舆县",
+            "正阳县",
+            "确山县",
+            "泌阳县",
+            "汝南县",
+            "遂平县",
+            "新蔡县"
+          ]
+        },
+        {
+          "name": "济源市",
+          "area": [
+            "济水街道",
+            "沁园街道",
+            "北海街道",
+            "天坛街道",
+            "玉泉街道",
+            "克井镇",
+            "五龙口镇",
+            "梨林镇",
+            "轵城镇",
+            "承留镇",
+            "坡头镇",
+            "大峪镇",
+            "邵原镇",
+            "思礼镇",
+            "王屋镇",
+            "下冶镇"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "四川省",
+      "city": [
+        {
+          "name": "成都市",
+          "area": [
+            "锦江区",
+            "青羊区",
+            "金牛区",
+            "武侯区",
+            "成华区",
+            "龙泉驿区",
+            "青白江区",
+            "新都区",
+            "温江区",
+            "双流区",
+            "郫都区",
+            "新津区",
+            "金堂县",
+            "大邑县",
+            "蒲江县",
+            "都江堰市",
+            "彭州市",
+            "邛崃市",
+            "崇州市",
+            "简阳市",
+            "天府区"
+          ]
+        },
+        {
+          "name": "自贡市",
+          "area": [
+            "自流井区",
+            "贡井区",
+            "大安区",
+            "沿滩区",
+            "荣县",
+            "富顺县"
+          ]
+        },
+        {
+          "name": "攀枝花市",
+          "area": [
+            "东区",
+            "西区",
+            "仁和区",
+            "米易县",
+            "盐边县"
+          ]
+        },
+        {
+          "name": "泸州市",
+          "area": [
+            "江阳区",
+            "纳溪区",
+            "龙马潭区",
+            "泸县",
+            "合江县",
+            "叙永县",
+            "古蔺县"
+          ]
+        },
+        {
+          "name": "德阳市",
+          "area": [
+            "旌阳区",
+            "罗江区",
+            "中江县",
+            "广汉市",
+            "什邡市",
+            "绵竹市"
+          ]
+        },
+        {
+          "name": "绵阳市",
+          "area": [
+            "涪城区",
+            "游仙区",
+            "安州区",
+            "三台县",
+            "盐亭县",
+            "梓潼县",
+            "北川羌族自治县",
+            "平武县",
+            "江油市"
+          ]
+        },
+        {
+          "name": "广元市",
+          "area": [
+            "利州区",
+            "昭化区",
+            "朝天区",
+            "旺苍县",
+            "青川县",
+            "剑阁县",
+            "苍溪县"
+          ]
+        },
+        {
+          "name": "遂宁市",
+          "area": [
+            "船山区",
+            "安居区",
+            "蓬溪县",
+            "大英县",
+            "射洪市"
+          ]
+        },
+        {
+          "name": "内江市",
+          "area": [
+            "市中区",
+            "东兴区",
+            "威远县",
+            "资中县",
+            "隆昌市"
+          ]
+        },
+        {
+          "name": "乐山市",
+          "area": [
+            "市中区",
+            "沙湾区",
+            "五通桥区",
+            "金口河区",
+            "犍为县",
+            "井研县",
+            "夹江县",
+            "沐川县",
+            "峨边彝族自治县",
+            "马边彝族自治县",
+            "峨眉山市"
+          ]
+        },
+        {
+          "name": "南充市",
+          "area": [
+            "顺庆区",
+            "高坪区",
+            "嘉陵区",
+            "南部县",
+            "营山县",
+            "蓬安县",
+            "仪陇县",
+            "西充县",
+            "阆中市"
+          ]
+        },
+        {
+          "name": "眉山市",
+          "area": [
+            "东坡区",
+            "彭山区",
+            "仁寿县",
+            "洪雅县",
+            "丹棱县",
+            "青神县"
+          ]
+        },
+        {
+          "name": "宜宾市",
+          "area": [
+            "翠屏区",
+            "南溪区",
+            "叙州区",
+            "江安县",
+            "长宁县",
+            "高县",
+            "珙县",
+            "筠连县",
+            "兴文县",
+            "屏山县"
+          ]
+        },
+        {
+          "name": "广安市",
+          "area": [
+            "广安区",
+            "前锋区",
+            "岳池县",
+            "武胜县",
+            "邻水县",
+            "华蓥市"
+          ]
+        },
+        {
+          "name": "达州市",
+          "area": [
+            "通川区",
+            "达川区",
+            "宣汉县",
+            "开江县",
+            "大竹县",
+            "渠县",
+            "万源市"
+          ]
+        },
+        {
+          "name": "雅安市",
+          "area": [
+            "雨城区",
+            "名山区",
+            "荥经县",
+            "汉源县",
+            "石棉县",
+            "天全县",
+            "芦山县",
+            "宝兴县"
+          ]
+        },
+        {
+          "name": "巴中市",
+          "area": [
+            "巴州区",
+            "恩阳区",
+            "通江县",
+            "南江县",
+            "平昌县"
+          ]
+        },
+        {
+          "name": "资阳市",
+          "area": [
+            "雁江区",
+            "安岳县",
+            "乐至县"
+          ]
+        },
+        {
+          "name": "阿坝藏族羌族自治州",
+          "area": [
+            "马尔康市",
+            "汶川县",
+            "理县",
+            "茂县",
+            "松潘县",
+            "九寨沟县",
+            "金川县",
+            "小金县",
+            "黑水县",
+            "壤塘县",
+            "阿坝县",
+            "若尔盖县",
+            "红原县"
+          ]
+        },
+        {
+          "name": "甘孜藏族自治州",
+          "area": [
+            "康定市",
+            "泸定县",
+            "丹巴县",
+            "九龙县",
+            "雅江县",
+            "道孚县",
+            "炉霍县",
+            "甘孜县",
+            "新龙县",
+            "德格县",
+            "白玉县",
+            "石渠县",
+            "色达县",
+            "理塘县",
+            "巴塘县",
+            "乡城县",
+            "稻城县",
+            "得荣县"
+          ]
+        },
+        {
+          "name": "凉山彝族自治州",
+          "area": [
+            "西昌市",
+            "木里藏族自治县",
+            "盐源县",
+            "德昌县",
+            "会理县",
+            "会东县",
+            "宁南县",
+            "普格县",
+            "布拖县",
+            "金阳县",
+            "昭觉县",
+            "喜德县",
+            "冕宁县",
+            "越西县",
+            "甘洛县",
+            "美姑县",
+            "雷波县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "湖北省",
+      "city": [
+        {
+          "name": "武汉市",
+          "area": [
+            "江岸区",
+            "江汉区",
+            "硚口区",
+            "汉阳区",
+            "武昌区",
+            "青山区",
+            "洪山区",
+            "东西湖区",
+            "汉南区",
+            "蔡甸区",
+            "江夏区",
+            "黄陂区",
+            "新洲区"
+          ]
+        },
+        {
+          "name": "黄石市",
+          "area": [
+            "黄石港区",
+            "西塞山区",
+            "下陆区",
+            "铁山区",
+            "阳新县",
+            "大冶市"
+          ]
+        },
+        {
+          "name": "十堰市",
+          "area": [
+            "茅箭区",
+            "张湾区",
+            "郧阳区",
+            "郧西县",
+            "竹山县",
+            "竹溪县",
+            "房县",
+            "丹江口市"
+          ]
+        },
+        {
+          "name": "宜昌市",
+          "area": [
+            "西陵区",
+            "伍家岗区",
+            "点军区",
+            "猇亭区",
+            "夷陵区",
+            "远安县",
+            "兴山县",
+            "秭归县",
+            "长阳土家族自治县",
+            "五峰土家族自治县",
+            "宜都市",
+            "当阳市",
+            "枝江市"
+          ]
+        },
+        {
+          "name": "襄阳市",
+          "area": [
+            "襄城区",
+            "樊城区",
+            "襄州区",
+            "南漳县",
+            "谷城县",
+            "保康县",
+            "老河口市",
+            "枣阳市",
+            "宜城市"
+          ]
+        },
+        {
+          "name": "鄂州市",
+          "area": [
+            "梁子湖区",
+            "华容区",
+            "鄂城区"
+          ]
+        },
+        {
+          "name": "荆门市",
+          "area": [
+            "东宝区",
+            "掇刀区",
+            "沙洋县",
+            "钟祥市",
+            "京山市"
+          ]
+        },
+        {
+          "name": "孝感市",
+          "area": [
+            "孝南区",
+            "孝昌县",
+            "大悟县",
+            "云梦县",
+            "应城市",
+            "安陆市",
+            "汉川市"
+          ]
+        },
+        {
+          "name": "荆州市",
+          "area": [
+            "沙市区",
+            "荆州区",
+            "公安县",
+            "监利县",
+            "江陵县",
+            "石首市",
+            "洪湖市",
+            "松滋市"
+          ]
+        },
+        {
+          "name": "黄冈市",
+          "area": [
+            "黄州区",
+            "团风县",
+            "红安县",
+            "罗田县",
+            "英山县",
+            "浠水县",
+            "蕲春县",
+            "黄梅县",
+            "麻城市",
+            "武穴市"
+          ]
+        },
+        {
+          "name": "咸宁市",
+          "area": [
+            "咸安区",
+            "嘉鱼县",
+            "通城县",
+            "崇阳县",
+            "通山县",
+            "赤壁市"
+          ]
+        },
+        {
+          "name": "随州市",
+          "area": [
+            "曾都区",
+            "随县",
+            "广水市"
+          ]
+        },
+        {
+          "name": "恩施土家族苗族自治州",
+          "area": [
+            "恩施市",
+            "利川市",
+            "建始县",
+            "巴东县",
+            "宣恩县",
+            "咸丰县",
+            "来凤县",
+            "鹤峰县"
+          ]
+        },
+        {
+          "name": "仙桃市",
+          "area": [
+            "干河街道",
+            "龙华山街道",
+            "沙嘴街道",
+            "郑场镇",
+            "毛嘴镇",
+            "剅河镇",
+            "三伏潭镇",
+            "胡场镇",
+            "长埫口镇",
+            "西流河镇",
+            "彭场镇",
+            "沙湖镇",
+            "杨林尾镇",
+            "张沟镇",
+            "郭河镇",
+            "沔城回族镇",
+            "通海口镇",
+            "陈场镇",
+            "仙桃经济开发区",
+            "仙桃工业园",
+            "沙湖原种场",
+            "九合垸原种场",
+            "排湖风景区"
+          ]
+        },
+        {
+          "name": "潜江市",
+          "area": [
+            "园林办事处",
+            "广华办事处",
+            "杨市办事处",
+            "周矶办事处",
+            "泰丰办事处",
+            "高场办事处",
+            "熊口镇",
+            "高石碑镇",
+            "老新镇",
+            "王场镇",
+            "渔洋镇",
+            "龙湾镇",
+            "浩口镇",
+            "积玉口镇",
+            "张金镇",
+            "白鹭湖管理区",
+            "总口管理区",
+            "熊口农场管理区",
+            "运粮湖管理区",
+            "后湖管理区",
+            "周矶管理区",
+            "竹根滩镇"
+          ]
+        },
+        {
+          "name": "天门市",
+          "area": [
+            "竟陵街道",
+            "候口街道",
+            "杨林街道",
+            "多宝镇",
+            "拖市镇",
+            "张港镇",
+            "蒋场镇",
+            "汪场镇",
+            "渔薪镇",
+            "黄潭镇",
+            "岳口镇",
+            "横林镇",
+            "彭市镇",
+            "麻洋镇",
+            "多祥镇",
+            "干驿镇",
+            "马湾镇",
+            "卢市镇",
+            "小板镇",
+            "九真镇",
+            "皂市镇",
+            "胡市镇",
+            "石家河镇",
+            "佛子山镇",
+            "净潭乡"
+          ]
+        },
+        {
+          "name": "神农架林区",
+          "area": [
+            "松柏镇",
+            "阳日镇",
+            "木鱼镇",
+            "红坪镇",
+            "新华镇",
+            "大九湖镇",
+            "宋洛乡",
+            "下谷坪土家族乡"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "湖南省",
+      "city": [
+        {
+          "name": "长沙市",
+          "area": [
+            "芙蓉区",
+            "天心区",
+            "岳麓区",
+            "开福区",
+            "雨花区",
+            "望城区",
+            "长沙县",
+            "浏阳市",
+            "宁乡市"
+          ]
+        },
+        {
+          "name": "株洲市",
+          "area": [
+            "荷塘区",
+            "芦淞区",
+            "石峰区",
+            "天元区",
+            "渌口区",
+            "攸县",
+            "茶陵县",
+            "炎陵县",
+            "醴陵市",
+            "云龙示范区"
+          ]
+        },
+        {
+          "name": "湘潭市",
+          "area": [
+            "雨湖区",
+            "岳塘区",
+            "湘潭县",
+            "湘乡市",
+            "韶山市"
+          ]
+        },
+        {
+          "name": "衡阳市",
+          "area": [
+            "珠晖区",
+            "雁峰区",
+            "石鼓区",
+            "蒸湘区",
+            "南岳区",
+            "衡阳县",
+            "衡南县",
+            "衡山县",
+            "衡东县",
+            "祁东县",
+            "耒阳市",
+            "常宁市"
+          ]
+        },
+        {
+          "name": "邵阳市",
+          "area": [
+            "双清区",
+            "大祥区",
+            "北塔区",
+            "新邵县",
+            "邵阳县",
+            "隆回县",
+            "洞口县",
+            "绥宁县",
+            "新宁县",
+            "城步苗族自治县",
+            "武冈市",
+            "邵东市"
+          ]
+        },
+        {
+          "name": "岳阳市",
+          "area": [
+            "岳阳楼区",
+            "云溪区",
+            "君山区",
+            "岳阳县",
+            "华容县",
+            "湘阴县",
+            "平江县",
+            "汨罗市",
+            "临湘市"
+          ]
+        },
+        {
+          "name": "常德市",
+          "area": [
+            "武陵区",
+            "鼎城区",
+            "安乡县",
+            "汉寿县",
+            "澧县",
+            "临澧县",
+            "桃源县",
+            "石门县",
+            "津市市"
+          ]
+        },
+        {
+          "name": "张家界市",
+          "area": [
+            "永定区",
+            "武陵源区",
+            "慈利县",
+            "桑植县"
+          ]
+        },
+        {
+          "name": "益阳市",
+          "area": [
+            "资阳区",
+            "赫山区",
+            "南县",
+            "桃江县",
+            "安化县",
+            "沅江市"
+          ]
+        },
+        {
+          "name": "郴州市",
+          "area": [
+            "北湖区",
+            "苏仙区",
+            "桂阳县",
+            "宜章县",
+            "永兴县",
+            "嘉禾县",
+            "临武县",
+            "汝城县",
+            "桂东县",
+            "安仁县",
+            "资兴市"
+          ]
+        },
+        {
+          "name": "永州市",
+          "area": [
+            "零陵区",
+            "冷水滩区",
+            "祁阳县",
+            "东安县",
+            "双牌县",
+            "道县",
+            "江永县",
+            "宁远县",
+            "蓝山县",
+            "新田县",
+            "江华瑶族自治县"
+          ]
+        },
+        {
+          "name": "怀化市",
+          "area": [
+            "鹤城区",
+            "中方县",
+            "沅陵县",
+            "辰溪县",
+            "溆浦县",
+            "会同县",
+            "麻阳苗族自治县",
+            "新晃侗族自治县",
+            "芷江侗族自治县",
+            "靖州苗族侗族自治县",
+            "通道侗族自治县",
+            "洪江市"
+          ]
+        },
+        {
+          "name": "娄底市",
+          "area": [
+            "娄星区",
+            "双峰县",
+            "新化县",
+            "冷水江市",
+            "涟源市"
+          ]
+        },
+        {
+          "name": "湘西土家族苗族自治州",
+          "area": [
+            "吉首市",
+            "泸溪县",
+            "凤凰县",
+            "花垣县",
+            "保靖县",
+            "古丈县",
+            "永顺县",
+            "龙山县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "河北省",
+      "city": [
+        {
+          "name": "石家庄市",
+          "area": [
+            "长安区",
+            "桥西区",
+            "新华区",
+            "井陉矿区",
+            "裕华区",
+            "藁城区",
+            "鹿泉区",
+            "栾城区",
+            "井陉县",
+            "正定县",
+            "行唐县",
+            "灵寿县",
+            "高邑县",
+            "深泽县",
+            "赞皇县",
+            "无极县",
+            "平山县",
+            "元氏县",
+            "赵县",
+            "辛集市",
+            "晋州市",
+            "新乐市"
+          ]
+        },
+        {
+          "name": "唐山市",
+          "area": [
+            "路南区",
+            "路北区",
+            "古冶区",
+            "开平区",
+            "丰南区",
+            "丰润区",
+            "曹妃甸区",
+            "滦州市",
+            "滦南县",
+            "乐亭县",
+            "迁西县",
+            "玉田县",
+            "遵化市",
+            "迁安市"
+          ]
+        },
+        {
+          "name": "秦皇岛市",
+          "area": [
+            "海港区",
+            "山海关区",
+            "北戴河区",
+            "抚宁区",
+            "青龙满族自治县",
+            "昌黎县",
+            "卢龙县"
+          ]
+        },
+        {
+          "name": "邯郸市",
+          "area": [
+            "邯山区",
+            "丛台区",
+            "复兴区",
+            "峰峰矿区",
+            "肥乡区",
+            "永年区",
+            "临漳县",
+            "成安县",
+            "大名县",
+            "涉县",
+            "磁县",
+            "邱县",
+            "鸡泽县",
+            "广平县",
+            "馆陶县",
+            "魏县",
+            "曲周县",
+            "武安市"
+          ]
+        },
+        {
+          "name": "邢台市",
+          "area": [
+            "襄都区",
+            "信都区",
+            "任泽区",
+            "南和区",
+            "临城县",
+            "内丘县",
+            "柏乡县",
+            "隆尧县",
+            "宁晋县",
+            "巨鹿县",
+            "新河县",
+            "广宗县",
+            "平乡县",
+            "威县",
+            "清河县",
+            "临西县",
+            "南宫市",
+            "沙河市"
+          ]
+        },
+        {
+          "name": "保定市",
+          "area": [
+            "竞秀区",
+            "莲池区",
+            "满城区",
+            "清苑区",
+            "徐水区",
+            "涞水县",
+            "阜平县",
+            "定兴县",
+            "唐县",
+            "高阳县",
+            "容城县",
+            "涞源县",
+            "望都县",
+            "安新县",
+            "易县",
+            "曲阳县",
+            "蠡县",
+            "顺平县",
+            "博野县",
+            "雄县",
+            "涿州市",
+            "定州市",
+            "安国市",
+            "高碑店市"
+          ]
+        },
+        {
+          "name": "张家口市",
+          "area": [
+            "桥东区",
+            "桥西区",
+            "宣化区",
+            "下花园区",
+            "万全区",
+            "崇礼区",
+            "张北县",
+            "康保县",
+            "沽源县",
+            "尚义县",
+            "蔚县",
+            "阳原县",
+            "怀安县",
+            "怀来县",
+            "涿鹿县",
+            "赤城县"
+          ]
+        },
+        {
+          "name": "承德市",
+          "area": [
+            "双桥区",
+            "双滦区",
+            "鹰手营子矿区",
+            "承德县",
+            "兴隆县",
+            "滦平县",
+            "隆化县",
+            "丰宁满族自治县",
+            "宽城满族自治县",
+            "围场满族蒙古族自治县",
+            "平泉市"
+          ]
+        },
+        {
+          "name": "沧州市",
+          "area": [
+            "新华区",
+            "运河区",
+            "沧县",
+            "青县",
+            "东光县",
+            "海兴县",
+            "盐山县",
+            "肃宁县",
+            "南皮县",
+            "吴桥县",
+            "献县",
+            "孟村回族自治县",
+            "泊头市",
+            "任丘市",
+            "黄骅市",
+            "河间市"
+          ]
+        },
+        {
+          "name": "廊坊市",
+          "area": [
+            "安次区",
+            "广阳区",
+            "固安县",
+            "永清县",
+            "香河县",
+            "大城县",
+            "文安县",
+            "大厂回族自治县",
+            "霸州市",
+            "三河市"
+          ]
+        },
+        {
+          "name": "衡水市",
+          "area": [
+            "桃城区",
+            "冀州区",
+            "枣强县",
+            "武邑县",
+            "武强县",
+            "饶阳县",
+            "安平县",
+            "故城县",
+            "景县",
+            "阜城县",
+            "深州市"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "福建省",
+      "city": [
+        {
+          "name": "福州市",
+          "area": [
+            "鼓楼区",
+            "台江区",
+            "仓山区",
+            "马尾区",
+            "晋安区",
+            "长乐区",
+            "闽侯县",
+            "连江县",
+            "罗源县",
+            "闽清县",
+            "永泰县",
+            "平潭县",
+            "福清市",
+            "高新技术产业开发区"
+          ]
+        },
+        {
+          "name": "厦门市",
+          "area": [
+            "思明区",
+            "海沧区",
+            "湖里区",
+            "集美区",
+            "同安区",
+            "翔安区"
+          ]
+        },
+        {
+          "name": "莆田市",
+          "area": [
+            "城厢区",
+            "涵江区",
+            "荔城区",
+            "秀屿区",
+            "仙游县"
+          ]
+        },
+        {
+          "name": "三明市",
+          "area": [
+            "梅列区",
+            "三元区",
+            "明溪县",
+            "清流县",
+            "宁化县",
+            "大田县",
+            "尤溪县",
+            "沙县",
+            "将乐县",
+            "泰宁县",
+            "建宁县",
+            "永安市"
+          ]
+        },
+        {
+          "name": "泉州市",
+          "area": [
+            "鲤城区",
+            "丰泽区",
+            "洛江区",
+            "泉港区",
+            "惠安县",
+            "安溪县",
+            "永春县",
+            "德化县",
+            "金门县",
+            "石狮市",
+            "晋江市",
+            "南安市"
+          ]
+        },
+        {
+          "name": "漳州市",
+          "area": [
+            "芗城区",
+            "龙文区",
+            "云霄县",
+            "漳浦县",
+            "诏安县",
+            "长泰县",
+            "东山县",
+            "南靖县",
+            "平和县",
+            "华安县",
+            "龙海市"
+          ]
+        },
+        {
+          "name": "南平市",
+          "area": [
+            "延平区",
+            "建阳区",
+            "顺昌县",
+            "浦城县",
+            "光泽县",
+            "松溪县",
+            "政和县",
+            "邵武市",
+            "武夷山市",
+            "建瓯市"
+          ]
+        },
+        {
+          "name": "龙岩市",
+          "area": [
+            "新罗区",
+            "永定区",
+            "长汀县",
+            "上杭县",
+            "武平县",
+            "连城县",
+            "漳平市"
+          ]
+        },
+        {
+          "name": "宁德市",
+          "area": [
+            "蕉城区",
+            "霞浦县",
+            "古田县",
+            "屏南县",
+            "寿宁县",
+            "周宁县",
+            "柘荣县",
+            "福安市",
+            "福鼎市"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "安徽省",
+      "city": [
+        {
+          "name": "合肥市",
+          "area": [
+            "瑶海区",
+            "庐阳区",
+            "蜀山区",
+            "包河区",
+            "长丰县",
+            "肥东县",
+            "肥西县",
+            "庐江县",
+            "巢湖市"
+          ]
+        },
+        {
+          "name": "芜湖市",
+          "area": [
+            "镜湖区",
+            "弋江区",
+            "鸠江区",
+            "三山区",
+            "芜湖县",
+            "繁昌县",
+            "南陵县",
+            "无为市"
+          ]
+        },
+        {
+          "name": "蚌埠市",
+          "area": [
+            "龙子湖区",
+            "蚌山区",
+            "禹会区",
+            "淮上区",
+            "怀远县",
+            "五河县",
+            "固镇县"
+          ]
+        },
+        {
+          "name": "淮南市",
+          "area": [
+            "大通区",
+            "田家庵区",
+            "谢家集区",
+            "八公山区",
+            "潘集区",
+            "凤台县",
+            "寿县"
+          ]
+        },
+        {
+          "name": "马鞍山市",
+          "area": [
+            "花山区",
+            "雨山区",
+            "博望区",
+            "当涂县",
+            "含山县",
+            "和县"
+          ]
+        },
+        {
+          "name": "淮北市",
+          "area": [
+            "杜集区",
+            "相山区",
+            "烈山区",
+            "濉溪县"
+          ]
+        },
+        {
+          "name": "铜陵市",
+          "area": [
+            "铜官区",
+            "义安区",
+            "郊区",
+            "枞阳县"
+          ]
+        },
+        {
+          "name": "安庆市",
+          "area": [
+            "迎江区",
+            "大观区",
+            "宜秀区",
+            "怀宁县",
+            "太湖县",
+            "宿松县",
+            "望江县",
+            "岳西县",
+            "桐城市",
+            "潜山市"
+          ]
+        },
+        {
+          "name": "黄山市",
+          "area": [
+            "屯溪区",
+            "黄山区",
+            "徽州区",
+            "歙县",
+            "休宁县",
+            "黟县",
+            "祁门县"
+          ]
+        },
+        {
+          "name": "滁州市",
+          "area": [
+            "琅琊区",
+            "南谯区",
+            "来安县",
+            "全椒县",
+            "定远县",
+            "凤阳县",
+            "天长市",
+            "明光市"
+          ]
+        },
+        {
+          "name": "阜阳市",
+          "area": [
+            "颍州区",
+            "颍东区",
+            "颍泉区",
+            "临泉县",
+            "太和县",
+            "阜南县",
+            "颍上县",
+            "界首市"
+          ]
+        },
+        {
+          "name": "宿州市",
+          "area": [
+            "埇桥区",
+            "砀山县",
+            "萧县",
+            "灵璧县",
+            "泗县"
+          ]
+        },
+        {
+          "name": "六安市",
+          "area": [
+            "金安区",
+            "裕安区",
+            "叶集区",
+            "霍邱县",
+            "舒城县",
+            "金寨县",
+            "霍山县"
+          ]
+        },
+        {
+          "name": "亳州市",
+          "area": [
+            "谯城区",
+            "涡阳县",
+            "蒙城县",
+            "利辛县"
+          ]
+        },
+        {
+          "name": "池州市",
+          "area": [
+            "贵池区",
+            "东至县",
+            "石台县",
+            "青阳县"
+          ]
+        },
+        {
+          "name": "宣城市",
+          "area": [
+            "宣州区",
+            "郎溪县",
+            "泾县",
+            "绩溪县",
+            "旌德县",
+            "宁国市",
+            "广德市"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "辽宁省",
+      "city": [
+        {
+          "name": "沈阳市",
+          "area": [
+            "和平区",
+            "沈河区",
+            "大东区",
+            "皇姑区",
+            "铁西区",
+            "苏家屯区",
+            "浑南区",
+            "沈北区",
+            "于洪区",
+            "辽中区",
+            "康平县",
+            "法库县",
+            "新民市"
+          ]
+        },
+        {
+          "name": "大连市",
+          "area": [
+            "中山区",
+            "西岗区",
+            "沙河口区",
+            "甘井子区",
+            "旅顺口区",
+            "金州区",
+            "普兰店区",
+            "长海县",
+            "瓦房店市",
+            "庄河市"
+          ]
+        },
+        {
+          "name": "鞍山市",
+          "area": [
+            "铁东区",
+            "铁西区",
+            "立山区",
+            "千山区",
+            "台安县",
+            "岫岩满族自治县",
+            "海城市"
+          ]
+        },
+        {
+          "name": "抚顺市",
+          "area": [
+            "新抚区",
+            "东洲区",
+            "望花区",
+            "顺城区",
+            "抚顺县",
+            "新宾满族自治县",
+            "清原满族自治县"
+          ]
+        },
+        {
+          "name": "本溪市",
+          "area": [
+            "平山区",
+            "溪湖区",
+            "明山区",
+            "南芬区",
+            "本溪满族自治县",
+            "桓仁满族自治县"
+          ]
+        },
+        {
+          "name": "丹东市",
+          "area": [
+            "元宝区",
+            "振兴区",
+            "振安区",
+            "宽甸满族自治县",
+            "东港市",
+            "凤城市"
+          ]
+        },
+        {
+          "name": "锦州市",
+          "area": [
+            "古塔区",
+            "凌河区",
+            "太和区",
+            "黑山县",
+            "义县",
+            "凌海市",
+            "北镇市"
+          ]
+        },
+        {
+          "name": "营口市",
+          "area": [
+            "站前区",
+            "西市区",
+            "鲅鱼圈区",
+            "老边区",
+            "盖州市",
+            "大石桥市"
+          ]
+        },
+        {
+          "name": "阜新市",
+          "area": [
+            "海州区",
+            "新邱区",
+            "太平区",
+            "清河门区",
+            "细河区",
+            "阜新蒙古族自治县",
+            "彰武县"
+          ]
+        },
+        {
+          "name": "辽阳市",
+          "area": [
+            "白塔区",
+            "文圣区",
+            "宏伟区",
+            "弓长岭区",
+            "太子河区",
+            "辽阳县",
+            "灯塔市"
+          ]
+        },
+        {
+          "name": "盘锦市",
+          "area": [
+            "双台子区",
+            "兴隆台区",
+            "大洼区",
+            "盘山县"
+          ]
+        },
+        {
+          "name": "铁岭市",
+          "area": [
+            "银州区",
+            "清河区",
+            "铁岭县",
+            "西丰县",
+            "昌图县",
+            "调兵山市",
+            "开原市"
+          ]
+        },
+        {
+          "name": "朝阳市",
+          "area": [
+            "双塔区",
+            "龙城区",
+            "朝阳县",
+            "建平县",
+            "喀喇沁左翼蒙古族自治县",
+            "北票市",
+            "凌源市"
+          ]
+        },
+        {
+          "name": "葫芦岛市",
+          "area": [
+            "连山区",
+            "龙港区",
+            "南票区",
+            "绥中县",
+            "建昌县",
+            "兴城市"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "陕西省",
+      "city": [
+        {
+          "name": "西安市",
+          "area": [
+            "新城区",
+            "碑林区",
+            "莲湖区",
+            "灞桥区",
+            "未央区",
+            "雁塔区",
+            "阎良区",
+            "临潼区",
+            "长安区",
+            "高陵区",
+            "鄠邑区",
+            "蓝田县",
+            "周至县",
+            "西咸区"
+          ]
+        },
+        {
+          "name": "铜川市",
+          "area": [
+            "王益区",
+            "印台区",
+            "耀州区",
+            "宜君县"
+          ]
+        },
+        {
+          "name": "宝鸡市",
+          "area": [
+            "渭滨区",
+            "金台区",
+            "陈仓区",
+            "凤翔县",
+            "岐山县",
+            "扶风县",
+            "眉县",
+            "陇县",
+            "千阳县",
+            "麟游县",
+            "凤县",
+            "太白县"
+          ]
+        },
+        {
+          "name": "咸阳市",
+          "area": [
+            "秦都区",
+            "杨陵区",
+            "渭城区",
+            "三原县",
+            "泾阳县",
+            "乾县",
+            "礼泉县",
+            "永寿县",
+            "长武县",
+            "旬邑县",
+            "淳化县",
+            "武功县",
+            "兴平市",
+            "彬州市"
+          ]
+        },
+        {
+          "name": "渭南市",
+          "area": [
+            "临渭区",
+            "华州区",
+            "潼关县",
+            "大荔县",
+            "合阳县",
+            "澄城县",
+            "蒲城县",
+            "白水县",
+            "富平县",
+            "韩城市",
+            "华阴市"
+          ]
+        },
+        {
+          "name": "延安市",
+          "area": [
+            "宝塔区",
+            "安塞区",
+            "延长县",
+            "延川县",
+            "志丹县",
+            "吴起县",
+            "甘泉县",
+            "富县",
+            "洛川县",
+            "宜川县",
+            "黄龙县",
+            "黄陵县",
+            "子长市"
+          ]
+        },
+        {
+          "name": "汉中市",
+          "area": [
+            "汉台区",
+            "南郑区",
+            "城固县",
+            "洋县",
+            "西乡县",
+            "勉县",
+            "宁强县",
+            "略阳县",
+            "镇巴县",
+            "留坝县",
+            "佛坪县"
+          ]
+        },
+        {
+          "name": "榆林市",
+          "area": [
+            "榆阳区",
+            "横山区",
+            "府谷县",
+            "靖边县",
+            "定边县",
+            "绥德县",
+            "米脂县",
+            "佳县",
+            "吴堡县",
+            "清涧县",
+            "子洲县",
+            "神木市"
+          ]
+        },
+        {
+          "name": "安康市",
+          "area": [
+            "汉滨区",
+            "汉阴县",
+            "石泉县",
+            "宁陕县",
+            "紫阳县",
+            "岚皋县",
+            "平利县",
+            "镇坪县",
+            "旬阳县",
+            "白河县"
+          ]
+        },
+        {
+          "name": "商洛市",
+          "area": [
+            "商州区",
+            "洛南县",
+            "丹凤县",
+            "商南县",
+            "山阳县",
+            "镇安县",
+            "柞水县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "江西省",
+      "city": [
+        {
+          "name": "南昌市",
+          "area": [
+            "东湖区",
+            "西湖区",
+            "青云谱区",
+            "青山湖区",
+            "新建区",
+            "红谷滩区",
+            "南昌县",
+            "安义县",
+            "进贤县"
+          ]
+        },
+        {
+          "name": "景德镇市",
+          "area": [
+            "昌江区",
+            "珠山区",
+            "浮梁县",
+            "乐平市"
+          ]
+        },
+        {
+          "name": "萍乡市",
+          "area": [
+            "安源区",
+            "湘东区",
+            "莲花县",
+            "上栗县",
+            "芦溪县"
+          ]
+        },
+        {
+          "name": "九江市",
+          "area": [
+            "濂溪区",
+            "浔阳区",
+            "柴桑区",
+            "武宁县",
+            "修水县",
+            "永修县",
+            "德安县",
+            "都昌县",
+            "湖口县",
+            "彭泽县",
+            "瑞昌市",
+            "共青城市",
+            "庐山市"
+          ]
+        },
+        {
+          "name": "新余市",
+          "area": [
+            "渝水区",
+            "分宜县"
+          ]
+        },
+        {
+          "name": "鹰潭市",
+          "area": [
+            "月湖区",
+            "余江区",
+            "贵溪市"
+          ]
+        },
+        {
+          "name": "赣州市",
+          "area": [
+            "章贡区",
+            "南康区",
+            "赣县区",
+            "信丰县",
+            "大余县",
+            "上犹县",
+            "崇义县",
+            "安远县",
+            "定南县",
+            "全南县",
+            "宁都县",
+            "于都县",
+            "兴国县",
+            "会昌县",
+            "寻乌县",
+            "石城县",
+            "瑞金市",
+            "龙南市"
+          ]
+        },
+        {
+          "name": "吉安市",
+          "area": [
+            "吉州区",
+            "青原区",
+            "吉安县",
+            "吉水县",
+            "峡江县",
+            "新干县",
+            "永丰县",
+            "泰和县",
+            "遂川县",
+            "万安县",
+            "安福县",
+            "永新县",
+            "井冈山市"
+          ]
+        },
+        {
+          "name": "宜春市",
+          "area": [
+            "袁州区",
+            "奉新县",
+            "万载县",
+            "上高县",
+            "宜丰县",
+            "靖安县",
+            "铜鼓县",
+            "丰城市",
+            "樟树市",
+            "高安市"
+          ]
+        },
+        {
+          "name": "抚州市",
+          "area": [
+            "临川区",
+            "东乡区",
+            "南城县",
+            "黎川县",
+            "南丰县",
+            "崇仁县",
+            "乐安县",
+            "宜黄县",
+            "金溪县",
+            "资溪县",
+            "广昌县"
+          ]
+        },
+        {
+          "name": "上饶市",
+          "area": [
+            "信州区",
+            "广丰区",
+            "广信区",
+            "玉山县",
+            "铅山县",
+            "横峰县",
+            "弋阳县",
+            "余干县",
+            "鄱阳县",
+            "万年县",
+            "婺源县",
+            "德兴市"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "云南省",
+      "city": [
+        {
+          "name": "昆明市",
+          "area": [
+            "五华区",
+            "盘龙区",
+            "官渡区",
+            "西山区",
+            "东川区",
+            "呈贡区",
+            "晋宁区",
+            "富民县",
+            "宜良县",
+            "石林彝族自治县",
+            "嵩明县",
+            "禄劝彝族苗族自治县",
+            "寻甸回族彝族自治县",
+            "安宁市"
+          ]
+        },
+        {
+          "name": "曲靖市",
+          "area": [
+            "麒麟区",
+            "沾益区",
+            "马龙区",
+            "陆良县",
+            "师宗县",
+            "罗平县",
+            "富源县",
+            "会泽县",
+            "宣威市"
+          ]
+        },
+        {
+          "name": "玉溪市",
+          "area": [
+            "红塔区",
+            "江川区",
+            "通海县",
+            "华宁县",
+            "易门县",
+            "峨山彝族自治县",
+            "新平彝族傣族自治县",
+            "元江哈尼族彝族傣族自治县",
+            "澄江市"
+          ]
+        },
+        {
+          "name": "保山市",
+          "area": [
+            "隆阳区",
+            "施甸县",
+            "龙陵县",
+            "昌宁县",
+            "腾冲市"
+          ]
+        },
+        {
+          "name": "昭通市",
+          "area": [
+            "昭阳区",
+            "鲁甸县",
+            "巧家县",
+            "盐津县",
+            "大关县",
+            "永善县",
+            "绥江县",
+            "镇雄县",
+            "彝良县",
+            "威信县",
+            "水富市"
+          ]
+        },
+        {
+          "name": "丽江市",
+          "area": [
+            "古城区",
+            "玉龙纳西族自治县",
+            "永胜县",
+            "华坪县",
+            "宁蒗彝族自治县"
+          ]
+        },
+        {
+          "name": "普洱市",
+          "area": [
+            "思茅区",
+            "宁洱哈尼族彝族自治县",
+            "墨江哈尼族自治县",
+            "景东彝族自治县",
+            "景谷傣族彝族自治县",
+            "镇沅彝族哈尼族拉祜族自治县",
+            "江城哈尼族彝族自治县",
+            "孟连傣族拉祜族佤族自治县",
+            "澜沧拉祜族自治县",
+            "西盟佤族自治县"
+          ]
+        },
+        {
+          "name": "临沧市",
+          "area": [
+            "临翔区",
+            "凤庆县",
+            "云县",
+            "永德县",
+            "镇康县",
+            "双江拉祜族佤族布朗族傣族自治县",
+            "耿马傣族佤族自治县",
+            "沧源佤族自治县"
+          ]
+        },
+        {
+          "name": "楚雄彝族自治州",
+          "area": [
+            "楚雄市",
+            "双柏县",
+            "牟定县",
+            "南华县",
+            "姚安县",
+            "大姚县",
+            "永仁县",
+            "元谋县",
+            "武定县",
+            "禄丰县"
+          ]
+        },
+        {
+          "name": "红河哈尼族彝族自治州",
+          "area": [
+            "个旧市",
+            "开远市",
+            "蒙自市",
+            "弥勒市",
+            "屏边苗族自治县",
+            "建水县",
+            "石屏县",
+            "泸西县",
+            "元阳县",
+            "红河县",
+            "金平苗族瑶族傣族自治县",
+            "绿春县",
+            "河口瑶族自治县"
+          ]
+        },
+        {
+          "name": "文山壮族苗族自治州",
+          "area": [
+            "文山市",
+            "砚山县",
+            "西畴县",
+            "麻栗坡县",
+            "马关县",
+            "丘北县",
+            "广南县",
+            "富宁县"
+          ]
+        },
+        {
+          "name": "西双版纳傣族自治州",
+          "area": [
+            "景洪市",
+            "勐海县",
+            "勐腊县"
+          ]
+        },
+        {
+          "name": "大理白族自治州",
+          "area": [
+            "大理市",
+            "漾濞彝族自治县",
+            "祥云县",
+            "宾川县",
+            "弥渡县",
+            "南涧彝族自治县",
+            "巍山彝族回族自治县",
+            "永平县",
+            "云龙县",
+            "洱源县",
+            "剑川县",
+            "鹤庆县"
+          ]
+        },
+        {
+          "name": "德宏傣族景颇族自治州",
+          "area": [
+            "瑞丽市",
+            "芒市",
+            "梁河县",
+            "盈江县",
+            "陇川县"
+          ]
+        },
+        {
+          "name": "怒江傈僳族自治州",
+          "area": [
+            "泸水市",
+            "福贡县",
+            "贡山独龙族怒族自治县",
+            "兰坪白族普米族自治县"
+          ]
+        },
+        {
+          "name": "迪庆藏族自治州",
+          "area": [
+            "香格里拉市",
+            "德钦县",
+            "维西傈僳族自治县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "山西省",
+      "city": [
+        {
+          "name": "太原市",
+          "area": [
+            "小店区",
+            "迎泽区",
+            "杏花岭区",
+            "尖草坪区",
+            "万柏林区",
+            "晋源区",
+            "清徐县",
+            "阳曲县",
+            "娄烦县",
+            "古交市"
+          ]
+        },
+        {
+          "name": "大同市",
+          "area": [
+            "新荣区",
+            "平城区",
+            "云冈区",
+            "云州区",
+            "阳高县",
+            "天镇县",
+            "广灵县",
+            "灵丘县",
+            "浑源县",
+            "左云县"
+          ]
+        },
+        {
+          "name": "阳泉市",
+          "area": [
+            "城区",
+            "矿区",
+            "郊区",
+            "平定县",
+            "盂县"
+          ]
+        },
+        {
+          "name": "长治市",
+          "area": [
+            "潞州区",
+            "上党区",
+            "屯留区",
+            "潞城区",
+            "襄垣县",
+            "平顺县",
+            "黎城县",
+            "壶关县",
+            "长子县",
+            "武乡县",
+            "沁县",
+            "沁源县"
+          ]
+        },
+        {
+          "name": "晋城市",
+          "area": [
+            "城区",
+            "沁水县",
+            "阳城县",
+            "陵川县",
+            "泽州县",
+            "高平市"
+          ]
+        },
+        {
+          "name": "朔州市",
+          "area": [
+            "朔城区",
+            "平鲁区",
+            "山阴县",
+            "应县",
+            "右玉县",
+            "怀仁市"
+          ]
+        },
+        {
+          "name": "晋中市",
+          "area": [
+            "榆次区",
+            "太谷区",
+            "榆社县",
+            "左权县",
+            "和顺县",
+            "昔阳县",
+            "寿阳县",
+            "祁县",
+            "平遥县",
+            "灵石县",
+            "介休市"
+          ]
+        },
+        {
+          "name": "运城市",
+          "area": [
+            "盐湖区",
+            "临猗县",
+            "万荣县",
+            "闻喜县",
+            "稷山县",
+            "新绛县",
+            "绛县",
+            "垣曲县",
+            "夏县",
+            "平陆县",
+            "芮城县",
+            "永济市",
+            "河津市"
+          ]
+        },
+        {
+          "name": "忻州市",
+          "area": [
+            "忻府区",
+            "定襄县",
+            "五台县",
+            "代县",
+            "繁峙县",
+            "宁武县",
+            "静乐县",
+            "神池县",
+            "五寨县",
+            "岢岚县",
+            "河曲县",
+            "保德县",
+            "偏关县",
+            "原平市"
+          ]
+        },
+        {
+          "name": "临汾市",
+          "area": [
+            "尧都区",
+            "曲沃县",
+            "翼城县",
+            "襄汾县",
+            "洪洞县",
+            "古县",
+            "安泽县",
+            "浮山县",
+            "吉县",
+            "乡宁县",
+            "大宁县",
+            "隰县",
+            "永和县",
+            "蒲县",
+            "汾西县",
+            "侯马市",
+            "霍州市"
+          ]
+        },
+        {
+          "name": "吕梁市",
+          "area": [
+            "离石区",
+            "文水县",
+            "交城县",
+            "兴县",
+            "临县",
+            "柳林县",
+            "石楼县",
+            "岚县",
+            "方山县",
+            "中阳县",
+            "交口县",
+            "孝义市",
+            "汾阳市"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "吉林省",
+      "city": [
+        {
+          "name": "长春市",
+          "area": [
+            "南关区",
+            "宽城区",
+            "朝阳区",
+            "二道区",
+            "绿园区",
+            "双阳区",
+            "九台区",
+            "农安县",
+            "榆树市",
+            "德惠市",
+            "公主岭市",
+            "长德区",
+            "北湖区",
+            "空港区",
+            "北区",
+            "南区",
+            "高新区",
+            "汽开区",
+            "净月区",
+            "莲花山旅游度假区"
+          ]
+        },
+        {
+          "name": "吉林市",
+          "area": [
+            "昌邑区",
+            "龙潭区",
+            "船营区",
+            "丰满区",
+            "永吉县",
+            "蛟河市",
+            "桦甸市",
+            "舒兰市",
+            "磐石市"
+          ]
+        },
+        {
+          "name": "四平市",
+          "area": [
+            "铁西区",
+            "铁东区",
+            "梨树县",
+            "伊通满族自治县",
+            "双辽市"
+          ]
+        },
+        {
+          "name": "辽源市",
+          "area": [
+            "龙山区",
+            "西安区",
+            "东丰县",
+            "东辽县"
+          ]
+        },
+        {
+          "name": "通化市",
+          "area": [
+            "东昌区",
+            "二道江区",
+            "通化县",
+            "辉南县",
+            "柳河县",
+            "梅河口市",
+            "集安市"
+          ]
+        },
+        {
+          "name": "白山市",
+          "area": [
+            "浑江区",
+            "江源区",
+            "抚松县",
+            "靖宇县",
+            "长白朝鲜族自治县",
+            "临江市"
+          ]
+        },
+        {
+          "name": "松原市",
+          "area": [
+            "宁江区",
+            "前郭尔罗斯蒙古族自治县",
+            "长岭县",
+            "乾安县",
+            "扶余市"
+          ]
+        },
+        {
+          "name": "白城市",
+          "area": [
+            "洮北区",
+            "镇赉县",
+            "通榆县",
+            "洮南市",
+            "大安市"
+          ]
+        },
+        {
+          "name": "延边朝鲜族自治州",
+          "area": [
+            "延吉市",
+            "图们市",
+            "敦化市",
+            "珲春市",
+            "龙井市",
+            "和龙市",
+            "汪清县",
+            "安图县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "贵州省",
+      "city": [
+        {
+          "name": "贵阳市",
+          "area": [
+            "南明区",
+            "云岩区",
+            "花溪区",
+            "乌当区",
+            "白云区",
+            "观山湖区",
+            "开阳县",
+            "息烽县",
+            "修文县",
+            "清镇市"
+          ]
+        },
+        {
+          "name": "六盘水市",
+          "area": [
+            "钟山区",
+            "六枝特区",
+            "水城县",
+            "盘州市"
+          ]
+        },
+        {
+          "name": "遵义市",
+          "area": [
+            "红花岗区",
+            "汇川区",
+            "播州区",
+            "桐梓县",
+            "绥阳县",
+            "正安县",
+            "道真仡佬族苗族自治县",
+            "务川仡佬族苗族自治县",
+            "凤冈县",
+            "湄潭县",
+            "余庆县",
+            "习水县",
+            "赤水市",
+            "仁怀市"
+          ]
+        },
+        {
+          "name": "安顺市",
+          "area": [
+            "西秀区",
+            "平坝区",
+            "普定县",
+            "镇宁布依族苗族自治县",
+            "关岭布依族苗族自治县",
+            "紫云苗族布依族自治县"
+          ]
+        },
+        {
+          "name": "毕节市",
+          "area": [
+            "七星关区",
+            "大方县",
+            "黔西县",
+            "金沙县",
+            "织金县",
+            "纳雍县",
+            "威宁彝族回族苗族自治县",
+            "赫章县"
+          ]
+        },
+        {
+          "name": "铜仁市",
+          "area": [
+            "碧江区",
+            "万山区",
+            "江口县",
+            "玉屏侗族自治县",
+            "石阡县",
+            "思南县",
+            "印江土家族苗族自治县",
+            "德江县",
+            "沿河土家族自治县",
+            "松桃苗族自治县"
+          ]
+        },
+        {
+          "name": "黔西南布依族苗族自治州",
+          "area": [
+            "兴义市",
+            "兴仁市",
+            "普安县",
+            "晴隆县",
+            "贞丰县",
+            "望谟县",
+            "册亨县",
+            "安龙县"
+          ]
+        },
+        {
+          "name": "黔东南苗族侗族自治州",
+          "area": [
+            "凯里市",
+            "黄平县",
+            "施秉县",
+            "三穗县",
+            "镇远县",
+            "岑巩县",
+            "天柱县",
+            "锦屏县",
+            "剑河县",
+            "台江县",
+            "黎平县",
+            "榕江县",
+            "从江县",
+            "雷山县",
+            "麻江县",
+            "丹寨县"
+          ]
+        },
+        {
+          "name": "黔南布依族苗族自治州",
+          "area": [
+            "都匀市",
+            "福泉市",
+            "荔波县",
+            "贵定县",
+            "瓮安县",
+            "独山县",
+            "平塘县",
+            "罗甸县",
+            "长顺县",
+            "龙里县",
+            "惠水县",
+            "三都水族自治县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "甘肃省",
+      "city": [
+        {
+          "name": "兰州市",
+          "area": [
+            "城关区",
+            "七里河区",
+            "西固区",
+            "安宁区",
+            "红古区",
+            "永登县",
+            "皋兰县",
+            "榆中县"
+          ]
+        },
+        {
+          "name": "嘉峪关市",
+          "area": [
+            "胜利街道",
+            "五一街道",
+            "矿山街道",
+            "新华街道",
+            "建设街道",
+            "前进街道",
+            "峪苑街道",
+            "朝阳街道",
+            "峪泉镇",
+            "文殊镇",
+            "新城镇",
+            "雄关区",
+            "长城区",
+            "镜铁区"
+          ]
+        },
+        {
+          "name": "金昌市",
+          "area": [
+            "金川区",
+            "永昌县"
+          ]
+        },
+        {
+          "name": "白银市",
+          "area": [
+            "白银区",
+            "平川区",
+            "靖远县",
+            "会宁县",
+            "景泰县"
+          ]
+        },
+        {
+          "name": "天水市",
+          "area": [
+            "秦州区",
+            "麦积区",
+            "清水县",
+            "秦安县",
+            "甘谷县",
+            "武山县",
+            "张家川回族自治县"
+          ]
+        },
+        {
+          "name": "武威市",
+          "area": [
+            "凉州区",
+            "民勤县",
+            "古浪县",
+            "天祝藏族自治县"
+          ]
+        },
+        {
+          "name": "张掖市",
+          "area": [
+            "甘州区",
+            "肃南裕固族自治县",
+            "民乐县",
+            "临泽县",
+            "高台县",
+            "山丹县"
+          ]
+        },
+        {
+          "name": "平凉市",
+          "area": [
+            "崆峒区",
+            "泾川县",
+            "灵台县",
+            "崇信县",
+            "庄浪县",
+            "静宁县",
+            "华亭市"
+          ]
+        },
+        {
+          "name": "酒泉市",
+          "area": [
+            "肃州区",
+            "金塔县",
+            "瓜州县",
+            "肃北蒙古族自治县",
+            "阿克塞哈萨克族自治县",
+            "玉门市",
+            "敦煌市"
+          ]
+        },
+        {
+          "name": "庆阳市",
+          "area": [
+            "西峰区",
+            "庆城县",
+            "环县",
+            "华池县",
+            "合水县",
+            "正宁县",
+            "宁县",
+            "镇原县"
+          ]
+        },
+        {
+          "name": "定西市",
+          "area": [
+            "安定区",
+            "通渭县",
+            "陇西县",
+            "渭源县",
+            "临洮县",
+            "漳县",
+            "岷县"
+          ]
+        },
+        {
+          "name": "陇南市",
+          "area": [
+            "武都区",
+            "成县",
+            "文县",
+            "宕昌县",
+            "康县",
+            "西和县",
+            "礼县",
+            "徽县",
+            "两当县"
+          ]
+        },
+        {
+          "name": "临夏回族自治州",
+          "area": [
+            "临夏市",
+            "临夏县",
+            "康乐县",
+            "永靖县",
+            "广河县",
+            "和政县",
+            "东乡族自治县",
+            "积石山保安族东乡族撒拉族自治县"
+          ]
+        },
+        {
+          "name": "甘南藏族自治州",
+          "area": [
+            "合作市",
+            "临潭县",
+            "卓尼县",
+            "舟曲县",
+            "迭部县",
+            "玛曲县",
+            "碌曲县",
+            "夏河县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "海南省",
+      "city": [
+        {
+          "name": "海口市",
+          "area": [
+            "秀英区",
+            "龙华区",
+            "琼山区",
+            "美兰区"
+          ]
+        },
+        {
+          "name": "三亚市",
+          "area": [
+            "海棠区",
+            "吉阳区",
+            "天涯区",
+            "崖州区"
+          ]
+        },
+        {
+          "name": "三沙市",
+          "area": [
+            "西沙群岛",
+            "中沙群岛",
+            "南沙群岛"
+          ]
+        },
+        {
+          "name": "儋州市",
+          "area": [
+            "那大镇",
+            "和庆镇",
+            "南丰镇",
+            "大成镇",
+            "雅星镇",
+            "兰洋镇",
+            "光村镇",
+            "木棠镇",
+            "海头镇",
+            "峨蔓镇",
+            "王五镇",
+            "白马井镇",
+            "中和镇",
+            "排浦镇",
+            "东成镇",
+            "新州镇",
+            "国营八一总场",
+            "国营蓝洋农场",
+            "国营西联农场",
+            "国营西培农场"
+          ]
+        },
+        {
+          "name": "五指山市",
+          "area": [
+            "通什镇",
+            "南圣镇",
+            "毛阳镇",
+            "番阳镇",
+            "畅好乡",
+            "毛道乡",
+            "水满乡"
+          ]
+        },
+        {
+          "name": "琼海市",
+          "area": [
+            "嘉积镇",
+            "博鳌镇",
+            "万泉镇",
+            "潭门镇",
+            "长坡镇",
+            "塔洋镇",
+            "大路镇",
+            "中原镇",
+            "阳江镇",
+            "龙江镇",
+            "石壁镇",
+            "会山镇"
+          ]
+        },
+        {
+          "name": "文昌市",
+          "area": [
+            "文城镇",
+            "重兴镇",
+            "蓬莱镇",
+            "会文镇",
+            "东路镇",
+            "潭牛镇",
+            "东阁镇",
+            "文教镇",
+            "东郊镇",
+            "龙楼镇",
+            "昌洒镇",
+            "翁田镇",
+            "抱罗镇",
+            "冯坡镇",
+            "锦山镇",
+            "铺前镇",
+            "公坡镇"
+          ]
+        },
+        {
+          "name": "万宁市",
+          "area": [
+            "万城镇",
+            "龙滚镇",
+            "和乐镇",
+            "后安镇",
+            "大茂镇",
+            "东澳镇",
+            "礼纪镇",
+            "长丰镇",
+            "山根镇",
+            "北大镇",
+            "南桥镇",
+            "三更罗镇",
+            "兴隆华侨农场",
+            "地方国营六连林场"
+          ]
+        },
+        {
+          "name": "东方市",
+          "area": [
+            "八所镇",
+            "东河镇",
+            "大田镇",
+            "感城镇",
+            "板桥镇",
+            "三家镇",
+            "四更镇",
+            "新龙镇",
+            "天安乡",
+            "江边乡"
+          ]
+        },
+        {
+          "name": "定安县",
+          "area": [
+            "定城镇",
+            "新竹镇",
+            "龙湖镇",
+            "黄竹镇",
+            "雷鸣镇",
+            "龙门镇",
+            "龙河镇",
+            "岭口镇",
+            "翰林镇",
+            "富文镇"
+          ]
+        },
+        {
+          "name": "屯昌县",
+          "area": [
+            "屯城镇",
+            "新兴镇",
+            "枫木镇",
+            "乌坡镇",
+            "南吕镇",
+            "南坤镇",
+            "坡心镇",
+            "西昌镇"
+          ]
+        },
+        {
+          "name": "澄迈县",
+          "area": [
+            "金江镇",
+            "瑞溪镇",
+            "永发镇",
+            "老城镇",
+            "加乐镇",
+            "文儒镇",
+            "福山镇",
+            "桥头镇",
+            "中兴镇",
+            "仁兴镇",
+            "大丰镇",
+            "金安农场",
+            "红光农场",
+            "西达农场",
+            "澄迈林场",
+            "海南老城经济开发区",
+            "海口综合保税区",
+            "马村中心港区"
+          ]
+        },
+        {
+          "name": "临高县",
+          "area": [
+            "临城镇",
+            "东英镇",
+            "波莲镇",
+            "调楼镇",
+            "新盈镇",
+            "南宝镇",
+            "和舍镇",
+            "多文镇",
+            "博厚镇",
+            "皇桐镇",
+            "加来农场",
+            "金牌港经济开发区",
+            "临高角旅游度假开发区"
+          ]
+        },
+        {
+          "name": "白沙黎族自治县",
+          "area": [
+            "牙叉镇",
+            "七坊镇",
+            "邦溪镇",
+            "打安镇",
+            "细水乡",
+            "元门乡",
+            "南开乡",
+            "阜龙乡",
+            "青松乡",
+            "金波乡",
+            "荣邦乡"
+          ]
+        },
+        {
+          "name": "昌江黎族自治县",
+          "area": [
+            "石碌镇",
+            "叉河镇",
+            "十月田镇",
+            "乌烈镇",
+            "昌化镇",
+            "海尾镇",
+            "七叉镇",
+            "王下乡"
+          ]
+        },
+        {
+          "name": "乐东黎族自治县",
+          "area": [
+            "抱由镇",
+            "万冲镇",
+            "大安镇",
+            "志仲镇",
+            "千家镇",
+            "九所镇",
+            "利国镇",
+            "黄流镇",
+            "佛罗镇",
+            "尖峰镇",
+            "莺歌海镇"
+          ]
+        },
+        {
+          "name": "陵水黎族自治县",
+          "area": [
+            "椰林镇",
+            "新村镇",
+            "英州镇",
+            "本号镇",
+            "光坡镇",
+            "三才镇",
+            "黎安镇",
+            "隆广镇",
+            "文罗镇",
+            "提蒙乡",
+            "群英乡"
+          ]
+        },
+        {
+          "name": "保亭黎族苗族自治县",
+          "area": [
+            "保城镇",
+            "什玲镇",
+            "加茂镇",
+            "响水镇",
+            "新政镇",
+            "三道镇",
+            "六弓乡",
+            "南林乡",
+            "毛感乡"
+          ]
+        },
+        {
+          "name": "琼中黎族苗族自治县",
+          "area": [
+            "营根镇",
+            "湾岭镇",
+            "黎母山镇",
+            "红毛镇",
+            "长征镇",
+            "中平镇",
+            "和平镇",
+            "什运乡",
+            "上安乡",
+            "吊罗山乡",
+            "阳江农场",
+            "大丰农场",
+            "新进农场",
+            "乌石农场",
+            "岭头农场",
+            "南方农场",
+            "新伟农场",
+            "加钗农场",
+            "长征农场",
+            "乘坡农场",
+            "太平农场"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "青海省",
+      "city": [
+        {
+          "name": "西宁市",
+          "area": [
+            "城东区",
+            "城中区",
+            "城西区",
+            "城北区",
+            "湟中区",
+            "大通回族土族自治县",
+            "湟源县"
+          ]
+        },
+        {
+          "name": "海东市",
+          "area": [
+            "乐都区",
+            "平安区",
+            "民和回族土族自治县",
+            "互助土族自治县",
+            "化隆回族自治县",
+            "循化撒拉族自治县"
+          ]
+        },
+        {
+          "name": "海北藏族自治州",
+          "area": [
+            "门源回族自治县",
+            "祁连县",
+            "海晏县",
+            "刚察县"
+          ]
+        },
+        {
+          "name": "黄南藏族自治州",
+          "area": [
+            "同仁市",
+            "尖扎县",
+            "泽库县",
+            "河南蒙古族自治县"
+          ]
+        },
+        {
+          "name": "海南藏族自治州",
+          "area": [
+            "共和县",
+            "同德县",
+            "贵德县",
+            "兴海县",
+            "贵南县"
+          ]
+        },
+        {
+          "name": "果洛藏族自治州",
+          "area": [
+            "玛沁县",
+            "班玛县",
+            "甘德县",
+            "达日县",
+            "久治县",
+            "玛多县"
+          ]
+        },
+        {
+          "name": "玉树藏族自治州",
+          "area": [
+            "玉树市",
+            "杂多县",
+            "称多县",
+            "治多县",
+            "囊谦县",
+            "曲麻莱县"
+          ]
+        },
+        {
+          "name": "海西蒙古族藏族自治州",
+          "area": [
+            "格尔木市",
+            "德令哈市",
+            "茫崖市",
+            "乌兰县",
+            "都兰县",
+            "天峻县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "黑龙江省",
+      "city": [
+        {
+          "name": "哈尔滨市",
+          "area": [
+            "道里区",
+            "南岗区",
+            "道外区",
+            "平房区",
+            "松北区",
+            "香坊区",
+            "呼兰区",
+            "阿城区",
+            "双城区",
+            "依兰县",
+            "方正县",
+            "宾县",
+            "巴彦县",
+            "木兰县",
+            "通河县",
+            "延寿县",
+            "尚志市",
+            "五常市"
+          ]
+        },
+        {
+          "name": "齐齐哈尔市",
+          "area": [
+            "龙沙区",
+            "建华区",
+            "铁锋区",
+            "昂昂溪区",
+            "富拉尔基区",
+            "碾子山区",
+            "梅里斯达斡尔族区",
+            "龙江县",
+            "依安县",
+            "泰来县",
+            "甘南县",
+            "富裕县",
+            "克山县",
+            "克东县",
+            "拜泉县",
+            "讷河市"
+          ]
+        },
+        {
+          "name": "鸡西市",
+          "area": [
+            "鸡冠区",
+            "恒山区",
+            "滴道区",
+            "梨树区",
+            "城子河区",
+            "麻山区",
+            "鸡东县",
+            "虎林市",
+            "密山市"
+          ]
+        },
+        {
+          "name": "鹤岗市",
+          "area": [
+            "向阳区",
+            "工农区",
+            "南山区",
+            "兴安区",
+            "东山区",
+            "兴山区",
+            "萝北县",
+            "绥滨县"
+          ]
+        },
+        {
+          "name": "双鸭山市",
+          "area": [
+            "尖山区",
+            "岭东区",
+            "四方台区",
+            "宝山区",
+            "集贤县",
+            "友谊县",
+            "宝清县",
+            "饶河县"
+          ]
+        },
+        {
+          "name": "大庆市",
+          "area": [
+            "萨尔图区",
+            "龙凤区",
+            "让胡路区",
+            "红岗区",
+            "大同区",
+            "肇州县",
+            "肇源县",
+            "林甸县",
+            "杜尔伯特蒙古族自治县"
+          ]
+        },
+        {
+          "name": "伊春市",
+          "area": [
+            "伊美区",
+            "乌翠区",
+            "友好区",
+            "嘉荫县",
+            "汤旺县",
+            "丰林县",
+            "大箐山县",
+            "南岔县",
+            "金林区",
+            "铁力市"
+          ]
+        },
+        {
+          "name": "佳木斯市",
+          "area": [
+            "向阳区",
+            "前进区",
+            "东风区",
+            "郊区",
+            "桦南县",
+            "桦川县",
+            "汤原县",
+            "同江市",
+            "富锦市",
+            "抚远市"
+          ]
+        },
+        {
+          "name": "七台河市",
+          "area": [
+            "新兴区",
+            "桃山区",
+            "茄子河区",
+            "勃利县"
+          ]
+        },
+        {
+          "name": "牡丹江市",
+          "area": [
+            "东安区",
+            "阳明区",
+            "爱民区",
+            "西安区",
+            "林口县",
+            "绥芬河市",
+            "海林市",
+            "宁安市",
+            "穆棱市",
+            "东宁市"
+          ]
+        },
+        {
+          "name": "黑河市",
+          "area": [
+            "爱辉区",
+            "逊克县",
+            "孙吴县",
+            "北安市",
+            "五大连池市",
+            "嫩江市"
+          ]
+        },
+        {
+          "name": "绥化市",
+          "area": [
+            "北林区",
+            "望奎县",
+            "兰西县",
+            "青冈县",
+            "庆安县",
+            "明水县",
+            "绥棱县",
+            "安达市",
+            "肇东市",
+            "海伦市"
+          ]
+        },
+        {
+          "name": "大兴安岭地区",
+          "area": [
+            "漠河市",
+            "呼玛县",
+            "塔河县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "西藏自治区",
+      "city": [
+        {
+          "name": "拉萨市",
+          "area": [
+            "城关区",
+            "堆龙德庆区",
+            "达孜区",
+            "林周县",
+            "当雄县",
+            "尼木县",
+            "曲水县",
+            "墨竹工卡县"
+          ]
+        },
+        {
+          "name": "日喀则市",
+          "area": [
+            "桑珠孜区",
+            "南木林县",
+            "江孜县",
+            "定日县",
+            "萨迦县",
+            "拉孜县",
+            "昂仁县",
+            "谢通门县",
+            "白朗县",
+            "仁布县",
+            "康马县",
+            "定结县",
+            "仲巴县",
+            "亚东县",
+            "吉隆县",
+            "聂拉木县",
+            "萨嘎县",
+            "岗巴县"
+          ]
+        },
+        {
+          "name": "昌都市",
+          "area": [
+            "卡若区",
+            "江达县",
+            "贡觉县",
+            "类乌齐县",
+            "丁青县",
+            "察雅县",
+            "八宿县",
+            "左贡县",
+            "芒康县",
+            "洛隆县",
+            "边坝县"
+          ]
+        },
+        {
+          "name": "林芝市",
+          "area": [
+            "巴宜区",
+            "工布江达县",
+            "米林县",
+            "墨脱县",
+            "波密县",
+            "察隅县",
+            "朗县"
+          ]
+        },
+        {
+          "name": "山南市",
+          "area": [
+            "乃东区",
+            "扎囊县",
+            "贡嘎县",
+            "桑日县",
+            "琼结县",
+            "曲松县",
+            "措美县",
+            "洛扎县",
+            "加查县",
+            "隆子县",
+            "错那县",
+            "浪卡子县"
+          ]
+        },
+        {
+          "name": "那曲市",
+          "area": [
+            "色尼区",
+            "嘉黎县",
+            "比如县",
+            "聂荣县",
+            "安多县",
+            "申扎县",
+            "索县",
+            "班戈县",
+            "巴青县",
+            "尼玛县",
+            "双湖县"
+          ]
+        },
+        {
+          "name": "阿里地区",
+          "area": [
+            "普兰县",
+            "札达县",
+            "噶尔县",
+            "日土县",
+            "革吉县",
+            "改则县",
+            "措勤县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "内蒙古自治区",
+      "city": [
+        {
+          "name": "呼和浩特市",
+          "area": [
+            "新城区",
+            "回民区",
+            "玉泉区",
+            "赛罕区",
+            "土默特左旗",
+            "托克托县",
+            "和林格尔县",
+            "清水河县",
+            "武川县"
+          ]
+        },
+        {
+          "name": "包头市",
+          "area": [
+            "东河区",
+            "昆都仑区",
+            "青山区",
+            "石拐区",
+            "白云鄂博矿区",
+            "九原区",
+            "土默特右旗",
+            "固阳县",
+            "达尔罕茂明安联合旗"
+          ]
+        },
+        {
+          "name": "乌海市",
+          "area": [
+            "海勃湾区",
+            "海南区",
+            "乌达区"
+          ]
+        },
+        {
+          "name": "赤峰市",
+          "area": [
+            "红山区",
+            "元宝山区",
+            "松山区",
+            "阿鲁科尔沁旗",
+            "巴林左旗",
+            "巴林右旗",
+            "林西县",
+            "克什克腾旗",
+            "翁牛特旗",
+            "喀喇沁旗",
+            "宁城县",
+            "敖汉旗",
+            "新城区"
+          ]
+        },
+        {
+          "name": "通辽市",
+          "area": [
+            "科尔沁区",
+            "科尔沁左翼中旗",
+            "科尔沁左翼后旗",
+            "开鲁县",
+            "库伦旗",
+            "奈曼旗",
+            "扎鲁特旗",
+            "霍林郭勒市"
+          ]
+        },
+        {
+          "name": "鄂尔多斯市",
+          "area": [
+            "东胜区",
+            "康巴什区",
+            "达拉特旗",
+            "准格尔旗",
+            "鄂托克前旗",
+            "鄂托克旗",
+            "杭锦旗",
+            "乌审旗",
+            "伊金霍洛旗"
+          ]
+        },
+        {
+          "name": "呼伦贝尔市",
+          "area": [
+            "海拉尔区",
+            "扎赉诺尔区",
+            "阿荣旗",
+            "莫力达瓦达斡尔族自治旗",
+            "鄂伦春自治旗",
+            "鄂温克族自治旗",
+            "陈巴尔虎旗",
+            "新巴尔虎左旗",
+            "新巴尔虎右旗",
+            "满洲里市",
+            "牙克石市",
+            "扎兰屯市",
+            "额尔古纳市",
+            "根河市"
+          ]
+        },
+        {
+          "name": "巴彦淖尔市",
+          "area": [
+            "临河区",
+            "五原县",
+            "磴口县",
+            "乌拉特前旗",
+            "乌拉特中旗",
+            "乌拉特后旗",
+            "杭锦后旗"
+          ]
+        },
+        {
+          "name": "乌兰察布市",
+          "area": [
+            "集宁区",
+            "卓资县",
+            "化德县",
+            "商都县",
+            "兴和县",
+            "凉城县",
+            "察哈尔右翼前旗",
+            "察哈尔右翼中旗",
+            "察哈尔右翼后旗",
+            "四子王旗",
+            "丰镇市"
+          ]
+        },
+        {
+          "name": "兴安盟",
+          "area": [
+            "乌兰浩特市",
+            "阿尔山市",
+            "科尔沁右翼前旗",
+            "科尔沁右翼中旗",
+            "扎赉特旗",
+            "突泉县"
+          ]
+        },
+        {
+          "name": "锡林郭勒盟",
+          "area": [
+            "二连浩特市",
+            "锡林浩特市",
+            "阿巴嘎旗",
+            "苏尼特左旗",
+            "苏尼特右旗",
+            "东乌珠穆沁旗",
+            "西乌珠穆沁旗",
+            "太仆寺旗",
+            "镶黄旗",
+            "正镶白旗",
+            "正蓝旗",
+            "多伦县"
+          ]
+        },
+        {
+          "name": "阿拉善盟",
+          "area": [
+            "阿拉善左旗",
+            "阿拉善右旗",
+            "额济纳旗"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "广西壮族自治区",
+      "city": [
+        {
+          "name": "南宁市",
+          "area": [
+            "兴宁区",
+            "青秀区",
+            "江南区",
+            "西乡塘区",
+            "良庆区",
+            "邕宁区",
+            "武鸣区",
+            "隆安县",
+            "马山县",
+            "上林县",
+            "宾阳县",
+            "横县"
+          ]
+        },
+        {
+          "name": "柳州市",
+          "area": [
+            "城中区",
+            "鱼峰区",
+            "柳南区",
+            "柳北区",
+            "柳江区",
+            "柳城县",
+            "鹿寨县",
+            "融安县",
+            "融水苗族自治县",
+            "三江侗族自治县"
+          ]
+        },
+        {
+          "name": "桂林市",
+          "area": [
+            "秀峰区",
+            "叠彩区",
+            "象山区",
+            "七星区",
+            "雁山区",
+            "临桂区",
+            "阳朔县",
+            "灵川县",
+            "全州县",
+            "兴安县",
+            "永福县",
+            "灌阳县",
+            "龙胜各族自治县",
+            "资源县",
+            "平乐县",
+            "荔浦市",
+            "恭城瑶族自治县"
+          ]
+        },
+        {
+          "name": "梧州市",
+          "area": [
+            "万秀区",
+            "长洲区",
+            "龙圩区",
+            "苍梧县",
+            "藤县",
+            "蒙山县",
+            "岑溪市"
+          ]
+        },
+        {
+          "name": "北海市",
+          "area": [
+            "海城区",
+            "银海区",
+            "铁山港区",
+            "合浦县"
+          ]
+        },
+        {
+          "name": "防城港市",
+          "area": [
+            "港口区",
+            "防城区",
+            "上思县",
+            "东兴市"
+          ]
+        },
+        {
+          "name": "钦州市",
+          "area": [
+            "钦南区",
+            "钦北区",
+            "灵山县",
+            "浦北县"
+          ]
+        },
+        {
+          "name": "贵港市",
+          "area": [
+            "港北区",
+            "港南区",
+            "覃塘区",
+            "平南县",
+            "桂平市"
+          ]
+        },
+        {
+          "name": "玉林市",
+          "area": [
+            "玉州区",
+            "福绵区",
+            "容县",
+            "陆川县",
+            "博白县",
+            "兴业县",
+            "北流市"
+          ]
+        },
+        {
+          "name": "百色市",
+          "area": [
+            "右江区",
+            "田阳区",
+            "田东县",
+            "德保县",
+            "那坡县",
+            "凌云县",
+            "乐业县",
+            "田林县",
+            "西林县",
+            "隆林各族自治县",
+            "靖西市",
+            "平果市"
+          ]
+        },
+        {
+          "name": "贺州市",
+          "area": [
+            "八步区",
+            "平桂区",
+            "昭平县",
+            "钟山县",
+            "富川瑶族自治县"
+          ]
+        },
+        {
+          "name": "河池市",
+          "area": [
+            "金城江区",
+            "宜州区",
+            "南丹县",
+            "天峨县",
+            "凤山县",
+            "东兰县",
+            "罗城仫佬族自治县",
+            "环江毛南族自治县",
+            "巴马瑶族自治县",
+            "都安瑶族自治县",
+            "大化瑶族自治县"
+          ]
+        },
+        {
+          "name": "来宾市",
+          "area": [
+            "兴宾区",
+            "忻城县",
+            "象州县",
+            "武宣县",
+            "金秀瑶族自治县",
+            "合山市"
+          ]
+        },
+        {
+          "name": "崇左市",
+          "area": [
+            "江州区",
+            "扶绥县",
+            "宁明县",
+            "龙州县",
+            "大新县",
+            "天等县",
+            "凭祥市"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "宁夏回族自治区",
+      "city": [
+        {
+          "name": "银川市",
+          "area": [
+            "兴庆区",
+            "西夏区",
+            "金凤区",
+            "永宁县",
+            "贺兰县",
+            "灵武市"
+          ]
+        },
+        {
+          "name": "石嘴山市",
+          "area": [
+            "大武口区",
+            "惠农区",
+            "平罗县"
+          ]
+        },
+        {
+          "name": "吴忠市",
+          "area": [
+            "利通区",
+            "红寺堡区",
+            "盐池县",
+            "同心县",
+            "青铜峡市"
+          ]
+        },
+        {
+          "name": "固原市",
+          "area": [
+            "原州区",
+            "西吉县",
+            "隆德县",
+            "泾源县",
+            "彭阳县"
+          ]
+        },
+        {
+          "name": "中卫市",
+          "area": [
+            "沙坡头区",
+            "中宁县",
+            "海原县"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "新疆维吾尔自治区",
+      "city": [
+        {
+          "name": "乌鲁木齐市",
+          "area": [
+            "天山区",
+            "沙依巴克区",
+            "新市区",
+            "水磨沟区",
+            "头屯河区",
+            "达坂城区",
+            "米东区",
+            "乌鲁木齐县"
+          ]
+        },
+        {
+          "name": "克拉玛依市",
+          "area": [
+            "独山子区",
+            "克拉玛依区",
+            "白碱滩区",
+            "乌尔禾区"
+          ]
+        },
+        {
+          "name": "吐鲁番市",
+          "area": [
+            "高昌区",
+            "鄯善县",
+            "托克逊县"
+          ]
+        },
+        {
+          "name": "哈密市",
+          "area": [
+            "伊州区",
+            "巴里坤哈萨克自治县",
+            "伊吾县"
+          ]
+        },
+        {
+          "name": "昌吉回族自治州",
+          "area": [
+            "昌吉市",
+            "阜康市",
+            "呼图壁县",
+            "玛纳斯县",
+            "奇台县",
+            "吉木萨尔县",
+            "木垒哈萨克自治县"
+          ]
+        },
+        {
+          "name": "博尔塔拉蒙古自治州",
+          "area": [
+            "博乐市",
+            "阿拉山口市",
+            "精河县",
+            "温泉县"
+          ]
+        },
+        {
+          "name": "巴音郭楞蒙古自治州",
+          "area": [
+            "库尔勒市",
+            "轮台县",
+            "尉犁县",
+            "若羌县",
+            "且末县",
+            "焉耆回族自治县",
+            "和静县",
+            "和硕县",
+            "博湖县"
+          ]
+        },
+        {
+          "name": "阿克苏地区",
+          "area": [
+            "阿克苏市",
+            "库车市",
+            "温宿县",
+            "沙雅县",
+            "新和县",
+            "拜城县",
+            "乌什县",
+            "阿瓦提县",
+            "柯坪县"
+          ]
+        },
+        {
+          "name": "克孜勒苏柯尔克孜自治州",
+          "area": [
+            "阿图什市",
+            "阿克陶县",
+            "阿合奇县",
+            "乌恰县"
+          ]
+        },
+        {
+          "name": "喀什地区",
+          "area": [
+            "喀什市",
+            "疏附县",
+            "疏勒县",
+            "英吉沙县",
+            "泽普县",
+            "莎车县",
+            "叶城县",
+            "麦盖提县",
+            "岳普湖县",
+            "伽师县",
+            "巴楚县",
+            "塔什库尔干塔吉克自治县"
+          ]
+        },
+        {
+          "name": "和田地区",
+          "area": [
+            "和田市",
+            "和田县",
+            "墨玉县",
+            "皮山县",
+            "洛浦县",
+            "策勒县",
+            "于田县",
+            "民丰县"
+          ]
+        },
+        {
+          "name": "伊犁哈萨克自治州",
+          "area": [
+            "伊宁市",
+            "奎屯市",
+            "霍尔果斯市",
+            "伊宁县",
+            "察布查尔锡伯自治县",
+            "霍城县",
+            "巩留县",
+            "新源县",
+            "昭苏县",
+            "特克斯县",
+            "尼勒克县"
+          ]
+        },
+        {
+          "name": "塔城地区",
+          "area": [
+            "塔城市",
+            "乌苏市",
+            "额敏县",
+            "沙湾县",
+            "托里县",
+            "裕民县",
+            "和布克赛尔蒙古自治县"
+          ]
+        },
+        {
+          "name": "阿勒泰地区",
+          "area": [
+            "阿勒泰市",
+            "布尔津县",
+            "富蕴县",
+            "福海县",
+            "哈巴河县",
+            "青河县",
+            "吉木乃县"
+          ]
+        },
+        {
+          "name": "石河子市",
+          "area": [
+            "新城街道",
+            "向阳街道",
+            "红山街道",
+            "老街街道",
+            "东城街道",
+            "北泉镇",
+            "石河子镇"
+          ]
+        },
+        {
+          "name": "阿拉尔市",
+          "area": [
+            "幸福路街道",
+            "金银川路街道",
+            "青松路街道",
+            "南口街道",
+            "托喀依乡",
+            "一团金银川镇",
+            "二团新井子镇",
+            "三团甘泉镇",
+            "四团永宁镇",
+            "五团沙河镇",
+            "六团双城镇",
+            "七团玛滩镇",
+            "八团塔门镇",
+            "九团梨花镇",
+            "十团昌安镇",
+            "十一团花桥镇",
+            "十二团塔南镇",
+            "十三团幸福镇",
+            "十四团金杨镇",
+            "十五团",
+            "十六团新开岭镇"
+          ]
+        },
+        {
+          "name": "图木舒克市",
+          "area": [
+            "锦绣街道",
+            "前海街道",
+            "永安坝街道",
+            "四十一团草湖镇",
+            "四十二团龙口镇",
+            "四十四团永安镇",
+            "四十五团前海镇",
+            "四十六团永兴镇",
+            "四十八团河东镇",
+            "四十九团海安镇",
+            "五十团夏河镇",
+            "五十一团唐驿镇",
+            "五十三团金胡杨镇",
+            "五十四团兴安镇",
+            "伽师总场嘉和镇"
+          ]
+        },
+        {
+          "name": "五家渠市",
+          "area": [
+            "军垦路街道",
+            "青湖路街道",
+            "人民路街道",
+            "一零二团梧桐镇",
+            "一零三团蔡家湖镇"
+          ]
+        },
+        {
+          "name": "北屯市",
+          "area": [
+            "天骄街道",
+            "龙疆街道",
+            "军垦街道",
+            "北屯镇",
+            "一八三团双渠镇",
+            "一八七团丰庆镇",
+            "一八八团海川镇"
+          ]
+        },
+        {
+          "name": "铁门关市",
+          "area": [
+            "迎宾街道",
+            "二十二团河畔镇",
+            "二十四团高桥镇",
+            "二十七团天湖镇",
+            "二十八团博古其镇",
+            "三十团双丰镇",
+            "三十六团米兰镇",
+            "三十七团金山镇",
+            "三十八团南屯镇",
+            "二二三团开泽镇"
+          ]
+        },
+        {
+          "name": "双河市",
+          "area": [
+            "八十一团双桥镇",
+            "八十四团石峪镇",
+            "八十五团",
+            "八十六团博河镇",
+            "八十九团",
+            "九十团双乐镇"
+          ]
+        },
+        {
+          "name": "可克达拉市",
+          "area": [
+            "六十三团榆树庄镇",
+            "六十四团苇湖镇",
+            "六十六团",
+            "六十七团",
+            "六十八团长丰镇"
+          ]
+        },
+        {
+          "name": "昆玉市",
+          "area": [
+            "四十七团老兵镇",
+            "皮山农场昆泉镇",
+            "一牧场昆牧镇",
+            "二二四团",
+            "二二五团玉泉镇"
+          ]
+        },
+        {
+          "name": "胡杨河市",
+          "area": [
+            "一二三团",
+            "一二四团",
+            "一二五团",
+            "一二六团",
+            "一二七团",
+            "一二八团",
+            "一二九团",
+            "一三零团",
+            "一三一团",
+            "一三七团"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "香港特别行政区",
+      "city": [
+        {
+          "name": "香港特别行政区",
+          "area": [
+            "中西区",
+            "湾仔区",
+            "东区",
+            "南区",
+            "油尖旺区",
+            "深水埗区",
+            "九龙城区",
+            "黄大仙区",
+            "观塘区",
+            "北区",
+            "大埔区",
+            "沙田区",
+            "西贡区",
+            "荃湾区",
+            "屯门区",
+            "元朗区",
+            "葵青区",
+            "离岛区"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "澳门特别行政区",
+      "city": [
+        {
+          "name": "澳门特别行政区",
+          "area": [
+            "花地玛堂区",
+            "圣安多尼堂区",
+            "大堂区",
+            "望德堂区",
+            "风顺堂区",
+            "嘉模堂区",
+            "圣方济各堂区",
+            "路氹城"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "台湾省",
+      "city": [
+        {
+          "name": "台北市",
+          "area": [
+            "中正区",
+            "大同区",
+            "中山区",
+            "万华区",
+            "信义区",
+            "松山区",
+            "大安区",
+            "南港区",
+            "北投区",
+            "内湖区",
+            "士林区",
+            "文山区"
+          ]
+        },
+        {
+          "name": "新北市",
+          "area": [
+            "板桥区",
+            "土城区",
+            "新庄区",
+            "新店区",
+            "深坑区",
+            "石碇区",
+            "坪林区",
+            "乌来区",
+            "五股区",
+            "八里区",
+            "林口区",
+            "淡水区",
+            "中和区",
+            "永和区",
+            "三重区",
+            "芦洲区",
+            "泰山区",
+            "树林区",
+            "莺歌区",
+            "三峡区",
+            "汐止区",
+            "金山区",
+            "万里区",
+            "三芝区",
+            "石门区",
+            "瑞芳区",
+            "贡寮区",
+            "双溪区",
+            "平溪区"
+          ]
+        },
+        {
+          "name": "桃园市",
+          "area": [
+            "桃园区",
+            "中坜区",
+            "平镇区",
+            "八德区",
+            "杨梅区",
+            "芦竹区",
+            "大溪区",
+            "龙潭区",
+            "龟山区",
+            "大园区",
+            "观音区",
+            "新屋区",
+            "复兴区"
+          ]
+        },
+        {
+          "name": "台中市",
+          "area": [
+            "中区",
+            "东区",
+            "西区",
+            "南区",
+            "北区",
+            "西屯区",
+            "南屯区",
+            "北屯区",
+            "丰原区",
+            "大里区",
+            "太平区",
+            "东势区",
+            "大甲区",
+            "清水区",
+            "沙鹿区",
+            "梧栖区",
+            "后里区",
+            "神冈区",
+            "潭子区",
+            "大雅区",
+            "新社区",
+            "石冈区",
+            "外埔区",
+            "大安区",
+            "乌日区",
+            "大肚区",
+            "龙井区",
+            "雾峰区",
+            "和平区"
+          ]
+        },
+        {
+          "name": "台南市",
+          "area": [
+            "中西区",
+            "东区",
+            "南区",
+            "北区",
+            "安平区",
+            "安南区",
+            "永康区",
+            "归仁区",
+            "新化区",
+            "左镇区",
+            "玉井区",
+            "楠西区",
+            "南化区",
+            "仁德区",
+            "关庙区",
+            "龙崎区",
+            "官田区",
+            "麻豆区",
+            "佳里区",
+            "西港区",
+            "七股区",
+            "将军区",
+            "学甲区",
+            "北门区",
+            "新营区",
+            "后壁区",
+            "白河区",
+            "东山区",
+            "六甲区",
+            "下营区",
+            "柳营区",
+            "盐水区",
+            "善化区",
+            "大内区",
+            "山上区",
+            "新市区",
+            "安定区"
+          ]
+        },
+        {
+          "name": "高雄市",
+          "area": [
+            "楠梓区",
+            "左营区",
+            "鼓山区",
+            "三民区",
+            "盐埕区",
+            "前金区",
+            "新兴区苓雅区",
+            "前镇区",
+            "旗津区",
+            "小港区",
+            "凤山区",
+            "大寮区",
+            "鸟松区",
+            "林园区",
+            "仁武区",
+            "大树区",
+            "大社区",
+            "冈山区",
+            "路竹区",
+            "桥头区",
+            "梓官区",
+            "弥陀区",
+            "永安区",
+            "燕巢区",
+            "阿莲区",
+            "茄萣区",
+            "湖内区",
+            "旗山区",
+            "美浓区",
+            "内门区",
+            "杉林区",
+            "甲仙区",
+            "六龟区",
+            "茂林区",
+            "桃源区",
+            "那玛夏区"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "海外",
+      "city": [
+        {
+          "name": "海外",
+          "area": [
+            "海外"
+          ]
+        }
+      ]
+    }
+  ];
+  function getProvinces() {
+    let provinces = [];
+    for (let i2 = 0; i2 < AreaJson.length; i2++) {
+      provinces.push(AreaJson[i2].name);
+    }
+    return provinces;
+  }
+  function getMyCity(provinceIndex) {
+    let citys = [];
+    for (let i2 = 0; i2 < AreaJson[provinceIndex].city.length; i2++) {
+      citys.push(AreaJson[provinceIndex].city[i2].name);
+    }
+    return citys;
+  }
+  function getAreas(provinceIndex, cityIndex) {
+    let areas = [];
+    areas = AreaJson[provinceIndex].city[cityIndex].area;
+    return areas;
+  }
   const _sfc_main$z = {
     __name: "SelectCity",
     props: {
@@ -9451,18 +18010,42 @@ ${i3}
         default: false
       }
     },
-    emits: ["hodeShow"],
+    emits: ["hideShow", "changeClick"],
     setup(__props, { emit }) {
-      const provinces = vue.ref(["广东省"]);
-      const citys = vue.ref(["潮州市"]);
-      const areas = vue.ref(["庵埠镇"]);
-      const value = vue.ref([0, 0, 0]);
-      const handleNYZAreaCancle = () => {
-        emit("hideShow", { detail: false });
-      };
+      const addressIndex = vue.ref([0, 0, 0]);
+      const provinces = vue.ref(getProvinces());
+      const selectProvinces = vue.ref(0);
+      const citys = vue.ref(getMyCity(addressIndex.value[0]));
+      const areas = vue.ref(getAreas(addressIndex.value[0], addressIndex.value[1]));
       const handleNYZAreaSelect = () => {
+        let data1 = provinces.value[addressIndex.value[0]];
+        let data2 = citys.value[addressIndex.value[1]];
+        let data3 = areas.value[addressIndex.value[2]];
+        emit("changeClick", data1, data2, data3);
+        addressIndex.value = [0, 0, 0];
+        provinces.value = getProvinces();
+        citys.value = getMyCity(addressIndex.value[0]);
+        areas.value = getAreas(addressIndex.value[0], addressIndex.value[1]);
+        emit("hideShow");
       };
-      const handleNYZAreaChange = () => {
+      const handleNYZAreaChange = (event) => {
+        if (event.detail.value[0] !== selectProvinces.value) {
+          addressIndex.value = [event.detail.value[0], 0, 0];
+          citys.value = getMyCity(addressIndex.value[0]);
+          areas.value = getAreas(addressIndex.value[0], addressIndex.value[1]);
+          selectProvinces.value = event.detail.value[0];
+        } else {
+          addressIndex.value = event.detail.value;
+          citys.value = getMyCity(addressIndex.value[0]);
+          areas.value = getAreas(addressIndex.value[0], addressIndex.value[1]);
+        }
+      };
+      const handleNYZAreaCancle = () => {
+        addressIndex.value = [0, 0, 0];
+        provinces.value = getProvinces();
+        citys.value = getMyCity(addressIndex.value[0]);
+        areas.value = getAreas(addressIndex.value[0], addressIndex.value[1]);
+        emit("hideShow");
       };
       return (_ctx, _cache) => {
         return vue.openBlock(), vue.createElementBlock("view", null, [
@@ -9474,7 +18057,7 @@ ${i3}
             512
             /* NEED_PATCH */
           ), [
-            [vue.vShow, __props.show == true]
+            [vue.vShow, __props.show]
           ]),
           vue.createElementVNode(
             "view",
@@ -9499,7 +18082,7 @@ ${i3}
                 class: "cc_area_pick_view",
                 "indicator-style": "height: 35px;",
                 onChange: handleNYZAreaChange,
-                value: value.value
+                value: addressIndex.value
               }, [
                 vue.createElementVNode("picker-view-column", null, [
                   (vue.openBlock(true), vue.createElementBlock(
@@ -9571,271 +18154,304 @@ ${i3}
     }
   };
   const SelectCit = /* @__PURE__ */ _export_sfc(_sfc_main$z, [["__scopeId", "data-v-79233ee6"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/SelectCity.vue"]]);
-  const _sfc_main$y = {
-    components: {
-      SelectCit
+  const rules$1 = {
+    address_name: {
+      rules: [{
+        required: true,
+        errorMessage: "请输入收货人姓名"
+      }]
     },
-    data() {
-      return {
-        colors: "#f37b1d",
-        show: false,
-        province: "广东省",
-        city: "广州市",
-        area: "天河区",
-        addressData: {
-          name: "",
-          phone: "",
-          address: "",
-          moreAddres: "",
-          isdefult: 0
+    address_phone: {
+      rules: [
+        {
+          required: true,
+          errorMessage: "请输入电话号码"
         },
-        isShow: true
-      };
+        {
+          pattern: /^1[3-9]\d{9}$/,
+          errorMessage: "请输入11位数字的电话号码"
+        }
+      ]
     },
-    methods: {
-      openPicker() {
-        formatAppLog("log", "at pages/my/EditAddress.vue:75", "执行打开地址选择器");
-        this.show = true;
-      },
-      changeClick(value, value2, value3) {
-        formatAppLog("log", "at pages/my/EditAddress.vue:81", "地址选择器 = " + value + value2 + value3);
-        this.province = value;
-        this.city = value2;
-        this.area = value3;
-      },
-      onhideShow() {
-        this.show = false;
-        formatAppLog("log", "at pages/my/EditAddress.vue:90", "执行了关闭地址选择器");
-      },
-      //选中省市区
-      onsetCity(e2) {
-        let data = e2.detail.target.dataset;
-        let address = data.province + data.city + data.area;
-        this.show = false;
-        this.addressData.address = address;
-      },
-      // 
-      switchChange(e2) {
-      }
+    address_area: {
+      rules: [{
+        required: true,
+        errorMessage: "请选择所在地区"
+      }]
+    },
+    address_details: {
+      rules: [
+        {
+          required: true,
+          errorMessage: "请输入详细地址"
+        }
+      ]
     }
   };
-  function _sfc_render$s(_ctx, _cache, $props, $setup, $data, $options) {
-    const _component_SelectCit = vue.resolveComponent("SelectCit");
-    return vue.openBlock(), vue.createElementBlock("view", null, [
-      vue.createElementVNode("view", { class: "editaddress" }, [
-        vue.createElementVNode("view", { class: "content" }, [
-          vue.createElementVNode("view", { class: "row" }, [
-            vue.createElementVNode("view", { class: "nominal" }, "收货人"),
-            vue.createElementVNode("view", { class: "input" }, [
-              vue.withDirectives(vue.createElementVNode(
-                "input",
-                {
-                  placeholder: "请输入收货人姓名",
-                  "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => $data.addressData.name = $event),
-                  type: "text"
-                },
-                null,
-                512
-                /* NEED_PATCH */
-              ), [
-                [vue.vModelText, $data.addressData.name]
-              ])
-            ])
-          ]),
-          vue.createElementVNode("view", { class: "row" }, [
-            vue.createElementVNode("view", { class: "nominal" }, "电话号码"),
-            vue.createElementVNode("view", { class: "input" }, [
-              vue.withDirectives(vue.createElementVNode(
-                "input",
-                {
-                  placeholder: "请输入收货人电话号码",
-                  "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => $data.addressData.phone = $event),
-                  type: "number",
-                  maxlength: "11"
-                },
-                null,
-                512
-                /* NEED_PATCH */
-              ), [
-                [vue.vModelText, $data.addressData.phone]
-              ])
-            ])
-          ]),
-          vue.createElementVNode("view", { class: "row" }, [
-            vue.createElementVNode("view", { class: "nominal" }, "所在地区"),
-            vue.createElementVNode("view", {
-              class: "input selectcity",
-              onClick: _cache[3] || (_cache[3] = (...args) => $options.openPicker && $options.openPicker(...args))
-            }, [
-              vue.withDirectives(vue.createElementVNode(
-                "input",
-                {
-                  placeholder: "请选择省市区",
-                  disabled: "",
-                  type: "text",
-                  "onUpdate:modelValue": _cache[2] || (_cache[2] = ($event) => $data.addressData.address = $event)
-                },
-                null,
-                512
-                /* NEED_PATCH */
-              ), [
-                [vue.vModelText, $data.addressData.address]
-              ]),
-              vue.createElementVNode("image", {
-                src: "/static/right.png",
-                class: "rights"
-              })
-            ])
-          ]),
-          vue.createElementVNode("view", { class: "row" }, [
-            vue.createElementVNode("view", { class: "nominal" }, "详细地址"),
-            vue.createElementVNode("view", { class: "input" }, [
-              $data.show == false ? vue.withDirectives((vue.openBlock(), vue.createElementBlock(
-                "textarea",
-                {
-                  key: 0,
-                  style: { "font-size": "28rpx" },
-                  "onUpdate:modelValue": _cache[4] || (_cache[4] = ($event) => $data.addressData.moreAddres = $event),
-                  "auto-height": "true",
-                  placeholder: "输入详细地址"
-                },
-                null,
-                512
-                /* NEED_PATCH */
-              )), [
-                [vue.vModelText, $data.addressData.moreAddres]
-              ]) : vue.createCommentVNode("v-if", true)
-            ])
-          ]),
-          vue.createElementVNode("view", { class: "row" }, [
-            vue.createElementVNode("view", {
-              class: "nominal",
-              style: { "color": "666", "margin-top": "10rpx" }
-            }, "设为默认地址"),
-            vue.createElementVNode("view", { class: "input switch" }, [
-              vue.createElementVNode("switch", {
-                color: $data.colors,
-                style: { "transform": "scale(0.8)" },
-                onChange: _cache[5] || (_cache[5] = (...args) => $options.switchChange && $options.switchChange(...args)),
-                checked: $data.addressData.isdefult == 1
-              }, null, 40, ["color", "checked"])
-            ])
-          ])
-        ]),
-        vue.createElementVNode("view", { class: "save" }, [
-          vue.createElementVNode(
-            "view",
-            {
-              class: "btn",
-              style: vue.normalizeStyle("background:" + $data.colors)
-            },
-            "保存地址",
-            4
-            /* STYLE */
-          )
-        ]),
-        vue.createCommentVNode(" 省市区选择 province city area初始省市区设置 show:是否显示  @sureSelectArea：确认事件 @hideShow：隐藏事件"),
-        vue.createVNode(_component_SelectCit, {
-          province: $data.province,
-          city: $data.city,
-          area: $data.area,
-          show: $data.show,
-          onChangeClick: $options.changeClick,
-          onSureSelectArea: $options.onsetCity,
-          onHideShow: $options.onhideShow
-        }, null, 8, ["province", "city", "area", "show", "onChangeClick", "onSureSelectArea", "onHideShow"])
-      ])
-    ]);
-  }
-  const PagesMyEditAddress = /* @__PURE__ */ _export_sfc(_sfc_main$y, [["render", _sfc_render$s], ["__scopeId", "data-v-039ae533"], ["__file", "D:/graduationProject/pet-front-end/pages/my/EditAddress.vue"]]);
-  const _sfc_main$x = {
-    data() {
-      return {
-        value: "请填写",
-        sex: [{
-          id: 1,
-          name: "男"
-        }, {
-          id: 2,
-          name: "女"
-        }],
-        index: 0,
-        region: ["请填写"],
-        date: "请填写",
-        avater: "",
-        description: "",
-        url: "",
-        nickName: "",
-        mobile: "",
-        headimg: ""
+  const _sfc_main$y = {
+    __name: "EditAddress",
+    setup(__props) {
+      const formData = vue.ref({
+        address_name: "",
+        address_phone: "",
+        address_area: "请选择省市区",
+        address_details: "",
+        address_default: ""
+      });
+      const form = vue.ref();
+      const selectArea = vue.ref();
+      onReady(() => {
+        form.value.setRules(rules$1);
+      });
+      const show = vue.ref(false);
+      vue.ref(true);
+      const saveAddress = () => {
+        form.value.validate().then((res) => {
+          formatAppLog("log", "at pages/my/EditAddress.vue:93", "表单数据信息：", res);
+        }).catch((err) => {
+          formatAppLog("log", "at pages/my/EditAddress.vue:95", "表单错误信息：", err);
+        });
       };
-    },
-    methods: {
-      bindPickerChange(e2) {
-        this.index = e2.detail.value;
-      },
-      bindRegionChange(e2) {
-        this.region = e2.detail.value;
-      },
-      bindDateChange(e2) {
-        this.date = e2.detail.value;
-      },
-      bindnickName(e2) {
-        this.nickName = e2.detail.value;
-      },
-      bindmobile(e2) {
-        this.mobile = e2.detail.value;
-      },
-      binddescription(e2) {
-        this.description = e2.detail.value;
-      },
-      avatarChoose() {
-        let that = this;
-        uni.chooseImage({
+      const openPicker = () => {
+        formatAppLog("log", "at pages/my/EditAddress.vue:100", "执行打开地址选择器");
+        show.value = true;
+      };
+      const changeClick = (value, value2, value3) => {
+        formData.value.address_area = value + value2 + value3;
+      };
+      const onhideShow = () => {
+        show.value = false;
+        formatAppLog("log", "at pages/my/EditAddress.vue:120", "执行了关闭地址选择器");
+      };
+      const onsetCity = (e2) => {
+      };
+      const switchChange = (e2) => {
+      };
+      onLoad((query) => {
+        if (Object.keys(query).length !== 0) {
+          let obj = {};
+          for (let i2 in query) {
+            obj[decodeURIComponent(i2)] = decodeURIComponent(query[i2]);
+          }
+          formData.value = obj;
+        }
+      });
+      return (_ctx, _cache) => {
+        const _component_uni_forms_item = resolveEasycom(vue.resolveDynamicComponent("uni-forms-item"), __easycom_0$6);
+        const _component_uni_forms = resolveEasycom(vue.resolveDynamicComponent("uni-forms"), __easycom_1$1);
+        return vue.openBlock(), vue.createElementBlock("view", null, [
+          vue.createElementVNode("view", { class: "editaddress" }, [
+            vue.createElementVNode("view", { class: "content" }, [
+              vue.createVNode(_component_uni_forms, {
+                modelValue: formData.value,
+                ref_key: "form",
+                ref: form
+              }, {
+                default: vue.withCtx(() => [
+                  vue.createVNode(_component_uni_forms_item, { name: "address_name" }, {
+                    default: vue.withCtx(() => [
+                      vue.createElementVNode("view", { class: "row" }, [
+                        vue.createElementVNode("view", { class: "nominal" }, "收货人"),
+                        vue.createElementVNode("view", { class: "input" }, [
+                          vue.withDirectives(vue.createElementVNode(
+                            "input",
+                            {
+                              placeholder: "请输入收货人姓名",
+                              "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => formData.value.address_name = $event),
+                              type: "text"
+                            },
+                            null,
+                            512
+                            /* NEED_PATCH */
+                          ), [
+                            [vue.vModelText, formData.value.address_name]
+                          ])
+                        ])
+                      ])
+                    ]),
+                    _: 1
+                    /* STABLE */
+                  }),
+                  vue.createVNode(_component_uni_forms_item, { name: "address_phone" }, {
+                    default: vue.withCtx(() => [
+                      vue.createElementVNode("view", { class: "row" }, [
+                        vue.createElementVNode("view", { class: "nominal" }, "电话号码"),
+                        vue.createElementVNode("view", { class: "input" }, [
+                          vue.withDirectives(vue.createElementVNode(
+                            "input",
+                            {
+                              placeholder: "请输入收货人电话号码",
+                              "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => formData.value.address_phone = $event),
+                              type: "number",
+                              maxlength: "11"
+                            },
+                            null,
+                            512
+                            /* NEED_PATCH */
+                          ), [
+                            [vue.vModelText, formData.value.address_phone]
+                          ])
+                        ])
+                      ])
+                    ]),
+                    _: 1
+                    /* STABLE */
+                  }),
+                  vue.createVNode(_component_uni_forms_item, { name: "address_area" }, {
+                    default: vue.withCtx(() => [
+                      vue.createElementVNode("view", { class: "row" }, [
+                        vue.createElementVNode("view", { class: "nominal" }, "所在地区"),
+                        vue.createElementVNode("view", {
+                          class: "input selectcity",
+                          onClick: openPicker
+                        }, [
+                          vue.createElementVNode(
+                            "view",
+                            { style: { "color": "#808080" } },
+                            vue.toDisplayString(formData.value.address_area),
+                            1
+                            /* TEXT */
+                          ),
+                          vue.withDirectives(vue.createElementVNode(
+                            "input",
+                            {
+                              placeholder: "请选择省市区",
+                              readonly: "",
+                              type: "text",
+                              disabled: "",
+                              "onUpdate:modelValue": _cache[2] || (_cache[2] = ($event) => formData.value.address_area = $event),
+                              ref_key: "selectArea",
+                              ref: selectArea,
+                              style: { "display": "none" }
+                            },
+                            null,
+                            512
+                            /* NEED_PATCH */
+                          ), [
+                            [vue.vModelText, formData.value.address_area]
+                          ]),
+                          vue.createCommentVNode(' <image src="/static/right.png" class="rights"></image> ')
+                        ])
+                      ])
+                    ]),
+                    _: 1
+                    /* STABLE */
+                  }),
+                  vue.createVNode(_component_uni_forms_item, { name: "address_details" }, {
+                    default: vue.withCtx(() => [
+                      vue.createElementVNode("view", { class: "row" }, [
+                        vue.createElementVNode("view", { class: "nominal" }, "详细地址"),
+                        vue.createElementVNode("view", { class: "input" }, [
+                          show.value == false ? vue.withDirectives((vue.openBlock(), vue.createElementBlock(
+                            "textarea",
+                            {
+                              key: 0,
+                              style: { "font-size": "28rpx" },
+                              "onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => formData.value.address_details = $event),
+                              "auto-height": "true",
+                              placeholder: "输入详细地址"
+                            },
+                            null,
+                            512
+                            /* NEED_PATCH */
+                          )), [
+                            [vue.vModelText, formData.value.address_details]
+                          ]) : vue.createCommentVNode("v-if", true)
+                        ])
+                      ])
+                    ]),
+                    _: 1
+                    /* STABLE */
+                  }),
+                  vue.createVNode(_component_uni_forms_item, { name: "address_default" }, {
+                    default: vue.withCtx(() => [
+                      vue.createElementVNode("view", { class: "row" }, [
+                        vue.createElementVNode("view", {
+                          class: "nominal",
+                          style: { "color": "#2979FF", "margin-top": "10rpx" }
+                        }, "设为默认地址"),
+                        vue.createElementVNode("view", { class: "input switch" }, [
+                          vue.createElementVNode("switch", {
+                            color: _ctx.colors,
+                            style: { "transform": "scale(0.8)" },
+                            onChange: switchChange,
+                            checked: formData.value.address_default == 1
+                          }, null, 40, ["color", "checked"])
+                        ])
+                      ])
+                    ]),
+                    _: 1
+                    /* STABLE */
+                  })
+                ]),
+                _: 1
+                /* STABLE */
+              }, 8, ["modelValue"])
+            ]),
+            vue.createElementVNode("view", { class: "save" }, [
+              vue.createElementVNode(
+                "view",
+                {
+                  class: "btn",
+                  style: vue.normalizeStyle("background:" + _ctx.colors),
+                  onClick: saveAddress
+                },
+                "保存地址",
+                4
+                /* STYLE */
+              )
+            ]),
+            vue.createCommentVNode(" 省市区选择 province city area初始省市区设置 show:是否显示  @sureSelectArea：确认事件 @hideShow：隐藏事件"),
+            vue.createVNode(SelectCit, {
+              show: show.value,
+              onChangeClick: changeClick,
+              onSureSelectArea: onsetCity,
+              onHideShow: onhideShow
+            }, null, 8, ["show"])
+          ])
+        ]);
+      };
+    }
+  };
+  const PagesMyEditAddress = /* @__PURE__ */ _export_sfc(_sfc_main$y, [["__scopeId", "data-v-039ae533"], ["__file", "D:/graduationProject/pet-front-end/pages/my/EditAddress.vue"]]);
+  const _sfc_main$x = {
+    __name: "EditPerson",
+    setup(__props) {
+      const store = useUserStore();
+      const bindDateChange = (e2) => {
+        store.updateDate(e2.detail.value);
+      };
+      const avatarChoose = async () => {
+        const res = await uni.chooseImage({
           count: 1,
           sizeType: ["original", "compressed"],
-          sourceType: ["album", "camera"],
-          success(res) {
-            that.imgUpload(res.tempFilePaths);
-            res.tempFilePaths;
-          }
+          sourceType: ["album", "camera"]
         });
-      },
-      getUserInfo() {
-        uni.getUserProfile({
-          desc: "用于完善会员资料",
-          // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
-          success: (res) => {
-            formatAppLog("log", "at pages/my/EditPerson.vue:123", res);
-            uni.showToast({
-              title: "已授权",
-              icon: "none",
-              duration: 2e3
-            });
-          }
-        });
-      },
-      getphonenumber(e2) {
-        if (e2.detail.iv) {
-          formatAppLog("log", "at pages/my/EditPerson.vue:134", e2.detail.iv);
+        if (res) {
+          let token = null;
+          token = uni.getStorageSync("token");
+          const {
+            data
+          } = await uni.uploadFile({
+            url: "http://192.168.2.99:9000/user/upload",
+            filePath: res.tempFilePaths[0],
+            name: "avatar",
+            fileType: "image",
+            header: {
+              "Authorization": token
+            }
+          });
+          const result = JSON.parse(data);
+          store.updateAvatar(result.data.user_avatar);
           uni.showToast({
-            title: "已授权",
-            icon: "none",
-            duration: 2e3
+            title: "上传图像成功"
           });
         }
-      },
-      savaInfo() {
-        let that = this;
-        let nickname = that.nickName;
-        let headimg = that.headimg;
-        let gender = that.index + 1;
-        let mobile = that.mobile;
-        let region = that.region;
-        let birthday = that.date;
-        let description = that.description;
-        let updata = {};
-        if (!nickname) {
+      };
+      const saveInfo = () => {
+        const namePattern = /^[\u0041-\u005A\u0061-\u007A\u4E00-\u9FFF0-9_]{4,16}$/;
+        const birthdayPattern = /^\d{4}-\d{2}-\d{2}$/;
+        if (store.user.user_name === "" || !store.user.user_name) {
           uni.showToast({
             title: "请填写昵称",
             icon: "none",
@@ -9843,217 +18459,129 @@ ${i3}
           });
           return;
         }
-        updata.nickname = nickname;
-        if (!headimg) {
-          headimg = that.avater;
-        }
-        updata.headimg = headimg;
-        updata.gender = gender;
-        if (that.isPoneAvailable(mobile)) {
-          updata.mobile = mobile;
-        } else {
+        if (!namePattern.test(store.user.user_name)) {
           uni.showToast({
-            title: "手机号码有误，请重填",
+            title: "请填写昵称的正确格式,由4到16位(字母，数字，下划线，中文)",
+            icon: "none",
+            duration: 4e3
+          });
+          return;
+        }
+        if (store.user.user_birthday === "" || !store.user.user_birthday) {
+          uni.showToast({
+            title: "请选择日期",
             icon: "none",
             duration: 2e3
           });
           return;
         }
-        if (region.length == 1) {
+        if (!birthdayPattern.test(store.user.user_birthday)) {
           uni.showToast({
-            title: "请选择常住地",
+            title: "请选择正确的时间",
             icon: "none",
-            duration: 2e3
-          });
-          return;
-        } else {
-          updata.province = region[0];
-          updata.city = region[1];
-          updata.area = region[2];
-        }
-        if (birthday == "0000-00-00") {
-          uni.showToast({
-            title: "请选择生日",
-            icon: "none",
-            duration: 2e3
+            duration: 4e3
           });
           return;
         }
-        updata.birthday = birthday;
-        updata.description = description;
-        that.updata(updata);
-      },
-      isPoneAvailable(poneInput) {
-        var myreg = /^[1][3,4,5,7,8][0-9]{9}$/;
-        if (!myreg.test(poneInput)) {
-          return false;
-        } else {
-          return true;
+        let today = /* @__PURE__ */ new Date();
+        let date = new Date(store.user.user_birthday);
+        if (date > today) {
+          uni.showToast({
+            title: "您选择的生日是未来",
+            icon: "none",
+            duration: 4e3
+          });
+          return;
         }
-      },
-      async updata(datas) {
-      },
-      imgUpload(file) {
-        let that = this;
-        uni.uploadFile({
-          header: {
-            Authorization: uni.getStorageSync("token")
-          },
-          url: "/api/upload/image",
-          //需传后台图片上传接口
-          filePath: file[0],
-          name: "file",
-          formData: {
-            type: "user_headimg"
-          },
-          success: function(res) {
-            var data = JSON.parse(res.data);
-            data = data.data;
-            that.avater = that.url + data.img;
-            that.headimg = that.url + data.img;
-          },
-          fail: function(error) {
-            formatAppLog("log", "at pages/my/EditPerson.vue:234", error);
-          }
-        });
-      }
-    },
-    onLoad() {
+        if (store.saveInfo()) {
+          uni.showToast({
+            title: "修改用户成功"
+          });
+          uni.switchTab({
+            url: "/pages/my/index"
+          });
+        }
+      };
+      return (_ctx, _cache) => {
+        return vue.openBlock(), vue.createElementBlock("view", { class: "container" }, [
+          vue.createElementVNode("view", { class: "ui-all" }, [
+            vue.createElementVNode("view", {
+              class: "avatar",
+              onClick: avatarChoose
+            }, [
+              vue.createElementVNode("view", { class: "imgAvatar" }, [
+                vue.createElementVNode(
+                  "view",
+                  {
+                    class: "iavatar",
+                    style: vue.normalizeStyle("background: url(" + vue.unref(store).avatar + ") no-repeat center/cover #eeeeee;")
+                  },
+                  null,
+                  4
+                  /* STYLE */
+                )
+              ]),
+              vue.createElementVNode("text", null, "修改头像")
+            ]),
+            vue.createElementVNode("view", { class: "ui-list" }, [
+              vue.createElementVNode("text", null, "昵称"),
+              vue.withDirectives(vue.createElementVNode(
+                "input",
+                {
+                  type: "text",
+                  placeholder: "请填写用户名4到16位(字母，数字，下划线)",
+                  "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => vue.unref(store).user.user_name = $event),
+                  "placeholder-class": "place"
+                },
+                null,
+                512
+                /* NEED_PATCH */
+              ), [
+                [vue.vModelText, vue.unref(store).user.user_name]
+              ])
+            ]),
+            vue.createElementVNode("view", { class: "ui-list right" }, [
+              vue.createElementVNode("text", null, "生日"),
+              vue.createElementVNode("picker", {
+                mode: "date",
+                value: vue.unref(store).user.user_birthday,
+                onChange: bindDateChange
+              }, [
+                vue.createElementVNode(
+                  "view",
+                  { class: "picker" },
+                  vue.toDisplayString(vue.unref(store).user.user_birthday),
+                  1
+                  /* TEXT */
+                )
+              ], 40, ["value"])
+            ]),
+            vue.createElementVNode("view", { class: "ui-list" }, [
+              vue.createElementVNode("text", null, "签名"),
+              vue.withDirectives(vue.createElementVNode(
+                "textarea",
+                {
+                  placeholder: "请填写",
+                  "placeholder-class": "place",
+                  "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => vue.unref(store).user.user_signature = $event)
+                },
+                null,
+                512
+                /* NEED_PATCH */
+              ), [
+                [vue.vModelText, vue.unref(store).user.user_signature]
+              ])
+            ]),
+            vue.createElementVNode("button", {
+              class: "save",
+              onClick: saveInfo
+            }, "保 存 修 改")
+          ])
+        ]);
+      };
     }
   };
-  function _sfc_render$r(_ctx, _cache, $props, $setup, $data, $options) {
-    return vue.openBlock(), vue.createElementBlock("view", { class: "container" }, [
-      vue.createElementVNode("view", { class: "ui-all" }, [
-        vue.createElementVNode("view", {
-          class: "avatar",
-          onClick: _cache[1] || (_cache[1] = (...args) => $options.avatarChoose && $options.avatarChoose(...args))
-        }, [
-          vue.createElementVNode("view", { class: "imgAvatar" }, [
-            vue.createElementVNode(
-              "view",
-              {
-                class: "iavatar",
-                style: vue.normalizeStyle("background: url(" + $data.avater + ") no-repeat center/cover #eeeeee;")
-              },
-              null,
-              4
-              /* STYLE */
-            )
-          ]),
-          $data.avater ? (vue.openBlock(), vue.createElementBlock("text", { key: 0 }, "修改头像")) : vue.createCommentVNode("v-if", true),
-          !$data.avater ? (vue.openBlock(), vue.createElementBlock("text", { key: 1 }, "授权微信")) : vue.createCommentVNode("v-if", true),
-          !$data.avater ? (vue.openBlock(), vue.createElementBlock("button", {
-            key: 2,
-            "open-type": "getUserInfo",
-            onClick: _cache[0] || (_cache[0] = (...args) => $options.getUserInfo && $options.getUserInfo(...args)),
-            class: "getInfo"
-          })) : vue.createCommentVNode("v-if", true)
-        ]),
-        vue.createElementVNode("view", { class: "ui-list" }, [
-          vue.createElementVNode("text", null, "昵称"),
-          vue.createElementVNode("input", {
-            type: "text",
-            placeholder: $data.value,
-            value: $data.nickName,
-            onInput: _cache[2] || (_cache[2] = (...args) => $options.bindnickName && $options.bindnickName(...args)),
-            "placeholder-class": "place"
-          }, null, 40, ["placeholder", "value"])
-        ]),
-        vue.createElementVNode("view", { class: "ui-list" }, [
-          vue.createElementVNode("text", null, "手机号"),
-          $data.mobile ? (vue.openBlock(), vue.createElementBlock("input", {
-            key: 0,
-            type: "tel",
-            placeholder: $data.value,
-            value: $data.mobile,
-            onInput: _cache[3] || (_cache[3] = (...args) => $options.bindmobile && $options.bindmobile(...args)),
-            "placeholder-class": "place"
-          }, null, 40, ["placeholder", "value"])) : vue.createCommentVNode("v-if", true),
-          !$data.mobile ? (vue.openBlock(), vue.createElementBlock(
-            "button",
-            {
-              key: 1,
-              "open-type": "getPhoneNumber",
-              onGetphonenumber: _cache[4] || (_cache[4] = (...args) => $options.getphonenumber && $options.getphonenumber(...args)),
-              class: "getInfo bun"
-            },
-            "授权手机号",
-            32
-            /* HYDRATE_EVENTS */
-          )) : vue.createCommentVNode("v-if", true)
-        ]),
-        vue.createElementVNode("view", { class: "ui-list right" }, [
-          vue.createElementVNode("text", null, "性别"),
-          vue.createElementVNode("picker", {
-            onChange: _cache[5] || (_cache[5] = (...args) => $options.bindPickerChange && $options.bindPickerChange(...args)),
-            mode: "selector",
-            "range-key": "name",
-            value: $data.index,
-            range: $data.sex
-          }, [
-            vue.createElementVNode(
-              "view",
-              { class: "picker" },
-              vue.toDisplayString($data.sex[$data.index].name),
-              1
-              /* TEXT */
-            )
-          ], 40, ["value", "range"])
-        ]),
-        vue.createElementVNode("view", { class: "ui-list right" }, [
-          vue.createElementVNode("text", null, "常住地"),
-          vue.createElementVNode(
-            "picker",
-            {
-              onChange: _cache[6] || (_cache[6] = (...args) => $options.bindRegionChange && $options.bindRegionChange(...args)),
-              mode: "region"
-            },
-            [
-              vue.createElementVNode(
-                "view",
-                { class: "picker" },
-                vue.toDisplayString($data.region[0]) + " " + vue.toDisplayString($data.region[1]) + " " + vue.toDisplayString($data.region[2]),
-                1
-                /* TEXT */
-              )
-            ],
-            32
-            /* HYDRATE_EVENTS */
-          )
-        ]),
-        vue.createElementVNode("view", { class: "ui-list right" }, [
-          vue.createElementVNode("text", null, "生日"),
-          vue.createElementVNode("picker", {
-            mode: "date",
-            value: $data.date,
-            onChange: _cache[7] || (_cache[7] = (...args) => $options.bindDateChange && $options.bindDateChange(...args))
-          }, [
-            vue.createElementVNode(
-              "view",
-              { class: "picker" },
-              vue.toDisplayString($data.date),
-              1
-              /* TEXT */
-            )
-          ], 40, ["value"])
-        ]),
-        vue.createElementVNode("view", { class: "ui-list" }, [
-          vue.createElementVNode("text", null, "签名"),
-          vue.createElementVNode("textarea", {
-            placeholder: $data.value,
-            "placeholder-class": "place",
-            value: $data.description,
-            onInput: _cache[8] || (_cache[8] = (...args) => $options.binddescription && $options.binddescription(...args))
-          }, null, 40, ["placeholder", "value"])
-        ]),
-        vue.createElementVNode("button", {
-          class: "save",
-          onClick: _cache[9] || (_cache[9] = (...args) => $options.savaInfo && $options.savaInfo(...args))
-        }, "保 存 修 改")
-      ])
-    ]);
-  }
-  const PagesMyEditPerson = /* @__PURE__ */ _export_sfc(_sfc_main$x, [["render", _sfc_render$r], ["__file", "D:/graduationProject/pet-front-end/pages/my/EditPerson.vue"]]);
+  const PagesMyEditPerson = /* @__PURE__ */ _export_sfc(_sfc_main$x, [["__file", "D:/graduationProject/pet-front-end/pages/my/EditPerson.vue"]]);
   const _sfc_main$w = {
     name: "vk-data-input-number-box",
     emits: ["update:modelValue", "input", "change", "blur", "plus", "minus"],
@@ -10368,7 +18896,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$q(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$o(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "vk-data-input-number-box" }, [
       vue.createElementVNode(
         "view",
@@ -10450,7 +18978,7 @@ ${i3}
       )
     ]);
   }
-  const __easycom_0$5 = /* @__PURE__ */ _export_sfc(_sfc_main$w, [["render", _sfc_render$q], ["__scopeId", "data-v-223c2f5d"], ["__file", "D:/graduationProject/pet-front-end/components/vk-data-input-number-box/vk-data-input-number-box.vue"]]);
+  const __easycom_0$5 = /* @__PURE__ */ _export_sfc(_sfc_main$w, [["render", _sfc_render$o], ["__scopeId", "data-v-223c2f5d"], ["__file", "D:/graduationProject/pet-front-end/components/vk-data-input-number-box/vk-data-input-number-box.vue"]]);
   var vk;
   var goodsCache = {};
   const _sfc_main$v = {
@@ -11380,7 +19908,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$p(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$n(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_vk_data_input_number_box = resolveEasycom(vue.resolveDynamicComponent("vk-data-input-number-box"), __easycom_0$5);
     return vue.openBlock(), vue.createElementBlock(
       "view",
@@ -11628,7 +20156,7 @@ ${i3}
       /* CLASS, HYDRATE_EVENTS */
     );
   }
-  const __easycom_0$4 = /* @__PURE__ */ _export_sfc(_sfc_main$v, [["render", _sfc_render$p], ["__scopeId", "data-v-ed2d38e9"], ["__file", "D:/graduationProject/pet-front-end/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup.vue"]]);
+  const __easycom_0$4 = /* @__PURE__ */ _export_sfc(_sfc_main$v, [["render", _sfc_render$n], ["__scopeId", "data-v-ed2d38e9"], ["__file", "D:/graduationProject/pet-front-end/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup.vue"]]);
   const _sfc_main$u = {
     name: "UniRate",
     props: {
@@ -11835,8 +20363,8 @@ ${i3}
       }
     }
   };
-  function _sfc_render$o(_ctx, _cache, $props, $setup, $data, $options) {
-    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+  function _sfc_render$m(_ctx, _cache, $props, $setup, $data, $options) {
+    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock("view", null, [
       vue.createElementVNode(
         "view",
@@ -11897,7 +20425,7 @@ ${i3}
       )
     ]);
   }
-  const __easycom_0$3 = /* @__PURE__ */ _export_sfc(_sfc_main$u, [["render", _sfc_render$o], ["__scopeId", "data-v-5c8fbdf3"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-rate/components/uni-rate/uni-rate.vue"]]);
+  const __easycom_0$3 = /* @__PURE__ */ _export_sfc(_sfc_main$u, [["render", _sfc_render$m], ["__scopeId", "data-v-5c8fbdf3"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-rate/components/uni-rate/uni-rate.vue"]]);
   const _sfc_main$t = {
     props: {
       apprises: {
@@ -11906,7 +20434,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$n(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$l(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_uni_rate = resolveEasycom(vue.resolveDynamicComponent("uni-rate"), __easycom_0$3);
     return vue.openBlock(), vue.createElementBlock("view", { class: "commentcomponent" }, [
       (vue.openBlock(true), vue.createElementBlock(
@@ -11989,7 +20517,7 @@ ${i3}
       ))
     ]);
   }
-  const Evaluate = /* @__PURE__ */ _export_sfc(_sfc_main$t, [["render", _sfc_render$n], ["__scopeId", "data-v-32f129a4"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/Evaluate.vue"]]);
+  const Evaluate = /* @__PURE__ */ _export_sfc(_sfc_main$t, [["render", _sfc_render$l], ["__scopeId", "data-v-32f129a4"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/Evaluate.vue"]]);
   const _sfc_main$s = {
     __name: "DetailService",
     setup(__props) {
@@ -12315,7 +20843,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$m(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$k(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock(
       "view",
       {
@@ -12376,9 +20904,9 @@ ${i3}
       /* STYLE */
     );
   }
-  const __easycom_0$2 = /* @__PURE__ */ _export_sfc(_sfc_main$r, [["render", _sfc_render$m], ["__scopeId", "data-v-2fa0d557"], ["__file", "D:/graduationProject/pet-front-end/components/tab-nav/tab-nav.vue"]]);
+  const __easycom_0$2 = /* @__PURE__ */ _export_sfc(_sfc_main$r, [["render", _sfc_render$k], ["__scopeId", "data-v-2fa0d557"], ["__file", "D:/graduationProject/pet-front-end/components/tab-nav/tab-nav.vue"]]);
   const _sfc_main$q = {};
-  function _sfc_render$l(_ctx, _cache) {
+  function _sfc_render$j(_ctx, _cache) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "content" }, [
       vue.createElementVNode("view", { class: "timer-state" }, [
         vue.createElementVNode("view", { class: "timer" }, "自己营Apple产品专营店"),
@@ -12414,7 +20942,7 @@ ${i3}
       ])
     ]);
   }
-  const Order = /* @__PURE__ */ _export_sfc(_sfc_main$q, [["render", _sfc_render$l], ["__scopeId", "data-v-dc300319"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/Order.vue"]]);
+  const Order = /* @__PURE__ */ _export_sfc(_sfc_main$q, [["render", _sfc_render$j], ["__scopeId", "data-v-dc300319"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/Order.vue"]]);
   const _sfc_main$p = {
     __name: "OrderDetail",
     setup(__props) {
@@ -12627,8 +21155,8 @@ ${i3}
       }
     }
   };
-  function _sfc_render$k(_ctx, _cache, $props, $setup, $data, $options) {
-    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+  function _sfc_render$i(_ctx, _cache, $props, $setup, $data, $options) {
+    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-cursor-point" }, [
       $props.popMenu && ($options.leftBottom || $options.rightBottom || $options.leftTop || $options.rightTop) && $props.content.length > 0 ? (vue.openBlock(), vue.createElementBlock(
         "view",
@@ -12731,9 +21259,9 @@ ${i3}
       )
     ]);
   }
-  const __easycom_1$1 = /* @__PURE__ */ _export_sfc(_sfc_main$o, [["render", _sfc_render$k], ["__scopeId", "data-v-85f34dfc"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-fab/components/uni-fab/uni-fab.vue"]]);
+  const __easycom_1 = /* @__PURE__ */ _export_sfc(_sfc_main$o, [["render", _sfc_render$i], ["__scopeId", "data-v-85f34dfc"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-fab/components/uni-fab/uni-fab.vue"]]);
   const _sfc_main$n = {};
-  function _sfc_render$j(_ctx, _cache) {
+  function _sfc_render$h(_ctx, _cache) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "total" }, [
       vue.createElementVNode("view", { class: "left" }, [
         vue.createElementVNode("view", { class: "top" }, "2020数字中国创新大赛-数字政府赛道21强出炉，四大赛题紧贴政府数字化发展需求"),
@@ -12750,7 +21278,7 @@ ${i3}
       ])
     ]);
   }
-  const ImageText = /* @__PURE__ */ _export_sfc(_sfc_main$n, [["render", _sfc_render$j], ["__scopeId", "data-v-e9c1a8ef"], ["__file", "D:/graduationProject/pet-front-end/pages/community/components/ImageText.vue"]]);
+  const ImageText = /* @__PURE__ */ _export_sfc(_sfc_main$n, [["render", _sfc_render$h], ["__scopeId", "data-v-e9c1a8ef"], ["__file", "D:/graduationProject/pet-front-end/pages/community/components/ImageText.vue"]]);
   const _sfc_main$m = {
     __name: "index",
     setup(__props) {
@@ -12824,7 +21352,7 @@ ${i3}
       });
       return (_ctx, _cache) => {
         const _component_tab_nav = resolveEasycom(vue.resolveDynamicComponent("tab-nav"), __easycom_0$2);
-        const _component_uni_fab = resolveEasycom(vue.resolveDynamicComponent("uni-fab"), __easycom_1$1);
+        const _component_uni_fab = resolveEasycom(vue.resolveDynamicComponent("uni-fab"), __easycom_1);
         return vue.openBlock(), vue.createElementBlock(
           vue.Fragment,
           null,
@@ -12858,7 +21386,7 @@ ${i3}
   };
   const PagesCommunityIndex = /* @__PURE__ */ _export_sfc(_sfc_main$m, [["__file", "D:/graduationProject/pet-front-end/pages/community/index.vue"]]);
   const _sfc_main$l = {};
-  function _sfc_render$i(_ctx, _cache) {
+  function _sfc_render$g(_ctx, _cache) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "content" }, [
       vue.createCommentVNode("这里的高度应该由图片的高度决定 "),
       vue.createElementVNode("view", { class: "show-image" }, [
@@ -12898,7 +21426,7 @@ ${i3}
       ])
     ]);
   }
-  const PagesCommunityDetailArticle = /* @__PURE__ */ _export_sfc(_sfc_main$l, [["render", _sfc_render$i], ["__scopeId", "data-v-eded9e05"], ["__file", "D:/graduationProject/pet-front-end/pages/community/DetailArticle.vue"]]);
+  const PagesCommunityDetailArticle = /* @__PURE__ */ _export_sfc(_sfc_main$l, [["render", _sfc_render$g], ["__scopeId", "data-v-eded9e05"], ["__file", "D:/graduationProject/pet-front-end/pages/community/DetailArticle.vue"]]);
   const _sfc_main$k = {
     data() {
       return {
@@ -13027,7 +21555,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$h(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$f(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "" }, [
       vue.createElementVNode("scroll-view", {
         "scroll-y": "true",
@@ -13105,7 +21633,7 @@ ${i3}
       ])
     ]);
   }
-  const PagesMessagesChat = /* @__PURE__ */ _export_sfc(_sfc_main$k, [["render", _sfc_render$h], ["__scopeId", "data-v-d3b50b6a"], ["__file", "D:/graduationProject/pet-front-end/pages/messages/Chat.vue"]]);
+  const PagesMessagesChat = /* @__PURE__ */ _export_sfc(_sfc_main$k, [["render", _sfc_render$f], ["__scopeId", "data-v-d3b50b6a"], ["__file", "D:/graduationProject/pet-front-end/pages/messages/Chat.vue"]]);
   const ERR_MSG_OK = "chooseAndUploadFile:ok";
   const ERR_MSG_FAIL = "chooseAndUploadFile:fail";
   function chooseImage(opts) {
@@ -13230,7 +21758,7 @@ ${i3}
     files = JSON.parse(JSON.stringify(files));
     const len = files.length;
     let count = 0;
-    let self = this;
+    let self2 = this;
     return new Promise((resolve) => {
       while (count < max) {
         next();
@@ -13242,7 +21770,7 @@ ${i3}
           return;
         }
         const fileItem = files[cur];
-        const index = self.files.findIndex((v2) => v2.uuid === fileItem.uuid);
+        const index = self2.files.findIndex((v2) => v2.uuid === fileItem.uuid);
         fileItem.url = "";
         delete fileItem.errMsg;
         Ws.uploadFile({
@@ -13534,7 +22062,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$g(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$e(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-file-picker__container" }, [
       (vue.openBlock(true), vue.createElementBlock(
         vue.Fragment,
@@ -13627,7 +22155,7 @@ ${i3}
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const uploadImage = /* @__PURE__ */ _export_sfc(_sfc_main$j, [["render", _sfc_render$g], ["__scopeId", "data-v-bdfc07e0"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/upload-image.vue"]]);
+  const uploadImage = /* @__PURE__ */ _export_sfc(_sfc_main$j, [["render", _sfc_render$e], ["__scopeId", "data-v-bdfc07e0"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/upload-image.vue"]]);
   const _sfc_main$i = {
     name: "uploadFile",
     emits: ["uploadFiles", "choose", "delFile"],
@@ -13764,7 +22292,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$f(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$d(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-file-picker__files" }, [
       !$props.readonly ? (vue.openBlock(), vue.createElementBlock("view", {
         key: 0,
@@ -13846,7 +22374,7 @@ ${i3}
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const uploadFile = /* @__PURE__ */ _export_sfc(_sfc_main$i, [["render", _sfc_render$f], ["__scopeId", "data-v-a54939c6"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/upload-file.vue"]]);
+  const uploadFile = /* @__PURE__ */ _export_sfc(_sfc_main$i, [["render", _sfc_render$d], ["__scopeId", "data-v-a54939c6"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/upload-file.vue"]]);
   const _sfc_main$h = {
     name: "uniFilePicker",
     components: {
@@ -14329,7 +22857,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$e(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$c(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_upload_image = vue.resolveComponent("upload-image");
     const _component_upload_file = vue.resolveComponent("upload-file");
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-file-picker" }, [
@@ -14399,7 +22927,7 @@ ${i3}
       }, 8, ["readonly", "list-styles", "files-list", "showType", "delIcon", "onUploadFiles", "onChoose", "onDelFile"])) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$h, [["render", _sfc_render$e], ["__scopeId", "data-v-6223573f"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue"]]);
+  const __easycom_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$h, [["render", _sfc_render$c], ["__scopeId", "data-v-6223573f"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue"]]);
   function obj2strClass(obj) {
     let classess = "";
     for (let key in obj) {
@@ -14751,8 +23279,8 @@ ${i3}
       }
     }
   };
-  function _sfc_render$d(_ctx, _cache, $props, $setup, $data, $options) {
-    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+  function _sfc_render$b(_ctx, _cache, $props, $setup, $data, $options) {
+    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock(
       "view",
       {
@@ -14872,7 +23400,7 @@ ${i3}
       /* CLASS, STYLE */
     );
   }
-  const __easycom_2 = /* @__PURE__ */ _export_sfc(_sfc_main$g, [["render", _sfc_render$d], ["__scopeId", "data-v-09fd5285"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue"]]);
+  const __easycom_2 = /* @__PURE__ */ _export_sfc(_sfc_main$g, [["render", _sfc_render$b], ["__scopeId", "data-v-09fd5285"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue"]]);
   const _sfc_main$f = {
     name: "uni-data-select",
     mixins: [Ws.mixinDatacom || {}],
@@ -15106,8 +23634,8 @@ ${i3}
       }
     }
   };
-  function _sfc_render$c(_ctx, _cache, $props, $setup, $data, $options) {
-    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+  function _sfc_render$a(_ctx, _cache, $props, $setup, $data, $options) {
+    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-stat__select" }, [
       $props.label ? (vue.openBlock(), vue.createElementBlock(
         "span",
@@ -15231,7 +23759,7 @@ ${i3}
       )
     ]);
   }
-  const __easycom_3 = /* @__PURE__ */ _export_sfc(_sfc_main$f, [["render", _sfc_render$c], ["__scopeId", "data-v-ddf9e0a2"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-data-select/components/uni-data-select/uni-data-select.vue"]]);
+  const __easycom_3 = /* @__PURE__ */ _export_sfc(_sfc_main$f, [["render", _sfc_render$a], ["__scopeId", "data-v-ddf9e0a2"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-data-select/components/uni-data-select/uni-data-select.vue"]]);
   const _sfc_main$e = {
     __name: "PublishContent",
     setup(__props) {
@@ -15326,7 +23854,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$b(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$9(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "container" }, [
       vue.createElementVNode("view", { class: "address-list" }, [
         (vue.openBlock(true), vue.createElementBlock(
@@ -15374,396 +23902,7 @@ ${i3}
       ])
     ]);
   }
-  const PagesCatConfirmAddress = /* @__PURE__ */ _export_sfc(_sfc_main$d, [["render", _sfc_render$b], ["__file", "D:/graduationProject/pet-front-end/pages/cat/ConfirmAddress.vue"]]);
-  const _sfc_main$c = {
-    name: "uniFormsItem",
-    options: {
-      virtualHost: true
-    },
-    provide() {
-      return {
-        uniFormItem: this
-      };
-    },
-    inject: {
-      form: {
-        from: "uniForm",
-        default: null
-      }
-    },
-    props: {
-      // 表单校验规则
-      rules: {
-        type: Array,
-        default() {
-          return null;
-        }
-      },
-      // 表单域的属性名，在使用校验规则时必填
-      name: {
-        type: [String, Array],
-        default: ""
-      },
-      required: {
-        type: Boolean,
-        default: false
-      },
-      label: {
-        type: String,
-        default: ""
-      },
-      // label的宽度 ，默认 80
-      labelWidth: {
-        type: [String, Number],
-        default: ""
-      },
-      // label 居中方式，默认 left 取值 left/center/right
-      labelAlign: {
-        type: String,
-        default: ""
-      },
-      // 强制显示错误信息
-      errorMessage: {
-        type: [String, Boolean],
-        default: ""
-      },
-      // 1.4.0 弃用，统一使用 form 的校验时机
-      // validateTrigger: {
-      // 	type: String,
-      // 	default: ''
-      // },
-      // 1.4.0 弃用，统一使用 form 的label 位置
-      // labelPosition: {
-      // 	type: String,
-      // 	default: ''
-      // },
-      // 1.4.0 以下属性已经废弃，请使用  #label 插槽代替
-      leftIcon: String,
-      iconColor: {
-        type: String,
-        default: "#606266"
-      }
-    },
-    data() {
-      return {
-        errMsg: "",
-        userRules: null,
-        localLabelAlign: "left",
-        localLabelWidth: "65px",
-        localLabelPos: "left",
-        border: false,
-        isFirstBorder: false
-      };
-    },
-    computed: {
-      // 处理错误信息
-      msg() {
-        return this.errorMessage || this.errMsg;
-      }
-    },
-    watch: {
-      // 规则发生变化通知子组件更新
-      "form.formRules"(val) {
-        this.init();
-      },
-      "form.labelWidth"(val) {
-        this.localLabelWidth = this._labelWidthUnit(val);
-      },
-      "form.labelPosition"(val) {
-        this.localLabelPos = this._labelPosition();
-      },
-      "form.labelAlign"(val) {
-      }
-    },
-    created() {
-      this.init(true);
-      if (this.name && this.form) {
-        this.$watch(
-          () => {
-            const val = this.form._getDataValue(this.name, this.form.localData);
-            return val;
-          },
-          (value, oldVal) => {
-            const isEqual2 = this.form._isEqual(value, oldVal);
-            if (!isEqual2) {
-              const val = this.itemSetValue(value);
-              this.onFieldChange(val, false);
-            }
-          },
-          {
-            immediate: false
-          }
-        );
-      }
-    },
-    unmounted() {
-      this.__isUnmounted = true;
-      this.unInit();
-    },
-    methods: {
-      /**
-       * 外部调用方法
-       * 设置规则 ，主要用于小程序自定义检验规则
-       * @param {Array} rules 规则源数据
-       */
-      setRules(rules = null) {
-        this.userRules = rules;
-        this.init(false);
-      },
-      // 兼容老版本表单组件
-      setValue() {
-      },
-      /**
-       * 外部调用方法
-       * 校验数据
-       * @param {any} value 需要校验的数据
-       * @param {boolean} 是否立即校验
-       * @return {Array|null} 校验内容
-       */
-      async onFieldChange(value, formtrigger = true) {
-        const {
-          formData,
-          localData,
-          errShowType,
-          validateCheck,
-          validateTrigger,
-          _isRequiredField,
-          _realName
-        } = this.form;
-        const name = _realName(this.name);
-        if (!value) {
-          value = this.form.formData[name];
-        }
-        const ruleLen = this.itemRules.rules && this.itemRules.rules.length;
-        if (!this.validator || !ruleLen || ruleLen === 0)
-          return;
-        const isRequiredField2 = _isRequiredField(this.itemRules.rules || []);
-        let result = null;
-        if (validateTrigger === "bind" || formtrigger) {
-          result = await this.validator.validateUpdate(
-            {
-              [name]: value
-            },
-            formData
-          );
-          if (!isRequiredField2 && (value === void 0 || value === "")) {
-            result = null;
-          }
-          if (result && result.errorMessage) {
-            if (errShowType === "undertext") {
-              this.errMsg = !result ? "" : result.errorMessage;
-            }
-            if (errShowType === "toast") {
-              uni.showToast({
-                title: result.errorMessage || "校验错误",
-                icon: "none"
-              });
-            }
-            if (errShowType === "modal") {
-              uni.showModal({
-                title: "提示",
-                content: result.errorMessage || "校验错误"
-              });
-            }
-          } else {
-            this.errMsg = "";
-          }
-          validateCheck(result ? result : null);
-        } else {
-          this.errMsg = "";
-        }
-        return result ? result : null;
-      },
-      /**
-       * 初始组件数据
-       */
-      init(type = false) {
-        const {
-          validator,
-          formRules,
-          childrens,
-          formData,
-          localData,
-          _realName,
-          labelWidth,
-          _getDataValue,
-          _setDataValue
-        } = this.form || {};
-        this.localLabelAlign = this._justifyContent();
-        this.localLabelWidth = this._labelWidthUnit(labelWidth);
-        this.localLabelPos = this._labelPosition();
-        this.form && type && childrens.push(this);
-        if (!validator || !formRules)
-          return;
-        if (!this.form.isFirstBorder) {
-          this.form.isFirstBorder = true;
-          this.isFirstBorder = true;
-        }
-        if (this.group) {
-          if (!this.group.isFirstBorder) {
-            this.group.isFirstBorder = true;
-            this.isFirstBorder = true;
-          }
-        }
-        this.border = this.form.border;
-        const name = _realName(this.name);
-        const itemRule = this.userRules || this.rules;
-        if (typeof formRules === "object" && itemRule) {
-          formRules[name] = {
-            rules: itemRule
-          };
-          validator.updateSchema(formRules);
-        }
-        const itemRules = formRules[name] || {};
-        this.itemRules = itemRules;
-        this.validator = validator;
-        this.itemSetValue(_getDataValue(this.name, localData));
-      },
-      unInit() {
-        if (this.form) {
-          const {
-            childrens,
-            formData,
-            _realName
-          } = this.form;
-          childrens.forEach((item, index) => {
-            if (item === this) {
-              this.form.childrens.splice(index, 1);
-              delete formData[_realName(item.name)];
-            }
-          });
-        }
-      },
-      // 设置item 的值
-      itemSetValue(value) {
-        const name = this.form._realName(this.name);
-        const rules = this.itemRules.rules || [];
-        const val = this.form._getValue(name, value, rules);
-        this.form._setDataValue(name, this.form.formData, val);
-        return val;
-      },
-      /**
-       * 移除该表单项的校验结果
-       */
-      clearValidate() {
-        this.errMsg = "";
-      },
-      // 是否显示星号
-      _isRequired() {
-        return this.required;
-      },
-      // 处理对齐方式
-      _justifyContent() {
-        if (this.form) {
-          const {
-            labelAlign
-          } = this.form;
-          let labelAli = this.labelAlign ? this.labelAlign : labelAlign;
-          if (labelAli === "left")
-            return "flex-start";
-          if (labelAli === "center")
-            return "center";
-          if (labelAli === "right")
-            return "flex-end";
-        }
-        return "flex-start";
-      },
-      // 处理 label宽度单位 ,继承父元素的值
-      _labelWidthUnit(labelWidth) {
-        return this.num2px(this.labelWidth ? this.labelWidth : labelWidth || (this.label ? 65 : "auto"));
-      },
-      // 处理 label 位置
-      _labelPosition() {
-        if (this.form)
-          return this.form.labelPosition || "left";
-        return "left";
-      },
-      /**
-       * 触发时机
-       * @param {Object} rule 当前规则内时机
-       * @param {Object} itemRlue 当前组件时机
-       * @param {Object} parentRule 父组件时机
-       */
-      isTrigger(rule, itemRlue, parentRule) {
-        if (rule === "submit" || !rule) {
-          if (rule === void 0) {
-            if (itemRlue !== "bind") {
-              if (!itemRlue) {
-                return parentRule === "" ? "bind" : "submit";
-              }
-              return "submit";
-            }
-            return "bind";
-          }
-          return "submit";
-        }
-        return "bind";
-      },
-      num2px(num) {
-        if (typeof num === "number") {
-          return `${num}px`;
-        }
-        return num;
-      }
-    }
-  };
-  function _sfc_render$a(_ctx, _cache, $props, $setup, $data, $options) {
-    return vue.openBlock(), vue.createElementBlock(
-      "view",
-      {
-        class: vue.normalizeClass(["uni-forms-item", ["is-direction-" + $data.localLabelPos, $data.border ? "uni-forms-item--border" : "", $data.border && $data.isFirstBorder ? "is-first-border" : ""]])
-      },
-      [
-        vue.renderSlot(_ctx.$slots, "label", {}, () => [
-          vue.createElementVNode(
-            "view",
-            {
-              class: vue.normalizeClass(["uni-forms-item__label", { "no-label": !$props.label && !$props.required }]),
-              style: vue.normalizeStyle({ width: $data.localLabelWidth, justifyContent: $data.localLabelAlign })
-            },
-            [
-              $props.required ? (vue.openBlock(), vue.createElementBlock("text", {
-                key: 0,
-                class: "is-required"
-              }, "*")) : vue.createCommentVNode("v-if", true),
-              vue.createElementVNode(
-                "text",
-                null,
-                vue.toDisplayString($props.label),
-                1
-                /* TEXT */
-              )
-            ],
-            6
-            /* CLASS, STYLE */
-          )
-        ], true),
-        vue.createElementVNode("view", { class: "uni-forms-item__content" }, [
-          vue.renderSlot(_ctx.$slots, "default", {}, void 0, true),
-          vue.createElementVNode(
-            "view",
-            {
-              class: vue.normalizeClass(["uni-forms-item__error", { "msg--active": $options.msg }])
-            },
-            [
-              vue.createElementVNode(
-                "text",
-                null,
-                vue.toDisplayString($options.msg),
-                1
-                /* TEXT */
-              )
-            ],
-            2
-            /* CLASS */
-          )
-        ])
-      ],
-      2
-      /* CLASS */
-    );
-  }
-  const __easycom_1 = /* @__PURE__ */ _export_sfc(_sfc_main$c, [["render", _sfc_render$a], ["__scopeId", "data-v-462874dd"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.vue"]]);
+  const PagesCatConfirmAddress = /* @__PURE__ */ _export_sfc(_sfc_main$d, [["render", _sfc_render$9], ["__file", "D:/graduationProject/pet-front-end/pages/cat/ConfirmAddress.vue"]]);
   const en$1 = {
     "uni-load-more.contentdown": "Pull up to show more",
     "uni-load-more.contentrefresh": "loading...",
@@ -15791,7 +23930,7 @@ ${i3}
   const {
     t: t$2
   } = initVueI18n(messages);
-  const _sfc_main$b = {
+  const _sfc_main$c = {
     name: "UniLoadMore",
     emits: ["clickLoadMore"],
     props: {
@@ -15873,7 +24012,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$9(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$8(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", {
       class: "uni-load-more",
       onClick: _cache[0] || (_cache[0] = (...args) => $options.onClick && $options.onClick(...args))
@@ -15948,8 +24087,8 @@ ${i3}
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_0 = /* @__PURE__ */ _export_sfc(_sfc_main$b, [["render", _sfc_render$9], ["__scopeId", "data-v-9245e42c"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-load-more/components/uni-load-more/uni-load-more.vue"]]);
-  const _sfc_main$a = {
+  const __easycom_0 = /* @__PURE__ */ _export_sfc(_sfc_main$c, [["render", _sfc_render$8], ["__scopeId", "data-v-9245e42c"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-load-more/components/uni-load-more/uni-load-more.vue"]]);
+  const _sfc_main$b = {
     name: "uniDataChecklist",
     mixins: [Ws.mixinDatacom || {}],
     emits: ["input", "update:modelValue", "change"],
@@ -16292,7 +24431,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$8(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$7(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_uni_load_more = resolveEasycom(vue.resolveDynamicComponent("uni-load-more"), __easycom_0);
     return vue.openBlock(), vue.createElementBlock(
       "view",
@@ -16506,7 +24645,7 @@ ${i3}
       /* STYLE */
     );
   }
-  const __easycom_4 = /* @__PURE__ */ _export_sfc(_sfc_main$a, [["render", _sfc_render$8], ["__scopeId", "data-v-2f788efd"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.vue"]]);
+  const __easycom_4 = /* @__PURE__ */ _export_sfc(_sfc_main$b, [["render", _sfc_render$7], ["__scopeId", "data-v-2f788efd"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.vue"]]);
   let Calendar$1 = class Calendar {
     constructor({
       selected,
@@ -16856,7 +24995,7 @@ ${i3}
     }
     return value;
   }
-  const _sfc_main$9 = {
+  const _sfc_main$a = {
     props: {
       weeks: {
         type: Object,
@@ -16890,7 +25029,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$7(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$6(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock(
       "view",
       {
@@ -16946,7 +25085,7 @@ ${i3}
       /* CLASS, HYDRATE_EVENTS */
     );
   }
-  const calendarItem = /* @__PURE__ */ _export_sfc(_sfc_main$9, [["render", _sfc_render$7], ["__scopeId", "data-v-3c762a01"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/calendar-item.vue"]]);
+  const calendarItem = /* @__PURE__ */ _export_sfc(_sfc_main$a, [["render", _sfc_render$6], ["__scopeId", "data-v-3c762a01"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/calendar-item.vue"]]);
   const en = {
     "uni-datetime-picker.selectDate": "select date",
     "uni-datetime-picker.selectTime": "select time",
@@ -17019,7 +25158,7 @@ ${i3}
     "zh-Hant": zhHant
   };
   const { t: t$1 } = initVueI18n(i18nMessages);
-  const _sfc_main$8 = {
+  const _sfc_main$9 = {
     name: "UniDatetimePicker",
     data() {
       return {
@@ -17402,10 +25541,10 @@ ${i3}
       superTimeStamp(value) {
         let dateBase = "";
         if (this.type === "time" && value && typeof value === "string") {
-          const now = /* @__PURE__ */ new Date();
-          const year = now.getFullYear();
-          const month = now.getMonth() + 1;
-          const day = now.getDate();
+          const now2 = /* @__PURE__ */ new Date();
+          const year = now2.getFullYear();
+          const month = now2.getMonth() + 1;
+          const day = now2.getDate();
           dateBase = year + "/" + month + "/" + day + " ";
         }
         if (Number(value)) {
@@ -17627,7 +25766,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$6(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$5(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-datetime-picker" }, [
       vue.createElementVNode("view", {
         onClick: _cache[0] || (_cache[0] = (...args) => $options.initTimePicker && $options.initTimePicker(...args))
@@ -17904,9 +26043,9 @@ ${i3}
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const TimePicker = /* @__PURE__ */ _export_sfc(_sfc_main$8, [["render", _sfc_render$6], ["__scopeId", "data-v-1d532b70"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/time-picker.vue"]]);
+  const TimePicker = /* @__PURE__ */ _export_sfc(_sfc_main$9, [["render", _sfc_render$5], ["__scopeId", "data-v-1d532b70"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/time-picker.vue"]]);
   const { t } = initVueI18n(i18nMessages);
-  const _sfc_main$7 = {
+  const _sfc_main$8 = {
     components: {
       calendarItem,
       timePicker: TimePicker
@@ -18382,10 +26521,10 @@ ${i3}
       }
     }
   };
-  function _sfc_render$5(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$4(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_calendar_item = vue.resolveComponent("calendar-item");
     const _component_time_picker = vue.resolveComponent("time-picker");
-    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock(
       "view",
       {
@@ -18675,8 +26814,8 @@ ${i3}
       /* HYDRATE_EVENTS */
     );
   }
-  const Calendar = /* @__PURE__ */ _export_sfc(_sfc_main$7, [["render", _sfc_render$5], ["__scopeId", "data-v-1d379219"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/calendar.vue"]]);
-  const _sfc_main$6 = {
+  const Calendar = /* @__PURE__ */ _export_sfc(_sfc_main$8, [["render", _sfc_render$4], ["__scopeId", "data-v-1d379219"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/calendar.vue"]]);
+  const _sfc_main$7 = {
     name: "UniDatetimePicker",
     options: {
       virtualHost: true
@@ -19060,9 +27199,9 @@ ${i3}
       },
       confirmSingleChange() {
         if (!checkDate(this.inputDate)) {
-          const now = /* @__PURE__ */ new Date();
-          this.calendarDate = this.inputDate = getDate(now);
-          this.pickerTime = getTime(now, this.hideSecond);
+          const now2 = /* @__PURE__ */ new Date();
+          this.calendarDate = this.inputDate = getDate(now2);
+          this.pickerTime = getTime(now2, this.hideSecond);
         }
         let startLaterInputDate = false;
         let startDate, startTime;
@@ -19312,8 +27451,8 @@ ${i3}
       }
     }
   };
-  function _sfc_render$4(_ctx, _cache, $props, $setup, $data, $options) {
-    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$c);
+  function _sfc_render$3(_ctx, _cache, $props, $setup, $data, $options) {
+    const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     const _component_time_picker = vue.resolveComponent("time-picker");
     const _component_Calendar = vue.resolveComponent("Calendar");
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-date" }, [
@@ -19655,876 +27794,8 @@ ${i3}
       }, null, 8, ["date", "defTime", "start-date", "end-date", "selectableTimes", "startPlaceholder", "endPlaceholder", "default-value", "pleStatus", "range", "hasTime", "hideSecond", "onConfirm", "onMaskClose"])) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_5 = /* @__PURE__ */ _export_sfc(_sfc_main$6, [["render", _sfc_render$4], ["__scopeId", "data-v-9802168a"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.vue"]]);
-  var pattern = {
-    email: /^\S+?@\S+?\.\S+?$/,
-    idcard: /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/,
-    url: new RegExp(
-      "^(?!mailto:)(?:(?:http|https|ftp)://|//)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$",
-      "i"
-    )
-  };
-  const FORMAT_MAPPING = {
-    "int": "integer",
-    "bool": "boolean",
-    "double": "number",
-    "long": "number",
-    "password": "string"
-    // "fileurls": 'array'
-  };
-  function formatMessage(args, resources = "") {
-    var defaultMessage = ["label"];
-    defaultMessage.forEach((item) => {
-      if (args[item] === void 0) {
-        args[item] = "";
-      }
-    });
-    let str = resources;
-    for (let key in args) {
-      let reg = new RegExp("{" + key + "}");
-      str = str.replace(reg, args[key]);
-    }
-    return str;
-  }
-  function isEmptyValue(value, type) {
-    if (value === void 0 || value === null) {
-      return true;
-    }
-    if (typeof value === "string" && !value) {
-      return true;
-    }
-    if (Array.isArray(value) && !value.length) {
-      return true;
-    }
-    if (type === "object" && !Object.keys(value).length) {
-      return true;
-    }
-    return false;
-  }
-  const types = {
-    integer(value) {
-      return types.number(value) && parseInt(value, 10) === value;
-    },
-    string(value) {
-      return typeof value === "string";
-    },
-    number(value) {
-      if (isNaN(value)) {
-        return false;
-      }
-      return typeof value === "number";
-    },
-    "boolean": function(value) {
-      return typeof value === "boolean";
-    },
-    "float": function(value) {
-      return types.number(value) && !types.integer(value);
-    },
-    array(value) {
-      return Array.isArray(value);
-    },
-    object(value) {
-      return typeof value === "object" && !types.array(value);
-    },
-    date(value) {
-      return value instanceof Date;
-    },
-    timestamp(value) {
-      if (!this.integer(value) || Math.abs(value).toString().length > 16) {
-        return false;
-      }
-      return true;
-    },
-    file(value) {
-      return typeof value.url === "string";
-    },
-    email(value) {
-      return typeof value === "string" && !!value.match(pattern.email) && value.length < 255;
-    },
-    url(value) {
-      return typeof value === "string" && !!value.match(pattern.url);
-    },
-    pattern(reg, value) {
-      try {
-        return new RegExp(reg).test(value);
-      } catch (e2) {
-        return false;
-      }
-    },
-    method(value) {
-      return typeof value === "function";
-    },
-    idcard(value) {
-      return typeof value === "string" && !!value.match(pattern.idcard);
-    },
-    "url-https"(value) {
-      return this.url(value) && value.startsWith("https://");
-    },
-    "url-scheme"(value) {
-      return value.startsWith("://");
-    },
-    "url-web"(value) {
-      return false;
-    }
-  };
-  class RuleValidator {
-    constructor(message) {
-      this._message = message;
-    }
-    async validateRule(fieldKey, fieldValue, value, data, allData) {
-      var result = null;
-      let rules = fieldValue.rules;
-      let hasRequired = rules.findIndex((item) => {
-        return item.required;
-      });
-      if (hasRequired < 0) {
-        if (value === null || value === void 0) {
-          return result;
-        }
-        if (typeof value === "string" && !value.length) {
-          return result;
-        }
-      }
-      var message = this._message;
-      if (rules === void 0) {
-        return message["default"];
-      }
-      for (var i2 = 0; i2 < rules.length; i2++) {
-        let rule = rules[i2];
-        let vt2 = this._getValidateType(rule);
-        Object.assign(rule, {
-          label: fieldValue.label || `["${fieldKey}"]`
-        });
-        if (RuleValidatorHelper[vt2]) {
-          result = RuleValidatorHelper[vt2](rule, value, message);
-          if (result != null) {
-            break;
-          }
-        }
-        if (rule.validateExpr) {
-          let now = Date.now();
-          let resultExpr = rule.validateExpr(value, allData, now);
-          if (resultExpr === false) {
-            result = this._getMessage(rule, rule.errorMessage || this._message["default"]);
-            break;
-          }
-        }
-        if (rule.validateFunction) {
-          result = await this.validateFunction(rule, value, data, allData, vt2);
-          if (result !== null) {
-            break;
-          }
-        }
-      }
-      if (result !== null) {
-        result = message.TAG + result;
-      }
-      return result;
-    }
-    async validateFunction(rule, value, data, allData, vt2) {
-      let result = null;
-      try {
-        let callbackMessage = null;
-        const res = await rule.validateFunction(rule, value, allData || data, (message) => {
-          callbackMessage = message;
-        });
-        if (callbackMessage || typeof res === "string" && res || res === false) {
-          result = this._getMessage(rule, callbackMessage || res, vt2);
-        }
-      } catch (e2) {
-        result = this._getMessage(rule, e2.message, vt2);
-      }
-      return result;
-    }
-    _getMessage(rule, message, vt2) {
-      return formatMessage(rule, message || rule.errorMessage || this._message[vt2] || message["default"]);
-    }
-    _getValidateType(rule) {
-      var result = "";
-      if (rule.required) {
-        result = "required";
-      } else if (rule.format) {
-        result = "format";
-      } else if (rule.arrayType) {
-        result = "arrayTypeFormat";
-      } else if (rule.range) {
-        result = "range";
-      } else if (rule.maximum !== void 0 || rule.minimum !== void 0) {
-        result = "rangeNumber";
-      } else if (rule.maxLength !== void 0 || rule.minLength !== void 0) {
-        result = "rangeLength";
-      } else if (rule.pattern) {
-        result = "pattern";
-      } else if (rule.validateFunction) {
-        result = "validateFunction";
-      }
-      return result;
-    }
-  }
-  const RuleValidatorHelper = {
-    required(rule, value, message) {
-      if (rule.required && isEmptyValue(value, rule.format || typeof value)) {
-        return formatMessage(rule, rule.errorMessage || message.required);
-      }
-      return null;
-    },
-    range(rule, value, message) {
-      const {
-        range,
-        errorMessage
-      } = rule;
-      let list = new Array(range.length);
-      for (let i2 = 0; i2 < range.length; i2++) {
-        const item = range[i2];
-        if (types.object(item) && item.value !== void 0) {
-          list[i2] = item.value;
-        } else {
-          list[i2] = item;
-        }
-      }
-      let result = false;
-      if (Array.isArray(value)) {
-        result = new Set(value.concat(list)).size === list.length;
-      } else {
-        if (list.indexOf(value) > -1) {
-          result = true;
-        }
-      }
-      if (!result) {
-        return formatMessage(rule, errorMessage || message["enum"]);
-      }
-      return null;
-    },
-    rangeNumber(rule, value, message) {
-      if (!types.number(value)) {
-        return formatMessage(rule, rule.errorMessage || message.pattern.mismatch);
-      }
-      let {
-        minimum,
-        maximum,
-        exclusiveMinimum,
-        exclusiveMaximum
-      } = rule;
-      let min = exclusiveMinimum ? value <= minimum : value < minimum;
-      let max = exclusiveMaximum ? value >= maximum : value > maximum;
-      if (minimum !== void 0 && min) {
-        return formatMessage(rule, rule.errorMessage || message["number"][exclusiveMinimum ? "exclusiveMinimum" : "minimum"]);
-      } else if (maximum !== void 0 && max) {
-        return formatMessage(rule, rule.errorMessage || message["number"][exclusiveMaximum ? "exclusiveMaximum" : "maximum"]);
-      } else if (minimum !== void 0 && maximum !== void 0 && (min || max)) {
-        return formatMessage(rule, rule.errorMessage || message["number"].range);
-      }
-      return null;
-    },
-    rangeLength(rule, value, message) {
-      if (!types.string(value) && !types.array(value)) {
-        return formatMessage(rule, rule.errorMessage || message.pattern.mismatch);
-      }
-      let min = rule.minLength;
-      let max = rule.maxLength;
-      let val = value.length;
-      if (min !== void 0 && val < min) {
-        return formatMessage(rule, rule.errorMessage || message["length"].minLength);
-      } else if (max !== void 0 && val > max) {
-        return formatMessage(rule, rule.errorMessage || message["length"].maxLength);
-      } else if (min !== void 0 && max !== void 0 && (val < min || val > max)) {
-        return formatMessage(rule, rule.errorMessage || message["length"].range);
-      }
-      return null;
-    },
-    pattern(rule, value, message) {
-      if (!types["pattern"](rule.pattern, value)) {
-        return formatMessage(rule, rule.errorMessage || message.pattern.mismatch);
-      }
-      return null;
-    },
-    format(rule, value, message) {
-      var customTypes = Object.keys(types);
-      var format = FORMAT_MAPPING[rule.format] ? FORMAT_MAPPING[rule.format] : rule.format || rule.arrayType;
-      if (customTypes.indexOf(format) > -1) {
-        if (!types[format](value)) {
-          return formatMessage(rule, rule.errorMessage || message.typeError);
-        }
-      }
-      return null;
-    },
-    arrayTypeFormat(rule, value, message) {
-      if (!Array.isArray(value)) {
-        return formatMessage(rule, rule.errorMessage || message.typeError);
-      }
-      for (let i2 = 0; i2 < value.length; i2++) {
-        const element = value[i2];
-        let formatResult = this.format(rule, element, message);
-        if (formatResult !== null) {
-          return formatResult;
-        }
-      }
-      return null;
-    }
-  };
-  class SchemaValidator extends RuleValidator {
-    constructor(schema, options) {
-      super(SchemaValidator.message);
-      this._schema = schema;
-      this._options = options || null;
-    }
-    updateSchema(schema) {
-      this._schema = schema;
-    }
-    async validate(data, allData) {
-      let result = this._checkFieldInSchema(data);
-      if (!result) {
-        result = await this.invokeValidate(data, false, allData);
-      }
-      return result.length ? result[0] : null;
-    }
-    async validateAll(data, allData) {
-      let result = this._checkFieldInSchema(data);
-      if (!result) {
-        result = await this.invokeValidate(data, true, allData);
-      }
-      return result;
-    }
-    async validateUpdate(data, allData) {
-      let result = this._checkFieldInSchema(data);
-      if (!result) {
-        result = await this.invokeValidateUpdate(data, false, allData);
-      }
-      return result.length ? result[0] : null;
-    }
-    async invokeValidate(data, all, allData) {
-      let result = [];
-      let schema = this._schema;
-      for (let key in schema) {
-        let value = schema[key];
-        let errorMessage = await this.validateRule(key, value, data[key], data, allData);
-        if (errorMessage != null) {
-          result.push({
-            key,
-            errorMessage
-          });
-          if (!all)
-            break;
-        }
-      }
-      return result;
-    }
-    async invokeValidateUpdate(data, all, allData) {
-      let result = [];
-      for (let key in data) {
-        let errorMessage = await this.validateRule(key, this._schema[key], data[key], data, allData);
-        if (errorMessage != null) {
-          result.push({
-            key,
-            errorMessage
-          });
-          if (!all)
-            break;
-        }
-      }
-      return result;
-    }
-    _checkFieldInSchema(data) {
-      var keys = Object.keys(data);
-      var keys2 = Object.keys(this._schema);
-      if (new Set(keys.concat(keys2)).size === keys2.length) {
-        return "";
-      }
-      var noExistFields = keys.filter((key) => {
-        return keys2.indexOf(key) < 0;
-      });
-      var errorMessage = formatMessage({
-        field: JSON.stringify(noExistFields)
-      }, SchemaValidator.message.TAG + SchemaValidator.message["defaultInvalid"]);
-      return [{
-        key: "invalid",
-        errorMessage
-      }];
-    }
-  }
-  function Message() {
-    return {
-      TAG: "",
-      default: "验证错误",
-      defaultInvalid: "提交的字段{field}在数据库中并不存在",
-      validateFunction: "验证无效",
-      required: "{label}必填",
-      "enum": "{label}超出范围",
-      timestamp: "{label}格式无效",
-      whitespace: "{label}不能为空",
-      typeError: "{label}类型无效",
-      date: {
-        format: "{label}日期{value}格式无效",
-        parse: "{label}日期无法解析,{value}无效",
-        invalid: "{label}日期{value}无效"
-      },
-      length: {
-        minLength: "{label}长度不能少于{minLength}",
-        maxLength: "{label}长度不能超过{maxLength}",
-        range: "{label}必须介于{minLength}和{maxLength}之间"
-      },
-      number: {
-        minimum: "{label}不能小于{minimum}",
-        maximum: "{label}不能大于{maximum}",
-        exclusiveMinimum: "{label}不能小于等于{minimum}",
-        exclusiveMaximum: "{label}不能大于等于{maximum}",
-        range: "{label}必须介于{minimum}and{maximum}之间"
-      },
-      pattern: {
-        mismatch: "{label}格式不匹配"
-      }
-    };
-  }
-  SchemaValidator.message = new Message();
-  const deepCopy = (val) => {
-    return JSON.parse(JSON.stringify(val));
-  };
-  const typeFilter = (format) => {
-    return format === "int" || format === "double" || format === "number" || format === "timestamp";
-  };
-  const getValue = (key, value, rules) => {
-    const isRuleNumType = rules.find((val) => val.format && typeFilter(val.format));
-    const isRuleBoolType = rules.find((val) => val.format && val.format === "boolean" || val.format === "bool");
-    if (!!isRuleNumType) {
-      if (!value && value !== 0) {
-        value = null;
-      } else {
-        value = isNumber(Number(value)) ? Number(value) : value;
-      }
-    }
-    if (!!isRuleBoolType) {
-      value = isBoolean(value) ? value : false;
-    }
-    return value;
-  };
-  const setDataValue = (field, formdata, value) => {
-    formdata[field] = value;
-    return value || "";
-  };
-  const getDataValue = (field, data) => {
-    return objGet(data, field);
-  };
-  const realName = (name, data = {}) => {
-    const base_name = _basePath(name);
-    if (typeof base_name === "object" && Array.isArray(base_name) && base_name.length > 1) {
-      const realname = base_name.reduce((a2, b2) => a2 += `#${b2}`, "_formdata_");
-      return realname;
-    }
-    return base_name[0] || name;
-  };
-  const isRealName = (name) => {
-    const reg = /^_formdata_#*/;
-    return reg.test(name);
-  };
-  const rawData = (object = {}, name) => {
-    let newData = JSON.parse(JSON.stringify(object));
-    let formData = {};
-    for (let i2 in newData) {
-      let path = name2arr(i2);
-      objSet(formData, path, newData[i2]);
-    }
-    return formData;
-  };
-  const name2arr = (name) => {
-    let field = name.replace("_formdata_#", "");
-    field = field.split("#").map((v2) => isNumber(v2) ? Number(v2) : v2);
-    return field;
-  };
-  const objSet = (object, path, value) => {
-    if (typeof object !== "object")
-      return object;
-    _basePath(path).reduce((o2, k, i2, _2) => {
-      if (i2 === _2.length - 1) {
-        o2[k] = value;
-        return null;
-      } else if (k in o2) {
-        return o2[k];
-      } else {
-        o2[k] = /^[0-9]{1,}$/.test(_2[i2 + 1]) ? [] : {};
-        return o2[k];
-      }
-    }, object);
-    return object;
-  };
-  function _basePath(path) {
-    if (Array.isArray(path))
-      return path;
-    return path.replace(/\[/g, ".").replace(/\]/g, "").split(".");
-  }
-  const objGet = (object, path, defaultVal = "undefined") => {
-    let newPath = _basePath(path);
-    let val = newPath.reduce((o2, k) => {
-      return (o2 || {})[k];
-    }, object);
-    return !val || val !== void 0 ? val : defaultVal;
-  };
-  const isNumber = (num) => {
-    return !isNaN(Number(num));
-  };
-  const isBoolean = (bool) => {
-    return typeof bool === "boolean";
-  };
-  const isRequiredField = (rules) => {
-    let isNoField = false;
-    for (let i2 = 0; i2 < rules.length; i2++) {
-      const ruleData = rules[i2];
-      if (ruleData.required) {
-        isNoField = true;
-        break;
-      }
-    }
-    return isNoField;
-  };
-  const isEqual = (a2, b2) => {
-    if (a2 === b2) {
-      return a2 !== 0 || 1 / a2 === 1 / b2;
-    }
-    if (a2 == null || b2 == null) {
-      return a2 === b2;
-    }
-    var classNameA = toString.call(a2), classNameB = toString.call(b2);
-    if (classNameA !== classNameB) {
-      return false;
-    }
-    switch (classNameA) {
-      case "[object RegExp]":
-      case "[object String]":
-        return "" + a2 === "" + b2;
-      case "[object Number]":
-        if (+a2 !== +a2) {
-          return +b2 !== +b2;
-        }
-        return +a2 === 0 ? 1 / +a2 === 1 / b2 : +a2 === +b2;
-      case "[object Date]":
-      case "[object Boolean]":
-        return +a2 === +b2;
-    }
-    if (classNameA == "[object Object]") {
-      var propsA = Object.getOwnPropertyNames(a2), propsB = Object.getOwnPropertyNames(b2);
-      if (propsA.length != propsB.length) {
-        return false;
-      }
-      for (var i2 = 0; i2 < propsA.length; i2++) {
-        var propName = propsA[i2];
-        if (a2[propName] !== b2[propName]) {
-          return false;
-        }
-      }
-      return true;
-    }
-    if (classNameA == "[object Array]") {
-      if (a2.toString() == b2.toString()) {
-        return true;
-      }
-      return false;
-    }
-  };
-  const _sfc_main$5 = {
-    name: "uniForms",
-    emits: ["validate", "submit"],
-    options: {
-      virtualHost: true
-    },
-    props: {
-      // 即将弃用
-      value: {
-        type: Object,
-        default() {
-          return null;
-        }
-      },
-      // vue3 替换 value 属性
-      modelValue: {
-        type: Object,
-        default() {
-          return null;
-        }
-      },
-      // 1.4.0 开始将不支持 v-model ，且废弃 value 和 modelValue
-      model: {
-        type: Object,
-        default() {
-          return null;
-        }
-      },
-      // 表单校验规则
-      rules: {
-        type: Object,
-        default() {
-          return {};
-        }
-      },
-      //校验错误信息提示方式 默认 undertext 取值 [undertext|toast|modal]
-      errShowType: {
-        type: String,
-        default: "undertext"
-      },
-      // 校验触发器方式 默认 bind 取值 [bind|submit]
-      validateTrigger: {
-        type: String,
-        default: "submit"
-      },
-      // label 位置，默认 left 取值  top/left
-      labelPosition: {
-        type: String,
-        default: "left"
-      },
-      // label 宽度
-      labelWidth: {
-        type: [String, Number],
-        default: ""
-      },
-      // label 居中方式，默认 left 取值 left/center/right
-      labelAlign: {
-        type: String,
-        default: "left"
-      },
-      border: {
-        type: Boolean,
-        default: false
-      }
-    },
-    provide() {
-      return {
-        uniForm: this
-      };
-    },
-    data() {
-      return {
-        // 表单本地值的记录，不应该与传如的值进行关联
-        formData: {},
-        formRules: {}
-      };
-    },
-    computed: {
-      // 计算数据源变化的
-      localData() {
-        const localVal = this.model || this.modelValue || this.value;
-        if (localVal) {
-          return deepCopy(localVal);
-        }
-        return {};
-      }
-    },
-    watch: {
-      // 监听数据变化 ,暂时不使用，需要单独赋值
-      // localData: {},
-      // 监听规则变化
-      rules: {
-        handler: function(val, oldVal) {
-          this.setRules(val);
-        },
-        deep: true,
-        immediate: true
-      }
-    },
-    created() {
-      let getbinddata = getApp().$vm.$.appContext.config.globalProperties.binddata;
-      if (!getbinddata) {
-        getApp().$vm.$.appContext.config.globalProperties.binddata = function(name, value, formName) {
-          if (formName) {
-            this.$refs[formName].setValue(name, value);
-          } else {
-            let formVm;
-            for (let i2 in this.$refs) {
-              const vm = this.$refs[i2];
-              if (vm && vm.$options && vm.$options.name === "uniForms") {
-                formVm = vm;
-                break;
-              }
-            }
-            if (!formVm)
-              return formatAppLog("error", "at uni_modules/uni-forms/components/uni-forms/uni-forms.vue:182", "当前 uni-froms 组件缺少 ref 属性");
-            formVm.setValue(name, value);
-          }
-        };
-      }
-      this.childrens = [];
-      this.inputChildrens = [];
-      this.setRules(this.rules);
-    },
-    methods: {
-      /**
-       * 外部调用方法
-       * 设置规则 ，主要用于小程序自定义检验规则
-       * @param {Array} rules 规则源数据
-       */
-      setRules(rules) {
-        this.formRules = Object.assign({}, this.formRules, rules);
-        this.validator = new SchemaValidator(rules);
-      },
-      /**
-       * 外部调用方法
-       * 设置数据，用于设置表单数据，公开给用户使用 ， 不支持在动态表单中使用
-       * @param {Object} key
-       * @param {Object} value
-       */
-      setValue(key, value) {
-        let example = this.childrens.find((child) => child.name === key);
-        if (!example)
-          return null;
-        this.formData[key] = getValue(key, value, this.formRules[key] && this.formRules[key].rules || []);
-        return example.onFieldChange(this.formData[key]);
-      },
-      /**
-       * 外部调用方法
-       * 手动提交校验表单
-       * 对整个表单进行校验的方法，参数为一个回调函数。
-       * @param {Array} keepitem 保留不参与校验的字段
-       * @param {type} callback 方法回调
-       */
-      validate(keepitem, callback) {
-        return this.checkAll(this.formData, keepitem, callback);
-      },
-      /**
-       * 外部调用方法
-       * 部分表单校验
-       * @param {Array|String} props 需要校验的字段
-       * @param {Function} 回调函数
-       */
-      validateField(props = [], callback) {
-        props = [].concat(props);
-        let invalidFields = {};
-        this.childrens.forEach((item) => {
-          const name = realName(item.name);
-          if (props.indexOf(name) !== -1) {
-            invalidFields = Object.assign({}, invalidFields, {
-              [name]: this.formData[name]
-            });
-          }
-        });
-        return this.checkAll(invalidFields, [], callback);
-      },
-      /**
-       * 外部调用方法
-       * 移除表单项的校验结果。传入待移除的表单项的 prop 属性或者 prop 组成的数组，如不传则移除整个表单的校验结果
-       * @param {Array|String} props 需要移除校验的字段 ，不填为所有
-       */
-      clearValidate(props = []) {
-        props = [].concat(props);
-        this.childrens.forEach((item) => {
-          if (props.length === 0) {
-            item.errMsg = "";
-          } else {
-            const name = realName(item.name);
-            if (props.indexOf(name) !== -1) {
-              item.errMsg = "";
-            }
-          }
-        });
-      },
-      /**
-       * 外部调用方法 ，即将废弃
-       * 手动提交校验表单
-       * 对整个表单进行校验的方法，参数为一个回调函数。
-       * @param {Array} keepitem 保留不参与校验的字段
-       * @param {type} callback 方法回调
-       */
-      submit(keepitem, callback, type) {
-        for (let i2 in this.dataValue) {
-          const itemData = this.childrens.find((v2) => v2.name === i2);
-          if (itemData) {
-            if (this.formData[i2] === void 0) {
-              this.formData[i2] = this._getValue(i2, this.dataValue[i2]);
-            }
-          }
-        }
-        if (!type) {
-          formatAppLog("warn", "at uni_modules/uni-forms/components/uni-forms/uni-forms.vue:289", "submit 方法即将废弃，请使用validate方法代替！");
-        }
-        return this.checkAll(this.formData, keepitem, callback, "submit");
-      },
-      // 校验所有
-      async checkAll(invalidFields, keepitem, callback, type) {
-        if (!this.validator)
-          return;
-        let childrens = [];
-        for (let i2 in invalidFields) {
-          const item = this.childrens.find((v2) => realName(v2.name) === i2);
-          if (item) {
-            childrens.push(item);
-          }
-        }
-        if (!callback && typeof keepitem === "function") {
-          callback = keepitem;
-        }
-        let promise;
-        if (!callback && typeof callback !== "function" && Promise) {
-          promise = new Promise((resolve, reject) => {
-            callback = function(valid, invalidFields2) {
-              !valid ? resolve(invalidFields2) : reject(valid);
-            };
-          });
-        }
-        let results = [];
-        let tempFormData = JSON.parse(JSON.stringify(invalidFields));
-        for (let i2 in childrens) {
-          const child = childrens[i2];
-          let name = realName(child.name);
-          const result = await child.onFieldChange(tempFormData[name]);
-          if (result) {
-            results.push(result);
-            if (this.errShowType === "toast" || this.errShowType === "modal")
-              break;
-          }
-        }
-        if (Array.isArray(results)) {
-          if (results.length === 0)
-            results = null;
-        }
-        if (Array.isArray(keepitem)) {
-          keepitem.forEach((v2) => {
-            let vName = realName(v2);
-            let value = getDataValue(v2, this.localData);
-            if (value !== void 0) {
-              tempFormData[vName] = value;
-            }
-          });
-        }
-        if (type === "submit") {
-          this.$emit("submit", {
-            detail: {
-              value: tempFormData,
-              errors: results
-            }
-          });
-        } else {
-          this.$emit("validate", results);
-        }
-        let resetFormData = {};
-        resetFormData = rawData(tempFormData, this.name);
-        callback && typeof callback === "function" && callback(results, resetFormData);
-        if (promise && callback) {
-          return promise;
-        } else {
-          return null;
-        }
-      },
-      /**
-       * 返回validate事件
-       * @param {Object} result
-       */
-      validateCheck(result) {
-        this.$emit("validate", result);
-      },
-      _getValue: getValue,
-      _isRequiredField: isRequiredField,
-      _setDataValue: setDataValue,
-      _getDataValue: getDataValue,
-      _realName: realName,
-      _isRealName: isRealName,
-      _isEqual: isEqual
-    }
-  };
-  function _sfc_render$3(_ctx, _cache, $props, $setup, $data, $options) {
-    return vue.openBlock(), vue.createElementBlock("view", { class: "uni-forms" }, [
-      vue.createElementVNode("form", null, [
-        vue.renderSlot(_ctx.$slots, "default", {}, void 0, true)
-      ])
-    ]);
-  }
-  const __easycom_6 = /* @__PURE__ */ _export_sfc(_sfc_main$5, [["render", _sfc_render$3], ["__scopeId", "data-v-9a1e3c32"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-forms/components/uni-forms/uni-forms.vue"]]);
-  const _sfc_main$4 = {
+  const __easycom_5 = /* @__PURE__ */ _export_sfc(_sfc_main$7, [["render", _sfc_render$3], ["__scopeId", "data-v-9802168a"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.vue"]]);
+  const _sfc_main$6 = {
     name: "UniCard",
     emits: ["click"],
     props: {
@@ -20688,8 +27959,8 @@ ${i3}
       /* CLASS, STYLE */
     );
   }
-  const __easycom_7 = /* @__PURE__ */ _export_sfc(_sfc_main$4, [["render", _sfc_render$2], ["__scopeId", "data-v-ae4bee67"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-card/components/uni-card/uni-card.vue"]]);
-  const _sfc_main$3 = {
+  const __easycom_7 = /* @__PURE__ */ _export_sfc(_sfc_main$6, [["render", _sfc_render$2], ["__scopeId", "data-v-ae4bee67"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-card/components/uni-card/uni-card.vue"]]);
+  const _sfc_main$5 = {
     __name: "EditPet",
     setup(__props) {
       const baseFormData = vue.ref({
@@ -20722,12 +27993,12 @@ ${i3}
       ]);
       return (_ctx, _cache) => {
         const _component_uni_file_picker = resolveEasycom(vue.resolveDynamicComponent("uni-file-picker"), __easycom_0$1);
-        const _component_uni_forms_item = resolveEasycom(vue.resolveDynamicComponent("uni-forms-item"), __easycom_1);
+        const _component_uni_forms_item = resolveEasycom(vue.resolveDynamicComponent("uni-forms-item"), __easycom_0$6);
         const _component_uni_easyinput = resolveEasycom(vue.resolveDynamicComponent("uni-easyinput"), __easycom_2);
         const _component_uni_data_select = resolveEasycom(vue.resolveDynamicComponent("uni-data-select"), __easycom_3);
         const _component_uni_data_checkbox = resolveEasycom(vue.resolveDynamicComponent("uni-data-checkbox"), __easycom_4);
         const _component_uni_datetime_picker = resolveEasycom(vue.resolveDynamicComponent("uni-datetime-picker"), __easycom_5);
-        const _component_uni_forms = resolveEasycom(vue.resolveDynamicComponent("uni-forms"), __easycom_6);
+        const _component_uni_forms = resolveEasycom(vue.resolveDynamicComponent("uni-forms"), __easycom_1$1);
         const _component_uni_card = resolveEasycom(vue.resolveDynamicComponent("uni-card"), __easycom_7);
         return vue.openBlock(), vue.createElementBlock(
           vue.Fragment,
@@ -20840,8 +28111,8 @@ ${i3}
       };
     }
   };
-  const PagesMyEditPet = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-a65bf837"], ["__file", "D:/graduationProject/pet-front-end/pages/my/EditPet.vue"]]);
-  const _sfc_main$2 = {
+  const PagesMyEditPet = /* @__PURE__ */ _export_sfc(_sfc_main$5, [["__scopeId", "data-v-a65bf837"], ["__file", "D:/graduationProject/pet-front-end/pages/my/EditPet.vue"]]);
+  const _sfc_main$4 = {
     data() {
       return {};
     },
@@ -20850,9 +28121,9 @@ ${i3}
   function _sfc_render$1(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view");
   }
-  const PagesHomeOrderService = /* @__PURE__ */ _export_sfc(_sfc_main$2, [["render", _sfc_render$1], ["__file", "D:/graduationProject/pet-front-end/pages/home/OrderService.vue"]]);
+  const PagesHomeOrderService = /* @__PURE__ */ _export_sfc(_sfc_main$4, [["render", _sfc_render$1], ["__file", "D:/graduationProject/pet-front-end/pages/home/OrderService.vue"]]);
   const _imports_0 = "/static/pdf3.png";
-  const _sfc_main$1 = {
+  const _sfc_main$3 = {
     data() {
       return {};
     },
@@ -20961,7 +28232,306 @@ ${i3}
       ])
     ]);
   }
-  const PagesCatConfirmOrder = /* @__PURE__ */ _export_sfc(_sfc_main$1, [["render", _sfc_render], ["__file", "D:/graduationProject/pet-front-end/pages/cat/ConfirmOrder.vue"]]);
+  const PagesCatConfirmOrder = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["render", _sfc_render], ["__file", "D:/graduationProject/pet-front-end/pages/cat/ConfirmOrder.vue"]]);
+  const rules = {
+    phone: {
+      rules: [
+        {
+          required: true,
+          errorMessage: "请填写电话"
+        },
+        {
+          validateFunction: function(rule, value, data, callback) {
+            return new Promise((resolve, reject) => {
+              if (!/^[1][3,4,5,7,8,9][0-9]{9}$/.test(value)) {
+                reject(new Error("请输入正确的手机号"));
+              } else {
+                resolve();
+              }
+            });
+          }
+        }
+      ]
+    },
+    // 密码(以字母开头，长度在6~18之间，只能包含字母、数字和下划线)：^[a-zA-Z]\w{5,17}$
+    password: {
+      rules: [
+        {
+          required: true,
+          errorMessage: "请填写密码"
+        },
+        {
+          validateFunction: function(rule, value, data, callback) {
+            return new Promise((resolve, reject) => {
+              if (!/^[a-zA-Z]\w{5,17}$/.test(value)) {
+                reject(new Error("密码以字母开头，长度在6~18之间，只能包含字母、数字和下划线"));
+              } else {
+                resolve();
+              }
+            });
+          }
+        }
+      ]
+    }
+  };
+  const _sfc_main$2 = {
+    __name: "login",
+    setup(__props) {
+      const store = useUserStore();
+      const formData = vue.ref({
+        phone: "",
+        password: ""
+      });
+      const form = vue.ref();
+      const login = async () => {
+        uni.showLoading();
+        try {
+          await form.value.validate();
+          const result = await request("/user/login", formData.value, {
+            method: "post"
+          });
+          formatAppLog("log", "at pages/login/login.vue:60", result);
+          uni.showToast({
+            title: result.message
+          });
+          if (result.code === 200) {
+            store.updateUser(result.data.user);
+            store.updateToken(result.data.token);
+            formData.value = {
+              phone: "",
+              password: ""
+            };
+            uni.switchTab({
+              url: "/pages/home/index"
+            });
+          }
+        } catch (e2) {
+          formatAppLog("log", "at pages/login/login.vue:76", e2);
+        } finally {
+          uni.hideLoading();
+        }
+      };
+      const register = () => {
+        uni.navigateTo({
+          url: "/pages/login/register"
+        });
+      };
+      onReady(() => {
+        form.value.setRules(rules);
+      });
+      return (_ctx, _cache) => {
+        const _component_uni_forms_item = resolveEasycom(vue.resolveDynamicComponent("uni-forms-item"), __easycom_0$6);
+        const _component_uni_forms = resolveEasycom(vue.resolveDynamicComponent("uni-forms"), __easycom_1$1);
+        return vue.openBlock(), vue.createElementBlock("view", { style: { "height": "100vh", "background": "#fff" } }, [
+          vue.createElementVNode("view", { class: "img-a" }, [
+            vue.createElementVNode("view", { class: "t-b" }, [
+              vue.createTextVNode(" 您好， "),
+              vue.createElementVNode("br"),
+              vue.createTextVNode(" 欢迎使用，爱宠之家 ")
+            ])
+          ]),
+          vue.createElementVNode("view", {
+            class: "login-view",
+            style: {}
+          }, [
+            vue.createElementVNode("view", { class: "t-login" }, [
+              vue.createVNode(_component_uni_forms, {
+                class: "cl",
+                modelValue: formData.value,
+                ref_key: "form",
+                ref: form
+              }, {
+                default: vue.withCtx(() => [
+                  vue.createElementVNode("view", { class: "t-a" }, [
+                    vue.createElementVNode("text", { class: "txt" }, "手机号"),
+                    vue.createVNode(_component_uni_forms_item, { name: "phone" }, {
+                      default: vue.withCtx(() => [
+                        vue.withDirectives(vue.createElementVNode(
+                          "input",
+                          {
+                            type: "number",
+                            name: "phone",
+                            placeholder: "请输入您的手机号",
+                            maxlength: "11",
+                            "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => formData.value.phone = $event)
+                          },
+                          null,
+                          512
+                          /* NEED_PATCH */
+                        ), [
+                          [vue.vModelText, formData.value.phone]
+                        ])
+                      ]),
+                      _: 1
+                      /* STABLE */
+                    })
+                  ]),
+                  vue.createElementVNode("view", { class: "t-a" }, [
+                    vue.createElementVNode("text", { class: "txt" }, "密码"),
+                    vue.createVNode(_component_uni_forms_item, { name: "password" }, {
+                      default: vue.withCtx(() => [
+                        vue.withDirectives(vue.createElementVNode(
+                          "input",
+                          {
+                            type: "password",
+                            name: "password",
+                            maxlength: "18",
+                            placeholder: "请输入您的密码",
+                            "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => formData.value.password = $event)
+                          },
+                          null,
+                          512
+                          /* NEED_PATCH */
+                        ), [
+                          [vue.vModelText, formData.value.password]
+                        ]),
+                        vue.createCommentVNode(" 后面在补眼睛 ")
+                      ]),
+                      _: 1
+                      /* STABLE */
+                    })
+                  ]),
+                  vue.createElementVNode("button", { onClick: login }, "登录"),
+                  vue.createElementVNode("view", {
+                    class: "reg",
+                    onClick: register
+                  }, " 注册 ")
+                ]),
+                _: 1
+                /* STABLE */
+              }, 8, ["modelValue"])
+            ])
+          ])
+        ]);
+      };
+    }
+  };
+  const PagesLoginLogin = /* @__PURE__ */ _export_sfc(_sfc_main$2, [["__file", "D:/graduationProject/pet-front-end/pages/login/login.vue"]]);
+  const _sfc_main$1 = {
+    __name: "register",
+    setup(__props) {
+      const formData = vue.ref({
+        phone: "",
+        password: ""
+      });
+      const form = vue.ref();
+      const register = async () => {
+        uni.showLoading();
+        try {
+          await form.value.validate();
+          const result = await request("/user", formData.value, {
+            method: "post"
+          });
+          uni.showToast({
+            title: result.message
+          });
+          if (result.code === 200) {
+            formData.value = {
+              phone: "",
+              password: ""
+            };
+            setTimeout(() => {
+              uni.navigateBack({
+                delta: 1,
+                animationType: "slide-out-left",
+                animationDuration: 1e3
+              });
+            }, 1e3);
+            return;
+          }
+        } catch (e2) {
+          formatAppLog("error", "at pages/login/register.vue:72", e2);
+        } finally {
+          uni.hideLoading();
+        }
+      };
+      onReady(() => {
+        form.value.setRules(rules);
+      });
+      return (_ctx, _cache) => {
+        const _component_uni_forms_item = resolveEasycom(vue.resolveDynamicComponent("uni-forms-item"), __easycom_0$6);
+        const _component_uni_forms = resolveEasycom(vue.resolveDynamicComponent("uni-forms"), __easycom_1$1);
+        return vue.openBlock(), vue.createElementBlock("view", { style: { "height": "100vh", "background": "#fff" } }, [
+          vue.createElementVNode("view", { class: "img-a" }, [
+            vue.createElementVNode("view", { class: "t-b" }, [
+              vue.createTextVNode(" 您好， "),
+              vue.createElementVNode("br"),
+              vue.createTextVNode(" 欢迎使用，爱宠之家 ")
+            ])
+          ]),
+          vue.createElementVNode("view", {
+            class: "login-view",
+            style: {}
+          }, [
+            vue.createElementVNode("view", { class: "t-login" }, [
+              vue.createVNode(_component_uni_forms, {
+                class: "cl",
+                modelValue: formData.value,
+                ref_key: "form",
+                ref: form
+              }, {
+                default: vue.withCtx(() => [
+                  vue.createElementVNode("view", { class: "t-a" }, [
+                    vue.createElementVNode("text", { class: "txt" }, "手机号"),
+                    vue.createVNode(_component_uni_forms_item, { name: "phone" }, {
+                      default: vue.withCtx(() => [
+                        vue.withDirectives(vue.createElementVNode(
+                          "input",
+                          {
+                            type: "number",
+                            name: "phone",
+                            placeholder: "请输入您的手机号",
+                            maxlength: "11",
+                            "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => formData.value.phone = $event)
+                          },
+                          null,
+                          512
+                          /* NEED_PATCH */
+                        ), [
+                          [vue.vModelText, formData.value.phone]
+                        ])
+                      ]),
+                      _: 1
+                      /* STABLE */
+                    })
+                  ]),
+                  vue.createElementVNode("view", { class: "t-a" }, [
+                    vue.createElementVNode("text", { class: "txt" }, "密码"),
+                    vue.createVNode(_component_uni_forms_item, { name: "password" }, {
+                      default: vue.withCtx(() => [
+                        vue.withDirectives(vue.createElementVNode(
+                          "input",
+                          {
+                            type: "password",
+                            name: "password",
+                            maxlength: "18",
+                            placeholder: "请输入您的密码",
+                            "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => formData.value.password = $event)
+                          },
+                          null,
+                          512
+                          /* NEED_PATCH */
+                        ), [
+                          [vue.vModelText, formData.value.password]
+                        ]),
+                        vue.createCommentVNode(" 后面在补眼睛 ")
+                      ]),
+                      _: 1
+                      /* STABLE */
+                    })
+                  ]),
+                  vue.createElementVNode("button", { onClick: register }, "注册")
+                ]),
+                _: 1
+                /* STABLE */
+              }, 8, ["modelValue"])
+            ])
+          ])
+        ]);
+      };
+    }
+  };
+  const PagesLoginRegister = /* @__PURE__ */ _export_sfc(_sfc_main$1, [["__file", "D:/graduationProject/pet-front-end/pages/login/register.vue"]]);
   __definePage("pages/my/index", PagesMyIndex);
   __definePage("pages/home/index", PagesHomeIndex);
   __definePage("pages/messages/index", PagesMessagesIndex);
@@ -20983,23 +28553,151 @@ ${i3}
   __definePage("pages/my/EditPet", PagesMyEditPet);
   __definePage("pages/home/OrderService", PagesHomeOrderService);
   __definePage("pages/cat/ConfirmOrder", PagesCatConfirmOrder);
+  __definePage("pages/login/login", PagesLoginLogin);
+  __definePage("pages/login/register", PagesLoginRegister);
+  const whiteList = [
+    "/pages/login/login",
+    "/pages/login/register",
+    ,
+    "/pages/home/index",
+    "/pages/shop/index",
+    "/pages/category/index",
+    "/pages/category/categoryproductlist",
+    "/pages/category/productdetail",
+    "/pages/home/DetailService",
+    "/pages/detail/detail",
+    "/pages/community/PublishContent"
+  ];
+  const loginPage = "/pages/login/login";
+  function initPermission() {
+    const list = ["navigateTo", "reLaunch", "switchTab"];
+    list.forEach((item) => {
+      uni.addInterceptor(item, {
+        invoke(e2) {
+          let token = null;
+          token = uni.getStorageSync("token");
+          let url = e2.url.split("?")[0];
+          let notNeed = whiteList.includes(url);
+          if (notNeed) {
+            return e2;
+          } else {
+            if (!token) {
+              uni.showToast({
+                title: "请先登录",
+                duration: 2e3,
+                icon: "none"
+              });
+              uni.navigateTo({
+                url: loginPage
+              });
+              return false;
+            } else {
+              return e2;
+            }
+          }
+        },
+        fail(err) {
+          formatAppLog("log", "at utils/permission.js:47", err);
+        }
+      });
+    });
+  }
   const _sfc_main = {
     onLaunch: function() {
-      formatAppLog("warn", "at App.vue:4", "当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！");
-      formatAppLog("log", "at App.vue:5", "App Launch");
-    },
-    onShow: function() {
-      formatAppLog("log", "at App.vue:8", "App Show");
-    },
-    onHide: function() {
-      formatAppLog("log", "at App.vue:11", "App Hide");
+      initPermission();
     }
   };
   const App = /* @__PURE__ */ _export_sfc(_sfc_main, [["__file", "D:/graduationProject/pet-front-end/App.vue"]]);
+  function get(state, path) {
+    return path.reduce((obj, p2) => {
+      return obj == null ? void 0 : obj[p2];
+    }, state);
+  }
+  function set(state, path, val) {
+    return path.slice(0, -1).reduce((obj, p2) => {
+      if (!/^(__proto__)$/.test(p2)) {
+        return obj[p2] = obj[p2] || {};
+      } else
+        return {};
+    }, state)[path[path.length - 1]] = val, state;
+  }
+  function pick(baseState, paths) {
+    return paths.reduce((substate, path) => {
+      const pathArray = path.split(".");
+      return set(
+        substate,
+        pathArray,
+        get(baseState, pathArray)
+      );
+    }, {});
+  }
+  const isObject = (v2) => typeof v2 === "object" && v2 !== null;
+  const normalizeOptions = (options, globalOptions) => {
+    options = isObject(options) ? options : /* @__PURE__ */ Object.create(null);
+    return new Proxy(options, {
+      get(t2, p2, r2) {
+        return Reflect.get(t2, p2, r2) || Reflect.get(globalOptions, p2, r2);
+      }
+    });
+  };
+  function passage(key) {
+    return key;
+  }
+  function createUnistorage(globalOptions = {}) {
+    const { key: normalizeKey = passage } = globalOptions || {};
+    if (globalOptions == null ? void 0 : globalOptions.key) {
+      delete globalOptions.key;
+    }
+    return function(ctx) {
+      {
+        const { store, options } = ctx;
+        let { unistorage } = options || {};
+        if (!unistorage)
+          return;
+        const {
+          paths = null,
+          afterRestore,
+          beforeRestore,
+          serializer = {
+            serialize: JSON.stringify,
+            deserialize: JSON.parse
+          },
+          key = store.$id
+        } = normalizeOptions(unistorage, globalOptions);
+        beforeRestore == null ? void 0 : beforeRestore(ctx);
+        const normalizedKey = normalizeKey(key);
+        try {
+          const fromStorage = uni.getStorageSync(normalizedKey);
+          if (fromStorage) {
+            store.$patch(serializer.deserialize(fromStorage));
+          }
+        } catch (_error) {
+        }
+        afterRestore == null ? void 0 : afterRestore(ctx);
+        store.$subscribe(
+          (_2, state) => {
+            try {
+              const toStore = Array.isArray(paths) ? pick(state, paths) : state;
+              uni.setStorageSync(
+                normalizedKey,
+                serializer.serialize(toStore)
+              );
+            } catch (_error) {
+            }
+          },
+          { detached: true }
+        );
+      }
+    };
+  }
   function createApp() {
     const app = vue.createVueApp(App);
+    const store = createPinia();
+    store.use(createUnistorage());
+    app.use(store);
     return {
-      app
+      app,
+      Pinia
     };
   }
   const { app: __app__, Vuex: __Vuex__, Pinia: __Pinia__ } = createApp();

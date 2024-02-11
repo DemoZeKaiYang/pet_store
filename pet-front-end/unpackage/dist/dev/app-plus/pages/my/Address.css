@@ -90,3 +90,12 @@
 .moren uni-text[data-v-eda7be84] {
   font-size: 1.875rem;
 }
+.addAddress[data-v-eda7be84] {
+  position: fixed;
+  left: 10%;
+  bottom: 10%;
+  width: 80%;
+  height: 3.125rem;
+  border-radius: 20px;
+  font-size: 1.25rem;
+}

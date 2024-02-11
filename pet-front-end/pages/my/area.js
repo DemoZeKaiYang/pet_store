@@ -5554,9 +5554,9 @@ let AreaJson = [
  */
 
 export function getProvinces() {
-	var provinces = [];
+	let provinces = [];
 
-	for (var i = 0; i < AreaJson.length; i++) {
+	for (let i = 0; i < AreaJson.length; i++) {
 		provinces.push(AreaJson[i].name);
 	}
 
@@ -5568,13 +5568,13 @@ export function getProvinces() {
 
 
 export function getMyCity(provinceIndex) {
-	var citys = [];
+	let citys = []
 
-	for (var i = 0; i < AreaJson[provinceIndex].city.length; i++) {
-		citys.push(AreaJson[provinceIndex].city[i].name);
+	for (let i = 0; i < AreaJson[provinceIndex].city.length; i++) {
+		citys.push(AreaJson[provinceIndex].city[i].name)
 	}
 
-	return citys;
+	return citys
 }
 /**
  * 获取省市对应的所有地区
@@ -5582,7 +5582,7 @@ export function getMyCity(provinceIndex) {
 
 
 export function getAreas(provinceIndex, cityIndex) {
-	var areas = [];
+	let areas = [];
 	areas = AreaJson[provinceIndex].city[cityIndex].area;
 	return areas;
 }

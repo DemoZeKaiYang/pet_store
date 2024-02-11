@@ -10,7 +10,7 @@
       </uni-grid-item>
       <uni-grid-item>
         <view class="grid-item-box" style="background-color: #fff;">
-             <icon-base type="fukuan" icColor="#2979FF" size="60"></icon-base>
+             <icon-base type="fukuan" icColor="#2979FF" size="50"></icon-base>
           <text class="text">待付款</text>
         </view>
       </uni-grid-item>

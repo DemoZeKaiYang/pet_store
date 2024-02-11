@@ -77,21 +77,21 @@
     {
       "path": "pages/my/EditPerson",
       "style": {
-        "navigationBarTitleText": "",
+        "navigationBarTitleText": "编辑个人信息",
         "enablePullDownRefresh": false
       }
     },
     {
       "path": "pages/home/DetailService",
       "style": {
-        "navigationBarTitleText": "",
+        "navigationBarTitleText": "详细服务",
         "enablePullDownRefresh": false
       }
     },
     {
       "path": "pages/my/OrderDetail",
       "style": {
-        "navigationBarTitleText": "",
+        "navigationBarTitleText": "详细订单",
         "enablePullDownRefresh": false
       }
     },
@@ -114,7 +114,7 @@
       "path" : "pages/messages/Chat",
       "style" : 
       {
-        "navigationBarTitleText" : "",
+        "navigationBarTitleText" : "聊天",
         "enablePullDownRefresh" : false
       }
     },
@@ -122,7 +122,7 @@
       "path" : "pages/community/PublishContent",
       "style" : 
       {
-        "navigationBarTitleText" : "",
+        "navigationBarTitleText" : "推送内容",
         "enablePullDownRefresh" : false
       }
     },
@@ -130,7 +130,7 @@
     {
       "path": "pages/cat/ConfirmAddress",
       "style": {
-        "navigationBarTitleText" : "",
+        "navigationBarTitleText" : "确认地址",
         "enablePullDownRefresh" : false
       }
     },
@@ -138,7 +138,7 @@
       "path" : "pages/my/EditPet",
       "style" : 
       {
-        "navigationBarTitleText" : "",
+        "navigationBarTitleText" : "编辑宠物",
         "enablePullDownRefresh" : false
       }
     },
@@ -146,7 +146,7 @@
       "path" : "pages/home/OrderService",
       "style" : 
       {
-        "navigationBarTitleText" : "",
+        "navigationBarTitleText" : "服务订单",
         "enablePullDownRefresh" : false
       }
     },
@@ -154,7 +154,23 @@
       "path" : "pages/cat/ConfirmOrder",
       "style" : 
       {
-        "navigationBarTitleText" : "",
+        "navigationBarTitleText" : "确认订单",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/login/login",
+      "style" : 
+      {
+        "navigationBarTitleText" : "登录",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/login/register",
+      "style" : 
+      {
+        "navigationBarTitleText" : "注册",
         "enablePullDownRefresh" : false
       }
     }

@@ -74,7 +74,7 @@
         }
       }
     },
-    "arguments": "{\"name\":\"\",\"path\":\"\",\"query\":\"\"}",
+    "arguments": "{\"path\":\"pages/my/EditAddress\"}",
     "allowsInlineMediaPlayback": true,
     "safearea": {
       "background": "#ffffff",
@@ -140,11 +140,7 @@
         }
       ],
       "selectedIndex": 0,
-      "shown": true,
-      "child": [
-        "lauchwebview"
-      ],
-      "selected": 4
+      "shown": true
     }
   },
   "launch_path": "__uniappview.html"
