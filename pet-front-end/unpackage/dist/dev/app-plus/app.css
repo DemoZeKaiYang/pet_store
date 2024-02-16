@@ -6,8 +6,6 @@
 /* 水平间距 */
 @font-face {
   font-family: "iconfont"; /* Project id 4391130 */
-  /* url('iconfont.woff2?t=1706858808518') format('woff2'),
-       url('iconfont.woff?t=1706858808518') format('woff'), */
   src: url('static/iconfont/iconfont.ttf') format('truetype');
 }
 .iconfont {
@@ -17,17 +15,17 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-.icon-wancheng:before {
-  content: "\e65c";
+.icon-quanchangbaoyou:before {
+  content: "\e619";
 }
-.icon-icon-receive:before {
-  content: "\e62d";
+.icon-wuliyoutuihuo:before {
+  content: "\e61d";
 }
-.icon-dingdan:before {
-  content: "\e645";
+.icon-huodaofukuan:before {
+  content: "\e61e";
 }
-.icon-fukuan:before {
-  content: "\e62c";
+.icon-zhengguifapiao:before {
+  content: "\e61f";
 }
 .icon-fenleiorguangchangorqitatianchong:before {
   content: "\e67d";

@@ -1,15 +1,27 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
-
+const fs = require('fs')
+const path = require('path')
 app.use(cors())
 app.use(express.json())
 //图片静态资源
 app.use('/uploads', express.static('./uploads'))
+app.use('/pet_uploads', express.static('./pet_uploads'))
+app.use('/good_uploads', express.static('./good_uploads'))
+
 const UserRouter = require('./router/UserRouter.js')
 const AddressRouter = require('./router/AddressRouter.js')
+const PetRouter = require('./router/PetRouter')
+const PetKindRouter = require('./router/PetKindRouter.js')
+const ShopRouter = require('./router/ShopRouter')
+const GoodRouter = require('./router/GoodRouter')
 app.use(UserRouter)
 app.use(AddressRouter)
+app.use(PetRouter)
+app.use(PetKindRouter)
+app.use(ShopRouter)
+app.use(GoodRouter)
 
 app.listen(9000, () => {
   console.log('服务已经启动，端口9000')

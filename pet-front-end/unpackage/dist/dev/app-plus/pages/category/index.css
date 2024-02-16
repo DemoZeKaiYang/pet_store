@@ -7,7 +7,7 @@
 }
 .category-list .left,
 .category-list .right {
-  top: 0px;
+  top: 0;
   bottom: 0;
 }
 .category-list .left {
@@ -15,6 +15,7 @@
   width: 24%;
   left: 0;
   background-color: #f2f2f2;
+  top: 2.75rem;
 }
 .category-list .left .row {
   width: 100%;
@@ -54,6 +55,7 @@
   margin-left: 24%;
   width: 76%;
   left: 24%;
+  white-space: nowrap;
 }
 .category-list .right .category {
   width: 94%;

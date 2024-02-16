@@ -676,6 +676,14 @@
   font-size: 0.78125rem;
   color: #909399;
 }
+[data-v-bfd5e8ec] .uni-section-header__slot-right {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+.pet-swiper-item[data-v-bfd5e8ec] {
+  display: flex;
+}
 /* 水平间距 */
 /* 水平间距 */
 .uni-badge--x[data-v-c97cb896] {

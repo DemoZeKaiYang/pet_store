@@ -61,6 +61,13 @@
   font-size: 0.8125rem;
   font-weight: bold;
   color: #333;
+  white-space: nowrap;
+  /* 不允许文本换行 */
+  overflow: hidden;
+  /* 隐藏超出容器的部分 */
+  text-overflow: ellipsis;
+  /* 当文本溢出时显示省略号 */
+  width: 15.625rem;
 }
 .noaddress[data-v-eda7be84] {
   margin-left: 1.25rem;

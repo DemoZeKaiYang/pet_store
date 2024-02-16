@@ -1,25 +1,16 @@
 <template>
 
-
-  <uni-nav-bar statusBar="false" left-icon="left" right-icon="cart" color="white" title="" background-color="#007AFF"
-    @clickLeft="backLayer"  @clickRight="gotoCat"/>
-
-
-
-
   <!-- 轮播图 -->
   <view class="">
     <swiper class="swiper" circular :indicator-dots="true" :autoplay="autoplay" :interval="interval"
       :duration="duration">
-      <swiper-item>
-        <view class="swiper-item uni-bg-red">A</view>
-      </swiper-item>
-      <swiper-item>
-        <view class="swiper-item uni-bg-green">B</view>
-      </swiper-item>
-      <swiper-item>
-        <view class="swiper-item uni-bg-blue">C</view>
-      </swiper-item>
+      <template v-for="(g,index) in good.good_images">
+        <swiper-item v-if="g.good_image_type===0">
+          <view class="swiper-item">
+            <image class="swiper-img" :src="`${devUrl}/good_uploads/`+g.good_image_url" mode="scaleToFill"></image>
+          </view>
+        </swiper-item>
+      </template>
     </swiper>
   </view>
 
@@ -27,21 +18,22 @@
   <view class="detail">
     <!-- 价格 -->
     <view class="price">
-      <span class="goods-price">￥22.9</span>
-      <span class="goods-origin-price">原价￥<del>29.9</del></span>
+      <span class="goods-price">￥{{good.good_price}}</span>
+      <span class="goods-origin-price">原价￥<del>{{good.good_origin_price}}</del></span>
     </view>
     <!-- 描述 -->
     <view class="describe">
-      <b>麦德氏In-Vet医护系列益生菌25g/盒</b>
+      <b>{{good.good_name}}</b>
     </view>
     <!-- 已售 -->
-    <view class="rate-num">已售41</view>
+    <view class="rate-num">已售{{good.good_sold_num}}</view>
   </view>
 
   <!-- 商品页面 -->
   <view class="goods-list-image">
-    <img src="/static/image/longPic1.jpg" alt="" />
-    <img src="/static/image/longPic.jpg" alt="" />
+    <template v-for="(g,index) in good.good_images">
+      <img :src="`${devUrl}/good_uploads/`+g.good_image_url" alt="" v-if="g.good_image_type===1" mode="scaleToFill" />
+    </template>
   </view>
 
   <!-- 加入购物车或者立即购买 -->
@@ -52,17 +44,68 @@
 </template>
 <script setup>
   import {
-    onNavigationBarButtonTap
+    onNavigationBarButtonTap,
+    onLoad
   } from '@dcloudio/uni-app'
+  import {
+    ref
+  } from 'vue'
+  import request from '@/utils/request';
+  import {
+    devUrl
+  } from '@/config.js'
+  const options = ref([{
+    icon: 'cart',
+    text: '购物车',
+    info: 2
+  }])
+  const buttonGroup = ref([{
+      text: '加入购物车',
+      backgroundColor: '#ff0000',
+      color: '#fff'
+    },
+    {
+      text: '立即购买',
+      backgroundColor: '#ffa200',
+      color: '#fff'
+    }
+  ])
+
+
+  const goodId = ref('')
+  const good = ref({})
   const backLayer = () => {
-    uni.navigateBack()
+    uni.navigateBack(1)
   }
-    
-  const gotoCat=()=>{
+
+  const gotoCat = () => {
     uni.navigateTo({
-      url:"/pages/cat/cat"
+      url: "/pages/cat/cat"
     })
   }
+  const getData = async () => {
+    const result = await request('/good', {
+      good_id: goodId.value
+    }, {
+      method: 'post'
+    })
+    if (result.code === 200) {
+      good.value = result.data
+    }
+  }
+  onLoad((query) => {
+    if (Object.keys(query).length !== 0) {
+      let obj = {}
+      for (let i in query) {
+        obj[decodeURIComponent(i)] = decodeURIComponent(query[i])
+      }
+      goodId.value = obj.good_id
+      getData()
+    }
+
+
+
+  })
 </script>
 <style lang="scss">
   .swiper {
@@ -71,9 +114,14 @@
 
   .swiper-item {
     display: block;
-    height: 500rpx;
+    height: 460rpx;
+    width: 100%;
     line-height: 500rpx;
     text-align: center;
+
+    .swiper-img {
+      width: 100%;
+    }
   }
 
   .swiper-list {
@@ -103,9 +151,10 @@
   }
 
   .goods-list-image {
+    padding: 20rpx;
 
     img {
-      width: 750rpx;
+      width: 710rpx;
     }
   }
 

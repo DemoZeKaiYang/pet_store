@@ -59,7 +59,7 @@
   //编辑地址:要传递props
   const editAddress = (item) => {
     const targetPage = '/pages/my/EditAddress';
-    console.log(item);
+
 
     // 拼接查询字符串
     const queryString = Object.keys(item)
@@ -82,17 +82,9 @@
       content: '确认要删除该地址吗?',
       confirmText: '删除',
       confirmColor: colors.value,
-      //     success: (res) => {
-      //       if (res.confirm) {
-      //         uni.showToast({
-      //           title: '删除成功~',
-      //           icon: 'none'
-      //         })
-      //       }
-      //     }
+
     })
     if (confirm) {
-
       const delResult = await request('/address/del', {
         address_id: item.address_id
       }, {

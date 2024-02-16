@@ -3,29 +3,38 @@
     <view class="category-list">
       <!-- 左侧分类导航 -->
       <scroll-view scroll-y="true" class="left">
-        <view class="row" v-for="(category, index) in categoryList" :key="category.cid"
-          :class="[category.cid == showCategoryIndex ? 'on' : '']" @click="showCategory(category.cid)">
+        <view class="row" :class="[showAll? 'on' : '']" @click="showCategory(null)">
           <view class="text">
             <view class="block"></view>
-            {{ category.main_name }}
+            全部
+          </view>
+        </view>
+        <view class="row" v-for="(kind, index) in kindList" :key="kind.good_kind_order"
+          :class="[kind.good_kind_order== showCategoryIndex ? 'on' : '']" @click="showCategory(kind.good_kind_order)">
+          <view class="text">
+            <view class="block"></view>
+            {{ kind.good_kind_name}}
           </view>
         </view>
       </scroll-view>
       <!-- 右侧子导航 -->
       <scroll-view scroll-y="true" class="right">
-        <view class="category" v-for="(category, index) in categoryList" :key="index"
-          v-show="category.cid == showCategoryIndex">
-          <view v-for="(box, i) in category.data" :key="i">
+        <!-- :style="{height:kind.children.length>3?'500rpx':'300rpx'}" -->
+        <view class="category" v-for="(kind, index) in kindList" :key="kind.good_kind_order"
+          v-show="showAll || kind.good_kind_order === showCategoryIndex">
+          <view>
             <view style="text-align: center">
               <text style="color: gainsboro">—</text>
-              <text style="color: #000000;margin-right: 8px;margin-left: 8px">{{ box.next_name }}</text>
+              <text style="color: #000000;margin-right: 8px;margin-left: 8px">{{kind.good_kind_name}}</text>
               <text style="color: gainsboro">—</text>
             </view>
-            <view class="list" v-if="box.info.length>0">
-              <view class="box" v-for="(item, i1) in box.info" :key="i1">
-                <image @click="toCategory(item)" :src="item.imgurl" lazy-load="https://taobao.xianmxkj.com/logo.png">
+            <view class="list" v-if="kind.children.length>0">
+              <view class="box" v-for="(category, i1) in kind.children" :key="category.good_category_order"
+                @click="toCategory(category.good_category_id)">
+                <image :src="'http://192.168.2.99:9000/good_uploads/'+category.good_image"
+                  lazy-load="https://taobao.xianmxkj.com/logo.png">
                 </image>
-                <view class="text">{{ item.son_name }}</view>
+                <view class="text">{{ category.good_category_name }}</view>
               </view>
             </view>
           </view>
@@ -36,56 +45,60 @@
 </template>
 <script setup>
   import {
-    ref
+    onMounted,
+    ref,
+    computed
   } from 'vue'
   import {
     onPageScroll,
     onLoad
   } from '@dcloudio/uni-app'
   //测试数据
-  import testData from './testData.js'
-  // const props = defineProps({
-  //   categoryList: {
-  //     type: Array,
-  //     default () {
-  //       return testData
-  //     }
-  //   }
-  // })
-  const emit=defineEmits(['itemClick'])
-  const showCategoryIndex = ref(1)
+  import request from '@/utils/request.js'
+  const emit = defineEmits(['itemClick'])
+  const showCategoryIndex = ref(0)
   const headerPosition = ref("fixed")
-  const categoryList=ref(testData)
+  const kindList = ref([])
+  const showAll = ref(true)
   onPageScroll((e) => {
     //兼容iOS端下拉时顶部漂移
     if (e.scrollTop >= 0) {
       headerPosition.value = 'fixed';
     } else {
-    headerPosition.value = 'absolute';
+      headerPosition.value = 'absolute';
     }
   })
-  onLoad(() => {
-    // this.$Request.get("/api/super_classify/apikey/maxd").then(res => {
-    //   if (res.code === 1) {
-    //     this.categoryList = res.general_classify;
-    //   }
-    // });
-    
-  })
   const showCategory = (index) => {
-    showCategoryIndex.value = index
+    if (index === null) {
+      showAll.value = true;
+      showCategoryIndex.value = null;
+    } else {
+      showAll.value = false;
+      showCategoryIndex.value = index;
+    }
+
   }
   const toCategory = (item) => {
+    const targetPage = '/pages/category/categoryproductlist'
+    const queryString = `${encodeURIComponent('good_category_id')}=${encodeURIComponent(item)}`
+
+
     uni.navigateTo({
-      url:'/pages/category/categoryproductlist'
+      url: `${targetPage}?${queryString}`,
     })
-    // emit('itemClick', item)
+
   }
-  const testJump=()=>{
-    uni.navigateTo({
-      url:''
-    })
+
+  const getData = async () => {
+    const result = await request('/shop/category')
+    if (result.code === 200) {
+      kindList.value = result.data
+    }
+
   }
+  onMounted(() => {
+    getData()
+  })
 </script>
 <style lang="scss">
   .category-list {
@@ -96,9 +109,8 @@
     .left,
     .right {
       // 修复不能置顶问题
-      top: 0px;
-
-      bottom: 0upx;
+      top: 0rpx;
+      bottom: 0rpx;
     }
 
     .left {
@@ -106,6 +118,7 @@
       width: 24%;
       left: 0upx;
       background-color: #f2f2f2;
+      top: 88rpx;
 
       .row {
         width: 100%;
@@ -152,6 +165,7 @@
       margin-left: 24%;
       width: 76%;
       left: 24%;
+      white-space: nowrap;
 
       .category {
         width: 94%;

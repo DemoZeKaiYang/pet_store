@@ -689,9 +689,13 @@
 }
 .swiper-item {
   display: block;
-  height: 15.625rem;
+  height: 14.375rem;
+  width: 100%;
   line-height: 15.625rem;
   text-align: center;
+}
+.swiper-item .swiper-img {
+  width: 100%;
 }
 .swiper-list {
   margin-top: 1.25rem;
@@ -714,8 +718,11 @@
 .detail .describe {
   color: #67686C;
 }
+.goods-list-image {
+  padding: 0.625rem;
+}
 .goods-list-image img {
-  width: 23.4375rem;
+  width: 22.1875rem;
 }
 .goods-carts {
   display: flex;

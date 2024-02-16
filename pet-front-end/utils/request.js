@@ -1,5 +1,5 @@
 // utils/request.js
-const baseUrl = 'http://192.168.2.99:9000'; // 你的API域名
+const baseUrl =  'http://192.168.2.99:9000' // 你的API域名
 
 /**
  * 封装的请求方法

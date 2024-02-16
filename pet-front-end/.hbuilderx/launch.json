@@ -19,6 +19,10 @@
         {
             "playground" : "standard",
             "type" : "uni-app:app-android"
+        },
+        {
+            "openVueDevtools" : false,
+            "type" : "uni-app:h5"
         }
     ]
 }

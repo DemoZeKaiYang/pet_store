@@ -1,34 +1,32 @@
 <template>
   <view class="content">
-    <view class="t-goods-list" v-if="goodsList&&goodsList.length>0">
-      <view class="t-goods-item" v-for="(item,index) in goodsList" :key="index" @click="clickItem(index)">
+    <view class="t-goods-list" v-if="goodList&&goodList.length>0">
+      <view class="t-goods-item" v-for="(item,index) in goodList" :key="index" @click="clickItem(item.good_id)">
         <!-- 图片 -->
-        <image class="t-goods-img" :src="item.goodsPic"></image>
+        <image class="t-goods-img" :src="'http://192.168.2.99:9000/good_uploads/'+item.good_image"></image>
         <!-- 商品名称 -->
-        <view class="t-goods-name"><text>{{item.goodsName}}</text></view>
-        <!-- 商品描述 -->
-        <view class="t-goods-desc"><text>{{item.goodsDesc}}</text></view>
+        <view class="t-goods-name"><text>{{item.good_name}}</text></view>
 
         <!-- 商品价格 -->
         <view class="t-goods-price">
           <text class="t-rmb">¥</text>
-          <text class="t-p1">{{item.goodsPrice}}</text>
-          <text class="t-p2">¥{{item.goodsOriginPrice}}</text>
+          <text class="t-p1">{{item.good_price}}</text>
+          <text class="t-p2">¥{{item.good_origin_price}}</text>
         </view>
         <view class="t-rate">
-          <view><text>{{item.rateNum}}人评价</text></view>
-          <view class="t-rate-percent"><text>{{item.ratePercent}}好评</text></view>
+          <view><text>{{item.good_comment_num}}人评价</text></view>
+          <view class="t-rate-percent"><text>{{item.good_comment_num}}好评</text></view>
         </view>
+      </view>
+    </view>
+    <view class="t-loading-more" v-if="isLoading || isNoMore && goodList && goodList.length>0">
+      <image src="../../static/loading.png" v-if="isLoading"></image>
+      <view class="t-loading-desc" v-if="isLoading || isNoMore">{{isLoading?'加载中...':(isNoMore?'没有更多数据了':'')}}
       </view>
     </view>
     <view class="t-empty" v-else-if="isInit">
       <image src="/static/goods.png"></image>
       <view class="t-empty-desc">没有商品哦~</view>
-    </view>
-    <view class="t-loading-more" v-if="isLoading || isNoMore && goodsList && goodsList.length>0">
-      <image src="../../static/loading.png" v-if="isLoading"></image>
-      <view class="t-loading-desc" v-if="isLoading || isNoMore">{{isLoading?'加载中...':(isNoMore?'没有更多数据了':'')}}
-      </view>
     </view>
   </view>
 </template>
@@ -41,104 +39,62 @@
     onLoad,
     onReachBottom
   } from '@dcloudio/uni-app'
-  const goodsList = ref([])
-  const pageNo = ref(1)
+  import request from '@/utils/request.js'
+  const goodList = ref([])
+  const categoryId = ref('')
+  const currentPage = ref(1)
+
   const pageSize = ref(10)
   const isNoMore = ref(false)
   const isLoading = ref(false)
   const isInit = ref(false)
-  onLoad(() => {
-    isLoading.value = true
-    //这里模拟加载到的商品列表如下
-    setTimeout(() => {
-      const res = [{
-          goodsPic: '/static/goods/11.jpg',
-          goodsName: 'Helmetphone MT1 Neo智能骑行头盔(山地/框宽度）',
-          goodsDesc: '一键语音',
-          goodsPrice: 599,
-          goodsOriginPrice: 899,
-          rateNum: 1068,
-          ratePercent: '99%'
-        },
-        {
-          goodsPic: '/static/goods/12.jpg',
-          goodsName: '海德HEAD智能跳绳S1双绳版',
-          goodsDesc: '结合WATCH GT3等穿戴设备一起使用',
-          goodsPrice: 399,
-          goodsOriginPrice: 699,
-          rateNum: 56,
-          ratePercent: '98%'
-        }];
-      //给商品列表赋值
-      goodsList.value = res;
+
+
+
+  const getData = async () => {
+    const result = await request('/good', {
+      id: categoryId.value || '',
+      currentPage: currentPage.value,
+      pageSize: pageSize.value,
+    })
+    if (result.code === 200) {
+      goodList.value = [...goodList.value, ...result.data]
+    }
+  }
+
+  onReachBottom(() => {
+    currentPage.value += 1
+    getData()
+  })
+
+
+  const clickItem = (index) => {
+    const targetPage = '/pages/category/productdetail';
+    // 拼接查询字符串
+    const queryString = ` ${encodeURIComponent('good_id')}=${encodeURIComponent(index)}`
+    uni.navigateTo({
+      url: `${targetPage}?${queryString}`,
+    })
+  }
+  onLoad((query) => {
+    if (Object.keys(query).length !== 0) {
+      let obj = {}
+      for (let i in query) {
+        obj[decodeURIComponent(i)] = decodeURIComponent(query[i])
+      }
+      categoryId.value = obj.good_category_id
+      isLoading.value = true
+      getData()
       //初始化完成
       isInit.value = true;
       //关闭加载动画
       isLoading.value = false;
       //如果第一次请求数据量少于pageSize说明只有一页，直接显示没有更多数据
-      if (!goodsList.value || goodsList.value.length < pageSize.value) {
+      if (!goodList.value || goodList.value.length < pageSize.value) {
         isNoMore.value = true;
       }
-    }, 1500);
-  })
-
-  onReachBottom(() => {
-    //这里模拟分页加载数据，数据总数为12条，2页
-
-    //如果已经没有更多数据了，就不进行操作
-    if (isNoMore.value) {
-      return;
     }
-    //否则进行请求
-    isLoading.value = true;
-    //页码加1
-    pageNo.value += 1;
-    setTimeout(() => {
-      //这里模拟请求第二页数据如下：
-      const res = [{
-          goodsPic: '/static/goods/11.jpg',
-          goodsName: 'Helmetphone MT1 Neo智能骑行头盔(山地/框宽度）',
-          goodsDesc: '一键语音',
-          tags: [{
-            name: '限时直降300元',
-            type: 'hot'
-          }, {
-            name: '赠积分',
-            type: 'default'
-          }],
-          goodsPrice: 599,
-          goodsOriginPrice: 899,
-          rateNum: 1068,
-          ratePercent: '99%'
-        },
-        {
-          goodsPic: '/static/goods/12.jpg',
-          goodsName: '海德HEAD智能跳绳S1双绳版',
-          goodsDesc: '结合WATCH GT3等穿戴设备一起使用',
-          tags: [{
-            name: '限时直降300元',
-            type: 'hot'
-          }],
-          goodsPrice: 399,
-          goodsOriginPrice: 699,
-          rateNum: 56,
-          ratePercent: '98%'
-        }
-      ];
-      goodsList = [...goodsList.value, ...res];
-      isLoading.value = false;
-      if (!res || res.length < pageSize.value) {
-        isNoMore.value = true;
-      }
-    }, 1500)
-
   })
-  
- 
-  const clickItem=(index)=>{
-          console.log("当前点击的商品下标是" + index);
-  }
-
 </script>
 
 <style lang="scss" scoped>

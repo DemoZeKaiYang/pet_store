@@ -74,7 +74,7 @@
         }
       }
     },
-    "arguments": "{\"path\":\"pages/my/EditAddress\"}",
+    "arguments": "{\"path\":\"pages/shop/index\"}",
     "allowsInlineMediaPlayback": true,
     "safearea": {
       "background": "#ffffff",
@@ -140,7 +140,11 @@
         }
       ],
       "selectedIndex": 0,
-      "shown": true
+      "shown": true,
+      "child": [
+        "lauchwebview"
+      ],
+      "selected": 1
     }
   },
   "launch_path": "__uniappview.html"

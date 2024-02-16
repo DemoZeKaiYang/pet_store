@@ -594,27 +594,13 @@
   font-size: 0.875rem;
   color: #000000;
   line-height: 0.9375rem;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   display: -webkit-box;
   text-overflow: ellipsis;
   overflow: hidden;
   -webkit-box-orient: vertical;
   padding: 0 0.5625rem;
   box-sizing: border-box;
-  word-break: break-all;
-}
-.content .t-goods-list .t-goods-item .t-goods-desc[data-v-419b7e21] {
-  font-size: 0.75rem;
-  color: #9e9e9e;
-  line-height: 0.8125rem;
-  -webkit-line-clamp: 1;
-  display: -webkit-box;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  padding: 0 0.5625rem;
-  box-sizing: border-box;
-  margin-top: 0.5rem;
   word-break: break-all;
 }
 .content .t-goods-list .t-goods-item .t-goods-tags[data-v-419b7e21] {

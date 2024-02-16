@@ -75,9 +75,7 @@ const loginUser = async (req, res) => {
 
 //上传头像
 const uploadAvatar = async (req, res) => {
-  //图片的名字
-  console.log(req.file.filename)
-  //放回图片的名字，存储在pinia
+  //返回图片的名字，存储在pinia
   res.json({
     code: 200,
     data: {
