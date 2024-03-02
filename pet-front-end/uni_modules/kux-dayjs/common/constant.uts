@@ -1,0 +1,18 @@
+export const WEEKDAYS = Array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+
+export const MONTHS = Array(
+	'Jan',
+	'Feb',
+	'Mar',
+	'Apr',
+	'May',
+	'Jun',
+	'Jul',
+	'Aug',
+	'Sep',
+	'Oct',
+	'Nov',
+	'Dec'
+);
+
+export const MONTH_DAYS = Array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);

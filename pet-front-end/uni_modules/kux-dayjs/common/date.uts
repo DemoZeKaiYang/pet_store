@@ -1,0 +1,88 @@
+import { Lunar, LunarInfoType } from './calendar';
+
+export type DateType = {
+	fullDate: string;
+	year: number;
+	month: number;
+	date: number;
+	hour: number;
+	minute: number;
+	second: number;
+	millisecond: number;
+	day: number;
+	isToday: boolean;
+	lunar: string;
+};
+
+export class DateUtil {
+	private lunar: Lunar;
+	constructor () {
+		this.lunar = new Lunar();
+	};
+	
+	/**
+	 * 计算阴历日期显示
+	 */
+	getlunar (year : number, month : number, date : number) : LunarInfoType {
+		return this.lunar.solar2lunar(year, month, date)
+	}
+	
+	/**
+	 * 获取任意时间
+	 */
+	getDate (date: string): DateType {
+		let dd: Date = new Date();
+		let hour = 0;
+		let minute = 0;
+		let second = 0;
+		let milllisceond = 0;
+		
+		if (date !== '') {
+			const datePart = date.split(" ");
+			const dateData = datePart[0].split("-");
+			const year = parseInt(dateData[0]);
+			const month = parseInt(dateData[1]);
+			const day = parseInt(dateData[2]);
+			
+			if (datePart.length > 1) {
+				const timeData = datePart[1].split(":");
+				hour = parseInt(timeData[0]);
+				minute = parseInt(timeData[1]);
+				const secondPart = timeData[2].split(".");
+				second = parseInt(secondPart[0]);
+				if (secondPart.length > 1) {
+					milllisceond = parseInt(secondPart[1]);
+				}
+			}
+		
+			dd = new Date(year, month - 1, day, hour, minute, second, milllisceond);
+		}
+		
+		const y = dd.getFullYear();
+		const m = dd.getMonth() + 1;
+		const d = dd.getDate();
+		const h = dd.getHours();
+		const M = dd.getMinutes();
+		const s = dd.getSeconds();
+		const ms = dd.getMilliseconds();
+		
+		let nowDate = y + '-' + m + '-' + d;
+		const lunarData = this.getlunar(y, m, d);
+		
+		const data: DateType = {
+			fullDate: nowDate,
+			year: y,
+			month: m,
+			date: d,
+			hour: h,
+			minute: M,
+			second: s,
+			millisecond: ms,
+			day: dd.getDay() + 1,
+			lunar: lunarData.IDayCn,
+			isToday: this.getlunar(y, m, d).isToday
+		};
+		
+		return data;
+	}; 
+};

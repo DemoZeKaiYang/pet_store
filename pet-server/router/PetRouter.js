@@ -9,10 +9,9 @@ const {
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 const multer = require('multer')
-const secret = require('../secret')
+
 const path = require('path')
-//导入express-jwt
-const { expressjwt: jwt } = require('express-jwt')
+const jwtMiddleware = require('../utils/jwtMiddleware')
 
 const storage = multer.diskStorage({
   //保存路径
@@ -27,16 +26,6 @@ const storage = multer.diskStorage({
 })
 //存储在这个文字
 const upload = multer({ storage })
-//jwt中间件
-const jwtMiddleware = jwt({
-  secret,
-  algorithms: ['HS256'], // 使用HS256算法
-  customError: function (err, req, res) {
-    response.status(401).json({
-      message: '没有设置token,无法修改'
-    })
-  }
-})
 
 router.get('/pet', jwtMiddleware, urlencodedParser, getPets)
 //上传宠物图片

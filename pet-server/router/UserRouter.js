@@ -7,13 +7,9 @@ const bodyParser = require('body-parser')
 const jsonParser = bodyParser.json()
 //解析querystring请求体的中间件
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
+const jwtMiddleware = require('../utils/jwtMiddleware')
 //图片处理
 const multer = require('multer')
-//jwt密钥
-const secret = require('../secret')
-//导入express-jwt
-const { expressjwt: jwt } = require('express-jwt')
-
 const storage = multer.diskStorage({
   //保存路径
   destination: function (req, file, cb) {
@@ -34,21 +30,6 @@ const {
   uploadAvatar,
   updateUser
 } = require('../router_handler/UserHandler')
-
-//jwt中间件
-const jwtMiddleware = jwt({
-  secret,
-  algorithms: ['HS256'], // 使用HS256算法
-  customError: function (err, req, res) {
-    response.status(401).json({
-      message: '没有设置token,无法修改'
-    })
-  }
-})
-
-// .unless({
-//   path: ['/path1', '/path2'] // 允许这些路径不需要验证
-// })
 
 //注册用户
 router.post('/user', jsonParser, addUser)

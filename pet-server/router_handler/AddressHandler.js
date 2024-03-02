@@ -1,4 +1,5 @@
 const addressModel = require('../model/AddressModel')
+const userModel = require('../model/UserModel')
 const {
   addressValidate,
   delAddressValidate
@@ -7,20 +8,28 @@ const { v4: uuidv4 } = require('uuid')
 
 const getAddress = async (req, res) => {
   const id = req.query.user_id
-  const result = await addressModel.findAll({
-    where: { user_id: id },
-    order: [['address_default', 'DESC']]
-  })
+  try {
+    const result = await addressModel.findAll({
+      where: { user_id: id },
+      order: [['address_default', 'DESC']]
+    })
 
-  const arr = result.map((item) => {
-    return item.dataValues
-  })
+    const arr = result.map((item) => {
+      return item.dataValues
+    })
 
-  return res.json({
-    code: 200,
-    message: '获取数据成功',
-    data: arr
-  })
+    return res.json({
+      code: 1000,
+      message: '获取数据成功',
+      data: arr
+    })
+  } catch (error) {
+    return res.json({
+      code: 1001,
+      message: '获取数据失败',
+      data: {}
+    })
+  }
 }
 
 const addAddress = async (req, res) => {
@@ -52,10 +61,10 @@ const addAddress = async (req, res) => {
   return res.json({ code: 201, message: '数据格式错误', data: {} })
 }
 
+//打个bug需要增加删除默认地址
 const delAddress = async (req, res) => {
   //删除
   if (delAddressValidate(req.body)) {
-    console.log(1)
     const result = await addressModel.destroy({
       where: { address_id: req.body.address_id }
     })
@@ -67,8 +76,34 @@ const delAddress = async (req, res) => {
   }
   return res.json({ code: 203, message: 'address_id错误', data: {} })
 }
+
+//获取默认地址
+const getDefaultAddress = async (req, res) => {
+  //没有携带id，返回错误信息
+  if (!req.query)
+    return res.json({
+      code: 1001,
+      message: '获取默认地址失败,没有提供用户的唯一标识',
+      data: {}
+    })
+
+  //通过id查询默认地址
+  try {
+    const result = await addressModel.findOne({
+      where: {
+        user_id: req.query.user_id
+      }
+    })
+    const data = result.dataValues
+    return res.json({ code: 1000, message: '获取默认地址成功', data })
+  } catch (error) {
+    return res.json({ code: 1003, message: error, data: {} })
+  }
+}
+
 module.exports = {
   getAddress,
   addAddress,
-  delAddress
+  delAddress,
+  getDefaultAddress
 }

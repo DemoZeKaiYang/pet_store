@@ -31,7 +31,7 @@
             <view class="list" v-if="kind.children.length>0">
               <view class="box" v-for="(category, i1) in kind.children" :key="category.good_category_order"
                 @click="toCategory(category.good_category_id)">
-                <image :src="'http://192.168.2.99:9000/good_uploads/'+category.good_image"
+                <image :src="`${devUrl}/good_uploads/`+category.good_image"
                   lazy-load="https://taobao.xianmxkj.com/logo.png">
                 </image>
                 <view class="text">{{ category.good_category_name }}</view>
@@ -55,6 +55,8 @@
   } from '@dcloudio/uni-app'
   //测试数据
   import request from '@/utils/request.js'
+import { devUrl } from '../../config';
+    
   const emit = defineEmits(['itemClick'])
   const showCategoryIndex = ref(0)
   const headerPosition = ref("fixed")

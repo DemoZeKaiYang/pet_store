@@ -5,13 +5,18 @@ import {
   computed,
   ref
 } from 'vue'
-import request from '@/utils/request'
 
+import {
+  devUrl
+} from '@/config.js'
+import {
+  updateUserApi
+} from '@/apis/user.js'
 export const useUserStore = defineStore('user', () => {
   const user = ref(uni.getStorageSync("user") || {})
   const token = ref(uni.getStorageSync("token") || "")
   const avatar = computed(() => {
-    return 'http://192.168.2.99:9000/uploads/' + user.value.user_avatar
+    return `${devUrl}/uploads/` + user.value.user_avatar
   })
 
   function updateUser(newValue) {
@@ -26,6 +31,8 @@ export const useUserStore = defineStore('user', () => {
 
   function resetUser() {
     user.value = {}
+    uni.removeStorageSync("user")
+    uni.removeStorageSync("token")
   }
 
   function updateDate(newValue) {
@@ -37,13 +44,10 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function saveInfo() {
-    //调用接口
-    const result = await request('/user/update', user.value, {
-      method: 'post'
-    })
+    const result = updateUserApi(user.value)
     if (result.code === 200) {
       user.value = result.data
-      uni.setStorageSync("user",user.value)
+      uni.setStorageSync("user", user.value)
       return true
     }
     return false

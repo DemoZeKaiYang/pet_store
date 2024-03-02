@@ -4,9 +4,6 @@ const { getPets } = require('../router_handler/PetHandler')
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 const multer = require('multer')
-const secret = require('../secret')
-//导入express-jwt
-const { expressjwt: jwt } = require('express-jwt')
 const { getKinds } = require('../router_handler/PetKindHandler')
 
 //注册用户

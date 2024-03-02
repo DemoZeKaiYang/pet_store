@@ -6,7 +6,7 @@ const petsValidate = (value) => {
     pet_id: Joi.string()
       .guid({ version: ['uuidv4'] })
       .error(new Error('pet_id不规范')),
-    pet_avatar: Joi.string().required().error(new Error('头像名字不规范')),
+    pet_avatar: Joi.string().required().error(new Error('头像地址不规范')),
     pet_name: Joi.string().required().error(new Error('宠物名字不规范')),
     pet_kind_id: Joi.string()
       .required()

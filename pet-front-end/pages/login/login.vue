@@ -40,10 +40,11 @@
     onReady
   } from '@dcloudio/uni-app'
   import rules from './rules.js'
-  import requrest from '@/utils/request.js'
+  
   import {
     useUserStore
   } from '@/stores/user.js'
+import { loginApi } from '@/apis/user.js'
   const store = useUserStore()
   const formData = ref({
     phone: '',
@@ -54,9 +55,7 @@
     uni.showLoading()
     try {
       await form.value.validate()
-      const result = await requrest('/user/login', formData.value, {
-        method: 'post'
-      })
+      const result = await loginApi(formData.value)
       console.log(result);
       uni.showToast({
         title: result.message,

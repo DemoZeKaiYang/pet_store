@@ -1,5 +1,4 @@
 {
-
   "easycom": {
     "autoscan": true
   },
@@ -54,7 +53,7 @@
       }
     },
     {
-      "path": "pages/cat/cat",
+      "path": "pages/car/car",
       "style": {
         "navigationBarTitleText": "购物车",
         "enablePullDownRefresh": false
@@ -125,7 +124,7 @@
     },
 
     {
-      "path": "pages/cat/ConfirmAddress",
+      "path": "pages/car/ConfirmAddress",
       "style": {
         "navigationBarTitleText": "确认地址",
         "enablePullDownRefresh": false
@@ -146,7 +145,7 @@
       }
     },
     {
-      "path": "pages/cat/ConfirmOrder",
+      "path": "pages/car/ConfirmOrder",
       "style": {
         "navigationBarTitleText": "确认订单",
         "enablePullDownRefresh": false

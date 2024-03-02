@@ -1,0 +1,97 @@
+import { InfoType } from '../common/calendar';
+
+export type LunarType = {
+	month: string;
+	date: string;
+};
+
+export type DatetimeUnit = 
+| 'day'
+| 'd'
+| 'month'
+| 'M'
+| 'year'
+| 'y'
+| 'hour'
+| 'h'
+| 'minute'
+| 'm'
+| 'second'
+| 's'
+| 'millisecond'
+| 'ms'
+
+export type WeekUnit = 
+| 'week'
+| 'w'
+
+export type DiffUnit = 
+| 'week'
+| 'w'
+| 'day'
+| 'd'
+| 'month'
+| 'M'
+| 'year'
+| 'y'
+| 'hour'
+| 'h'
+| 'minute'
+| 'm'
+| 'second'
+| 's'
+| 'millisecond'
+| 'ms'
+;
+
+export type DateFormat = {
+	year: number;
+	month: number;
+	date: number;
+	render: any;
+	lunar: LunarType;
+	fullLunar: InfoType;
+	diffDays: number;
+	isToday: boolean;
+	fullDate: string;
+};
+
+export type RelativeTime = {
+	s?: string;
+	m?: string;
+	mm?: string;
+	h?: string;
+	hh?: string;
+	d?: string;
+	dd?: string;
+	mon?: string;
+	mons?: string;
+	y?: string;
+	yy?: string;
+};
+
+export type FromToOptions = {
+	isSuffix?: boolean;
+	relativeTime?: RelativeTime;
+};
+
+export type DatetimeOptions = {
+	years: number;
+	months: number;
+	date: number;
+	hours: number;
+	minutes: number;
+	seconds: number;
+	milliseconds: number;
+};
+
+export type DateDiff = {
+	date1: Date,
+	date2: Date
+};
+
+export type IsBetweenContains = 
+| '['
+| ']'
+| '[]'
+| ''

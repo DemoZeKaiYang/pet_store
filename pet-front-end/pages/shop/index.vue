@@ -19,13 +19,9 @@
   </view>
   <!-- 商品列表 -->
   <ShopList :goodList="goodList"></ShopList>
-
   <!-- 购物车 -->
-  
       <uni-fab ref="fab" horizontal="right" vertical="bottom" @fabClick="fabClick" :pattern="{icon:'cart'}">
       </uni-fab>
-  
-
 </template>
 
 <script setup>
@@ -40,7 +36,8 @@
   } from '@dcloudio/uni-app'
   import ShopList from './ShopList.vue'
   import CategorySelect from './CategorySelect.vue'
-  import request from '@/utils/request';
+  import {getGoodApi} from '@/apis/good.js'
+  
   const searchRef = ref()
   const searchValue = ref("")
   const goodList = ref([])
@@ -62,7 +59,7 @@
   }
   const getData = async () => {
     try {
-      const result = await request('/good', {
+      const result = await getGoodApi({
         id: categoryId.value || '',
         currentPage: currentPage.value,
         pageSize: pageSize.value,
@@ -87,7 +84,7 @@
   //跳转购物车
   const fabClick = () => {
     uni.navigateTo({
-      url: '/pages/cat/cat'
+      url: '/pages/car/car'
     })
   }
   onMounted(() => {

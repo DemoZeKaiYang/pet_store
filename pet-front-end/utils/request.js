@@ -1,6 +1,9 @@
 // utils/request.js
-const baseUrl =  'http://192.168.2.99:9000' // 你的API域名
 
+import {devUrl}from '@/config.js'
+import {
+  useUserStore
+} from '@/stores/user.js'
 /**
  * 封装的请求方法
  * @param {String} path 请求路径
@@ -12,7 +15,7 @@ function request(path, params = {}, options = {}) {
   token = uni.getStorageSync("token")
   return new Promise((resolve, reject) => {
     uni.request({
-      url: baseUrl + path,
+      url: devUrl + path,
       method: options.method || 'GET',
       data: params,
       header: {
@@ -21,10 +24,25 @@ function request(path, params = {}, options = {}) {
       sslVerify: false,
       ...options, // 其他请求配置
       success: (res) => {
-        // 请求成功处理
+        // 请求成功处理C
+        if (res.data.code === 401) {
+          const store = useUserStore()
+          store.resetUser()
+          //token过期，清除登录记录
+          uni.showToast({
+            title: '登录超时,请重新登录',
+            duration: 3000,
+            icon:'fail'
+          })
+          uni.navigateTo({
+            url:'/pages/login/login'
+          })
+          return reject(res.data)
+        }
         resolve(res.data);
       },
       fail: (err) => {
+
         // 请求失败处理
         reject(err);
       },

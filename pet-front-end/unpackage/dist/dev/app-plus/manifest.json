@@ -74,7 +74,7 @@
         }
       }
     },
-    "arguments": "{\"path\":\"pages/shop/index\"}",
+    "arguments": "{\"name\":\"\",\"path\":\"\",\"query\":\"\"}",
     "allowsInlineMediaPlayback": true,
     "safearea": {
       "background": "#ffffff",
@@ -144,7 +144,7 @@
       "child": [
         "lauchwebview"
       ],
-      "selected": 1
+      "selected": 4
     }
   },
   "launch_path": "__uniappview.html"

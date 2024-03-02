@@ -9,7 +9,6 @@
 </template>
 
 <script setup>
-
   defineProps({
     title:String,
     icColor:String,

@@ -1,7 +1,7 @@
 //地址表的模型
 const { DataTypes } = require('sequelize')
 const { sequelize } = require('../db/index')
-
+const goodCategoriesModel = require('./GoodCategoriesModel')
 //用户表模型
 const goodModel = sequelize.define(
   'goods',
@@ -27,9 +27,16 @@ const goodModel = sequelize.define(
       type: DataTypes.INTEGER
     },
     parent_category_id: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      references: {
+        model: goodCategoriesModel, // 这里指定外键所引用的模型
+        key: 'good_category_id' // 这里指定外键所引用的模型的主键
+      }
     },
     good_image: {
+      type: DataTypes.STRING
+    },
+    parent_category_id: {
       type: DataTypes.STRING
     }
   },

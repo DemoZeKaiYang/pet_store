@@ -156,8 +156,8 @@ export const useStore = defineStore("main", {
   unistorage: {
     // 初始化恢复前触发
     beforeRestore(ctx) {},
-    // 初始化恢复后触发
-    afterRestore(ctx) {},
+       // 初始化恢复后触发
+       afterRestore(ctx) {},
   },
 });
 ```
@@ -223,4 +223,4 @@ export const useStore = defineStore("main", {
 
 Made with [markthree](https://github.com/markthree)
 
-Published under [MIT License](./LICENSE).
+Published under [MIT License](./LICENSE).	

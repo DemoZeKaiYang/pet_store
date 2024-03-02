@@ -93,81 +93,81 @@
 /* 水平间距 */
 
 .txt {
-    font-size: 1rem;
-    font-weight: bold;
-    color: #333333;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #333333;
 }
 .img-a {
-    width: 100%;
-    height: 14.0625rem;
-    background-image: url(https://zhoukaiwen.com/img/loginImg/head.png);
-    background-size: 100%;
+  width: 100%;
+  height: 14.0625rem;
+  background-image: url(https://zhoukaiwen.com/img/loginImg/head.png);
+  background-size: 100%;
 }
 .reg {
-    font-size: 0.875rem;
-    color: #fff;
-    height: 2.8125rem;
-    line-height: 2.8125rem;
-    border-radius: 1.5625rem;
-    font-weight: bold;
-    background: #f5f6fa;
-    color: #000000;
-    text-align: center;
-    margin-top: 0.9375rem;
+  font-size: 0.875rem;
+  color: #fff;
+  height: 2.8125rem;
+  line-height: 2.8125rem;
+  border-radius: 1.5625rem;
+  font-weight: bold;
+  background: #f5f6fa;
+  color: #000000;
+  text-align: center;
+  margin-top: 0.9375rem;
 }
 .login-view {
-    width: 100%;
-    position: relative;
-    margin-top: -3.75rem;
-    background-color: #ffffff;
-    border-radius: 8% 8% 0% 0;
+  width: 100%;
+  position: relative;
+  margin-top: -3.75rem;
+  background-color: #ffffff;
+  border-radius: 8% 8% 0% 0;
 }
 .t-login {
-    width: 18.75rem;
-    margin: 0 auto;
-    font-size: 0.875rem;
-    padding-top: 2.5rem;
+  width: 18.75rem;
+  margin: 0 auto;
+  font-size: 0.875rem;
+  padding-top: 2.5rem;
 }
 .t-login uni-button {
-    font-size: 0.875rem;
-    background: #2796f2;
-    color: #fff;
-    height: 2.8125rem;
-    line-height: 2.8125rem;
-    border-radius: 1.5625rem;
-    font-weight: bold;
+  font-size: 0.875rem;
+  background: #2796f2;
+  color: #fff;
+  height: 2.8125rem;
+  line-height: 2.8125rem;
+  border-radius: 1.5625rem;
+  font-weight: bold;
 }
 .t-login uni-input {
-    height: 2.8125rem;
-    line-height: 2.8125rem;
-    margin-bottom: 1.5625rem;
-    border-bottom: 1px solid #e9e9e9;
-    font-size: 0.875rem;
+  height: 2.8125rem;
+  line-height: 2.8125rem;
+  margin-bottom: 1.5625rem;
+  border-bottom: 1px solid #e9e9e9;
+  font-size: 0.875rem;
 }
 .t-login .t-a {
-    position: relative;
+  position: relative;
 }
 .t-b {
-    text-align: left;
-    font-size: 1.3125rem;
-    color: #ffffff;
-    padding: 4.0625rem 0 0 2.1875rem;
-    font-weight: bold;
-    line-height: 2.1875rem;
+  text-align: left;
+  font-size: 1.3125rem;
+  color: #ffffff;
+  padding: 4.0625rem 0 0 2.1875rem;
+  font-weight: bold;
+  line-height: 2.1875rem;
 }
 .t-login .uni-input-placeholder {
-    color: #aeaeae;
+  color: #aeaeae;
 }
 .cl {
-    zoom: 1;
+  zoom: 1;
 }
 .cl:after {
-    clear: both;
-    display: block;
-    visibility: hidden;
-    height: 0;
-    content: '\20';
+  clear: both;
+  display: block;
+  visibility: hidden;
+  height: 0;
+  content: '\20';
 }
  .uni-forms-item__error {
-    top: 70% !important;
+  top: 70% !important;
 }
