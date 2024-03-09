@@ -144,6 +144,12 @@ const updateAddress=(obj)=>{
   address.value=obj
 }
 
+//立即支付
+const payHandler=()=>{
+  //调用生成的订单的后端接口
+}
+
+
 //支付处理
 onMounted(() => {
   orderTime.value = getCurrentTimeFormatted()

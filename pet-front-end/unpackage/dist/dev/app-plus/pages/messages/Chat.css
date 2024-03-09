@@ -7,7 +7,7 @@
   bottom: var(--window-bottom);
   left: 0;
   justify-content: space-between;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
 }
 .base-con[data-v-d3b50b6a] {
   margin-top: 7.5px;
@@ -19,16 +19,16 @@
 .send-image[data-v-d3b50b6a] {
   width: 35px;
   line-height: 35px;
-  background-color: #2979FF;
+  background-color: #2979ff;
   border-radius: 50%;
   text-align: center;
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 0.9375rem;
 }
 .input-text[data-v-d3b50b6a] {
   width: 58%;
   height: 35px;
-  background-color: #F2F2F2;
+  background-color: #f2f2f2;
   border-radius: 8px;
   padding: 0 15px;
 }
@@ -36,11 +36,12 @@
   width: 64px;
   line-height: 35px;
   text-align: center;
-  background-color: #2979FF;
+  background-color: #2979ff;
   border-radius: 8px;
-  color: #FFFFFF;
+  color: #ffffff;
 }
-.scroll-view[data-v-d3b50b6a], .base-con[data-v-d3b50b6a] {
+.scroll-view[data-v-d3b50b6a],
+.base-con[data-v-d3b50b6a] {
   margin: 0 15px;
 }
 .avatar[data-v-d3b50b6a] {
@@ -61,7 +62,7 @@
 }
 .message[data-v-d3b50b6a] {
   font-size: 0.75rem;
-  background-color: #E6E6E6;
+  background-color: #e6e6e6;
   padding: 15px;
   float: left;
   border-radius: 8px;

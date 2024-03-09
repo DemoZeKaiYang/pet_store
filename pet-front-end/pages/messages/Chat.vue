@@ -64,9 +64,7 @@ const windowObj = computed(() => {
   return obj
 })
 
-const initChatLog = () => {}
-//连接socket
-const connectSocket = () => {}
+
 
 const tabTo = (state) => {
   switch (state) {
@@ -126,7 +124,7 @@ onMounted(() => {
   initChatLog()
   connectSocket()
 })
-
+//初始化对话框
 const initChatLog = () => {
   list.value = [
     {
@@ -163,53 +161,53 @@ const initChatLog = () => {
 }
 
 const connectSocket = () => {
-  let that = this
-  let param = that.data,
-    userInfo = that.userInfo
+  
+  // let param = that.data,
+  //   userInfo = that.userInfo
 
-  uni.connectSocket({
-    url: 'wss://*******/wss:8282', // 修改为自己的
-  })
-  uni.onSocketOpen(function (res) {
-    // console.log('WebSocket连接已打开！', res);
-  })
-  uni.onSocketMessage(function (res) {
-    var data = JSON.parse(res.data)
-    switch (data['type']) {
-      // 绑定id
-      case 'init':
-        var bind = {
-          type: 'bind',
-          fromid: 2,
-        }
-        uni.sendSocketMessage({
-          data: JSON.stringify(bind),
-          complete: (res) => {
-            // console.log(res)
-          },
-        })
-        break
-      // 接收消息
-      case 'text':
-        data['isMe'] = false
-        data['type'] = data.message_type
-        that.list = that.list.concat([data])
-        that.setScrollTop()
-        break
-    }
-  })
+  // uni.connectSocket({
+  //   url: 'wss://*******/wss:8282', // 修改为自己的
+  // })
+  // uni.onSocketOpen(function (res) {
+  //   // console.log('WebSocket连接已打开！', res);
+  // })
+  // uni.onSocketMessage(function (res) {
+  //   var data = JSON.parse(res.data)
+  //   switch (data['type']) {
+  //     // 绑定id
+  //     case 'init':
+  //       var bind = {
+  //         type: 'bind',
+  //         fromid: 2,
+  //       }
+  //       uni.sendSocketMessage({
+  //         data: JSON.stringify(bind),
+  //         complete: (res) => {
+  //           // console.log(res)
+  //         },
+  //       })
+  //       break
+  //     // 接收消息
+  //     case 'text':
+  //       data['isMe'] = false
+  //       data['type'] = data.message_type
+  //       that.list = that.list.concat([data])
+  //       that.setScrollTop()
+  //       break
+  //   }
+  // })
 }
 
 const setScrollTop=()=> {
-			nextTick(() => {
-				let scrollView = uni.createSelectorQuery().select('.scroll-view');
-				scrollView.fields({ size: true }, data => {
-					let height = data.height;
-					this.scrollHeight = height;
-				}).exec();
-			});
-		}
-	}
+	// 		nextTick(() => {
+	// 			let scrollView = uni.createSelectorQuery().select('.scroll-view');
+	// 			scrollView.fields({ size: true }, data => {
+	// 				let height = data.height;
+	// 				this.scrollHeight = height;
+	// 			}).exec();
+	// 		});
+	// 	}
+	// }
 }
 </script>
 
