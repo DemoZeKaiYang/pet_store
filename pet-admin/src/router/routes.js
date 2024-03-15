@@ -38,6 +38,31 @@ const routes = [
         }
       }
     ]
+  },
+  {
+    path: '/address',
+    name: 'address',
+    meta: {
+      title: '地址管理'
+    }
+  },
+  {
+    path: '/shop',
+    name: 'shop',
+    component: () => import('@/views/shop/index.vue'),
+    meta: {
+      title: '商城管理'
+    },
+    children: [
+      {
+        path: 'kind',
+        name: 'kind',
+        component: () => import('@/views/shop/kind/index.vue'),
+        meta: {
+          title: '商品分类'
+        }
+      }
+    ]
   }
 ]
 

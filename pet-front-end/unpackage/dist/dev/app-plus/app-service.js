@@ -27205,6 +27205,11 @@ ${i3}
     const seconds = String(now2.getSeconds()).padStart(2, "0");
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
+  const confirmOrder = async (data) => {
+    return await request("/confirmOrder", data, {
+      method: "post"
+    });
+  };
   const _sfc_main$3 = {
     __name: "ConfirmOrder",
     setup(__props) {
@@ -27240,7 +27245,28 @@ ${i3}
       const updateAddress = (obj) => {
         address.value = obj;
       };
-      const payHandler = () => {
+      const payHandler = async () => {
+        if (!address.value) {
+          return uni.showToast({ title: "请检查您的地址", icon: "none" });
+        }
+        if (!carStore.checkOutCar) {
+          return uni.showToast({ title: "请检查您的商品", icon: "none" });
+        }
+        let obj = {
+          shipping_address: address.value.address_area + address.value.address_details,
+          //地址
+          goodList: carStore.checkOutCar,
+          //商品数据
+          user_id: userStore.user.user_id,
+          //用户id
+          create_date: orderTime.value
+        };
+        const result = await confirmOrder(obj);
+        if (result.code === 1e3)
+          ;
+        else {
+          return uni.showToast({ title: "确认订单失败", icon: "none" });
+        }
       };
       vue.onMounted(() => {
         orderTime.value = getCurrentTimeFormatted();
@@ -27458,7 +27484,7 @@ ${i3}
                   style: { "padding": "24rpx 60rpx", "border-radius": "14rpx" },
                   onClick: payHandler
                 }, [
-                  vue.createElementVNode("view", { class: "selecet-text" }, "立即支付")
+                  vue.createElementVNode("view", { class: "selecet-text" }, "确认订单")
                 ])
               ])
             ])

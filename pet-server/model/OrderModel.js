@@ -1,10 +1,11 @@
 //地址表的模型
 const { DataTypes } = require('sequelize')
 const { sequelize } = require('../db/index')
+const userModel = require('./UserModel')
 
 //用户表模型
 const orderModel = sequelize.define(
-  'order',
+  'orders',
   {
     order_id: {
       type: DataTypes.UUIDV4,
@@ -12,38 +13,33 @@ const orderModel = sequelize.define(
       primaryKey: true
     },
     user_id: {
-      type: DataTypes.STRING
-    },
-    payment_status: {
-      type: DataTypes.STRING
-    },
-    payment_date: {
-      type: DataTypes.STRING
-    },
-    shipping_address: {
-      type: DataTypes.INTEGER
-    },
-    shipping_status: {
-      type: DataTypes.INTEGER
-    },
-    notes: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUIDV4,
+      allowNull: false,
       references: {
-        model: goodCategoriesModel, // 这里指定外键所引用的模型
-        key: 'good_category_id' // 这里指定外键所引用的模型的主键
+        model: userModel, // 这里指定外键所引用的模型
+        key: 'user_id' // 这里指定外键所引用的模型的主键
       }
     },
-    patment_method: {
+    order_status: {
+      type: DataTypes.INTEGER
+    },
+    create_date: {
+      type: DataTypes.DATE
+    },
+    shipping_address: {
       type: DataTypes.STRING
     },
-    order_date: {
-      type: DataTypes.STRING
+    payment_method: {
+      type: DataTypes.INTEGER
+    },
+    order_number: {
+      type: DataTypes.INTEGER
     }
   },
   {
     // 这是其他模型参数
     sequelize,
-    modelName: 'goods',
+    modelName: 'orders',
     timestamps: true,
     createdAt: false,
     updatedAt: false,
@@ -51,4 +47,4 @@ const orderModel = sequelize.define(
   }
 )
 
-module.exports = goodModel
+module.exports = orderModel

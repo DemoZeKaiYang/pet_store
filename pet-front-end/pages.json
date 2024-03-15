@@ -164,6 +164,14 @@
         "navigationBarTitleText": "注册",
         "enablePullDownRefresh": false
       }
+    },
+    {
+      "path" : "pages/car/pay",
+      "style" : 
+      {
+        "navigationBarTitleText" : "",
+        "enablePullDownRefresh" : false
+      }
     }
 
 

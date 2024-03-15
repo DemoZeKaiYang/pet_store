@@ -46,7 +46,7 @@ import { ref } from 'vue'
 import { onReady } from '@dcloudio/uni-app'
 import rules from './rules.js'
 import requrest from '@/utils/request.js'
-import { registerApi } from '../../apis/user.js'
+import { registerApi } from '@/apis/user.js'
 const formData = ref({
   phone: '',
   password: '',

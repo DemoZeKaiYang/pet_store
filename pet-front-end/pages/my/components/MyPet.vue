@@ -1,23 +1,37 @@
 <template>
-  <uni-section title="我的宠物" type="line" padding titleFontSize="18px">
+  <uni-section title="我的宠物" type="line" padding titleFontSize="18px" class="pet-main">
     <template v-slot:right>
       添加宠物<uni-icons type="plusempty" size="18" @tap="addPet"></uni-icons>
     </template>
-    <!-- 因为swiper特性的关系，请指定swiper的高度 ，swiper的高度并不会被内容撑开-->
-    <swiper class="swiper" :indicator-dots="true">
-      <swiper-item v-for="(p, index) in petData" class="pet-swiper-item">
-        <view
-          class="grid-item-box"
-          style="background-color: #fff"
-          @click="editPet(pet)"
-          v-for="(pet, index) in p"
-          :key="pet.pet_id"
-        >
-          <img :src="`${devUrl}/pet_uploads/${pet.pet_avatar}`" alt="" srcset="" />
-          <text class="text">{{ pet.pet_name }}</text>
-        </view>
-      </swiper-item>
-    </swiper>
+ 
+      <!-- 因为swiper特性的关系，请指定swiper的高度 ，swiper的高度并不会被内容撑开-->
+      <swiper class="swiper" :indicator-dots="petData.length>0">
+        <!-- 没有宠物的时候添加一个占位 -->
+        <swiper-item v-if="petData.length<=0 " class="nopet-swiper-item">
+          <view class="none-pet" @tap="addPet">
+            <uni-icons type="plusempty" size="50" color="#c3c3c3" ></uni-icons>
+          <view  >
+            请添加一只宠物
+          </view>
+          <!-- 图标 -->
+          <img src="@/static/image/addCat.png" alt=""  class="add-pet-img"/>
+          </view>
+        </swiper-item>
+        <swiper-item v-for="(p, index) in petData" class="pet-swiper-item" v-else>
+          <view
+            class="grid-item-box"
+            style="background-color: #fff"
+            @click="editPet(pet)"
+            v-for="(pet, index) in p"
+            :key="pet.pet_id"
+          >
+            <img :src="`${devUrl}/pet_uploads/${pet.pet_avatar}`" alt="" srcset="" />
+            <text class="text">{{ pet.pet_name }}</text>
+          </view>
+        </swiper-item>
+      </swiper>
+ 
+  
   </uni-section>
 </template>
 
@@ -52,6 +66,8 @@ const addPet = () => {
     url: `/pages/my/EditPet`,
   })
 }
+
+
 onMounted(() => {
   getPetData()
 })
@@ -65,6 +81,11 @@ onUnload(() => {
 </script>
 
 <style scoped lang="scss">
+  
+.add-pet-img{
+  width: 100rpx;
+  height: 100rpx;
+}
 .swiper {
   height: 230rpx;
 }
@@ -99,5 +120,22 @@ onUnload(() => {
 
 .pet-swiper-item {
   display: flex;
+}
+
+  
+.nopet-swiper-item{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.none-pet{
+  width: 650rpx;
+  height: 160rpx;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  border-radius: 24rpx;
+  box-shadow: 0 0 3px #999;
+  
 }
 </style>

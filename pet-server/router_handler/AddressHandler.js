@@ -33,32 +33,36 @@ const getAddress = async (req, res) => {
 }
 
 const addAddress = async (req, res) => {
-  if (addressValidate(req.body)) {
-    //如果新增的用户和修改的用户设置成默认，清除该id所有的地址默认，再重新设置
-    if (req.body.address_default === 1) {
-      await addressModel.update(
-        { address_default: 0 },
-        { where: { user_id: req.body.user_id } }
-      )
-    }
+  try {
+    if (addressValidate(req.body)) {
+      //如果新增的用户和修改的用户设置成默认，清除该id所有的地址默认，再重新设置
+      if (req.body.address_default === 1) {
+        await addressModel.update(
+          { address_default: 0 },
+          { where: { user_id: req.body.user_id } }
+        )
+      }
 
-    if (req.body.address_id) {
-      //修改地址
-      const updateResult = await addressModel.update(
-        { ...req.body },
-        { where: { address_id: req.body.address_id } }
-      )
-      return res.json({ code: 200, message: '修改成功', data: {} })
-    } else {
-      //添加地址
-      const updateResult = await addressModel.create({
-        ...req.body,
-        address_id: uuidv4()
-      })
-      return res.json({ code: 200, message: '添加地址成功', data: {} })
+      if (req.body.address_id) {
+        //修改地址
+        const updateResult = await addressModel.update(
+          { ...req.body },
+          { where: { address_id: req.body.address_id } }
+        )
+        return res.json({ code: 200, message: '修改成功', data: {} })
+      } else {
+        //添加地址
+        const updateResult = await addressModel.create({
+          ...req.body,
+          address_id: uuidv4()
+        })
+        return res.json({ code: 200, message: '添加地址成功', data: {} })
+      }
     }
+    return res.json({ code: 201, message: '数据格式错误', data: {} })
+  } catch (error) {
+    return res.json({ code: 1003, message: '添加地址失败,请检查' })
   }
-  return res.json({ code: 201, message: '数据格式错误', data: {} })
 }
 
 //打个bug需要增加删除默认地址

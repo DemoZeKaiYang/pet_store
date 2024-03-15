@@ -15,10 +15,10 @@ const goodModel = sequelize.define(
       type: DataTypes.STRING
     },
     good_price: {
-      type: DataTypes.STRING
+      type: DataTypes.DOUBLE
     },
     good_origin_price: {
-      type: DataTypes.STRING
+      type: DataTypes.DOUBLE
     },
     good_comment_num: {
       type: DataTypes.INTEGER
@@ -34,9 +34,6 @@ const goodModel = sequelize.define(
       }
     },
     good_image: {
-      type: DataTypes.STRING
-    },
-    parent_category_id: {
       type: DataTypes.STRING
     }
   },

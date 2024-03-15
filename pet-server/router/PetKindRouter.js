@@ -6,9 +6,7 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false })
 const multer = require('multer')
 const { getKinds } = require('../router_handler/PetKindHandler')
 
-//注册用户
 router.get('/kind', getKinds)
-// 登录用户
 
 //暴漏数据
 module.exports = router

@@ -1,1 +1,1 @@
-export const  devUrl='http://192.168.189.245:9000'  
+export const  devUrl='http://192.168.6.3:9000'  

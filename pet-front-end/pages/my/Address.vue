@@ -86,10 +86,18 @@ const addAddress = () => {
 }
 //获取所有地址
 const getAddressData = async () => {
+  try{
   const result = await getAddressApi(userStore.user.user_id)
   if (result.code === 1000) {
     addressList.value = result.data
+  }  
+  }catch(e){
+    //TODO handle the exception
+    uni.showToast({
+      title:'获取地址失败',icon:'none'
+    })
   }
+  
 }
 onMounted(() => {
   //调接口

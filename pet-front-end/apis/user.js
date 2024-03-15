@@ -15,7 +15,7 @@ export const loginApi = async (obj) => {
 
 //注册用户
 export const registerApi = async (obj) => {
-  return await requrest('/user', obj, {
+  return await request('/user', obj, {
     method: 'post'
   })
 }

@@ -19,6 +19,7 @@
     "uuid": "^9.0.1"
   },
   "scripts": {
-    "dev": "nodemon ./app"
+    "dev": "nodemon ./app",
+    "serve": "node ./app"
   }
 }
