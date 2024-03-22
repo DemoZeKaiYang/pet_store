@@ -92,7 +92,7 @@ import { devUrl } from '../../config';
   }
 
   const getData = async () => {
-    const result = await request('/shop/category')
+    const result = await request('/shop/goodKind')
     if (result.code === 200) {
       kindList.value = result.data
     }

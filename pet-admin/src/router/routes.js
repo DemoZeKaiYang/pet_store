@@ -1,68 +1,85 @@
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: () => import('@/views/HomeView.vue'),
+    name: 'layout',
+    component: () => import('@/views/layouts/index.vue'),
     meta: {
-      title: '首页',
       icon: 'home-filled',
-      disabled: false
-    }
-  },
-  {
-    path: '/pet',
-    name: 'pet',
-    redirect: { name: 'addPet' },
-    meta: {
-      title: '宠物管理',
-      icon: 'aim',
       disabled: false
     },
     children: [
       {
-        path: 'add',
-        name: 'addPet',
+        path: 'pet',
+        name: 'pet',
+        redirect: { name: 'addPet' },
         meta: {
-          title: '添加宠物',
-          icon: '',
+          title: '宠物管理',
+          icon: 'aim',
           disabled: false
+        },
+        children: [
+          {
+            path: 'add',
+            name: 'addPet',
+            meta: {
+              title: '添加宠物',
+              icon: '',
+              disabled: false
+            }
+          },
+          {
+            path: 'del',
+            name: 'delPet',
+            meta: {
+              title: '添加宠物',
+              icon: '',
+              disabled: false
+            }
+          }
+        ]
+      },
+      {
+        path: 'address',
+        name: 'address',
+        meta: {
+          title: '地址管理'
         }
       },
       {
-        path: 'del',
-        name: 'delPet',
+        path: 'shop',
+        name: 'shop',
+        component: () => import('@/views/shop/index.vue'),
         meta: {
-          title: '添加宠物',
-          icon: '',
-          disabled: false
-        }
+          title: '商城管理'
+        },
+        children: [
+          {
+            path: 'kind',
+            name: 'kind',
+            component: () => import('@/views/shop/kind/index.vue'),
+            meta: {
+              title: '商品种类'
+            }
+          },
+          {
+            path: 'category',
+            name: 'category',
+            component: () => import('@/views/shop/category/index.vue'),
+            meta: {
+              title: '商品分类'
+            }
+          }
+        ]
       }
     ]
   },
   {
-    path: '/address',
-    name: 'address',
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/login/index.vue'),
     meta: {
-      title: '地址管理'
+      title: '登录'
     }
-  },
-  {
-    path: '/shop',
-    name: 'shop',
-    component: () => import('@/views/shop/index.vue'),
-    meta: {
-      title: '商城管理'
-    },
-    children: [
-      {
-        path: 'kind',
-        name: 'kind',
-        component: () => import('@/views/shop/kind/index.vue'),
-        meta: {
-          title: '商品分类'
-        }
-      }
-    ]
   }
 ]
 

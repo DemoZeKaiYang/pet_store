@@ -111,9 +111,10 @@ import { useUserStore } from '@/stores/user'
 import { getCurrentTimeFormatted } from '@/utils/getNowTime.js'
 import { onLoad } from '@dcloudio/uni-app'
 import { confirmOrder } from '@/apis/order'
-
+import { useOrderStore } from '@/stores/order.js'
 const carStore = useCarStore()
 const userStore = useUserStore()
+const orderStore = useOrderStore()
 const address = ref({})
 const showAddress = ref(true)
 const orderTime = ref('')
@@ -162,17 +163,33 @@ const payHandler = async () => {
   // 封装数据，用户id
   let obj = {
     shipping_address: address.value.address_area + address.value.address_details, //地址
+    address_name:address.value.address_name,
+    address_number:address.value.address_phone,
     goodList: carStore.checkOutCar, //商品数据
     user_id: userStore.user.user_id, //用户id
     create_date: orderTime.value,
-    order_number:orderNumber.value
+    order_number: orderNumber.value,
   }
   const result = await confirmOrder(obj)
-  if (result.code === 1000) {
-    //对后端返回的订单存储到pinia中,清除购物车
-    console.log(result)
+  if (result.code === 2000) {
+    //对后端返回的订单存储到orderStore中
+    orderStore.updateOrder(result.data)
+
+    //清除购物车
+    const good_id_arr = orderStore.orderList.goodList.map((item) => item.good_id)
+    if (good_id_arr.length > 0) {
+      good_id_arr.forEach((item) => {
+        carStore.deleteGoods(item)
+      })
+    }
+    uni.showToast({ title: '订单确认成功', icon: 'none' })
+    //跳转支付页面
+    uni.navigateTo({
+      url: '/pages/car/pay',
+    })
+    
   } else {
-    return uni.showToast({ title: '确认订单失败', icon: 'none' })
+    return uni.showToast({ title: '确认订单失败,请联系客服', icon: 'none' })
   }
 }
 

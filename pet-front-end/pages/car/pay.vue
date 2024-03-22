@@ -9,47 +9,37 @@
         <!-- 编辑地址 -->
         <view>
           <view class="center">
-            <!-- 默认 -->
-            <view class="moren" v-if="address.address_default == 1">
-              <icon-base type="moren" :color="'#2979FF'" :size="100"></icon-base>
-            </view>
             <view class="name">
-              <text class="text1">{{ address.address_name }}</text>
-              <text class="phones">{{ address.address_phone }}</text>
+              <text class="text1">{{ orderStore.orderList.address_name }}</text>
+              <text class="phones">{{ orderStore.orderList.address_phone }}</text>
             </view>
             <view class="address_name"
-              >{{ address.address_area }}{{ address.address_details }}</view
+              >{{ orderStore.orderList.shipping_address }}</view
             >
           </view>
         </view>
       </view>
     </view>
 
-    <view class="address-box" v-if="!showAddress">
-      <view class="address-icon"
-        ><u-icon name="plus-circle" color="#999" size="36rpx"></u-icon
-      ></view>
-      <view class="address-text">添加收货地址</view>
-    </view>
     <!-- 商品信息 -->
     <view class="shopping-box">
       <view class="shopping-top">
         <view class="lable-title">商品信息</view>
-        <view class="lable-number">共{{ carStore.checkOutNum }}个</view>
+        <view class="lable-number">共{{ orderStore.goodTotalNumber}}个</view>
       </view>
       <view class="shopping-list">
         <!-- 选中的商品  -->
-        <view class="shopping-item" v-for="(c, index) in carStore.checkOutCar" :key="c.good_id">
+        <view class="shopping-item" v-for="(good, index) in orderStore.goodList" :key="good.good_id">
           <view class="shopping-img">
-            <image :src="`${devUrl}/good_uploads/${c.good_image}`"></image>
+            <image :src="`${devUrl}/good_uploads/${good.good_image}`"></image>
           </view>
           <view class="shopping-info">
             <view class="shopping-hd">
-              <view class="shopping-title">{{ c.good_category.good_category_name }}</view>
-              <view class="shopping-price">￥{{ (c.good_price * c.addNum).toFixed(2) }}</view>
-              <view class="shopping-price">x{{ c.addNum }}</view>
+              <view class="shopping-title">{{ good.good_category.good_category_name }}</view>
+              <view class="shopping-price">￥{{ (good.good_price * good.addNum).toFixed(2) }}</view>
+              <view class="shopping-price">x{{ good.addNum }}</view>
             </view>
-            <view class="shopping-text">{{ c.good_name }}</view>
+            <view class="shopping-text">{{good.good_name }}</view>
           </view>
         </view>
       </view>
@@ -59,7 +49,7 @@
       </view>
       <view class="end-price">
         <view class="end-label">实付款</view>
-        <view class="end-number">￥{{ carStore.sumPrice }}</view>
+        <view class="end-number">￥{{ orderStore.goodSumPrice }}</view>
       </view>
     </view>
     <!-- 订单信息 -->
@@ -69,7 +59,7 @@
       </view>
       <view class="shopping-top cell-list">
         <view class="cell-left">订单编号</view>
-        <view class="cell-right">{{ orderNumber }}</view>
+        <view class="cell-right">{{ orderStore.orderList.order_number }}</view>
       </view>
       <view class="shopping-top cell-list">
         <view class="cell-left">支付方式</view>
@@ -77,7 +67,7 @@
       </view>
       <view class="shopping-top cell-list">
         <view class="cell-left">下单时间</view>
-        <view class="cell-right">{{ orderTime }}</view>
+        <view class="cell-right">{{orderStore.orderList.create_date }}</view>
       </view>
     </view>
     <view class="footer-box">
@@ -85,7 +75,7 @@
         <view class="price-box">
           合计:<view class="price-text">
             <u-icon name="rmb" :bold="true" color="rgb(245, 54, 22)" size="32rpx"></u-icon
-            >{{ carStore.sumPrice }}
+            >{{ orderStore.goodSumPrice }}
           </view>
         </view>
         <view class="print-item-entry" style="flex: 2">
@@ -94,7 +84,7 @@
             style="padding: 24rpx 60rpx; border-radius: 14rpx"
             @tap="payHandler"
           >
-            <view class="selecet-text">确认订单</view>
+            <view class="selecet-text">支付</view>
           </view>
         </view>
       </view>
@@ -104,87 +94,17 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useCarStore } from '@/stores/car.js'
 import { devUrl } from '@/config.js'
 import request from '@/utils/request'
-import { useUserStore } from '@/stores/user'
 import { getCurrentTimeFormatted } from '@/utils/getNowTime.js'
 import { onLoad } from '@dcloudio/uni-app'
-import { confirmOrder } from '@/apis/order'
+import { useOrderStore } from '@/stores/order.js'
+const orderStore=useOrderStore()
 
-const carStore = useCarStore()
-const userStore = useUserStore()
-const address = ref({})
-const showAddress = ref(true)
-const orderTime = ref('')
-const orderNumber = ref(0)
-const getDefaultAddress = async () => {
-  const result = await request('/address/default', { user_id: userStore.user.user_id })
-  if (result.code === 1000) {
-    showAddress.value = true
-    address.value = result.data
-  } else {
-    showAddress.value = false
-  }
+//支付事件
+const payHandler=()=>{
+  
 }
-//订单编号
-const getOrderNum = () => {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0') // 月份从0开始，所以要加1，并用'0'填充至两位
-  const day = String(now.getDate()).padStart(2, '0') // 日期用'0'填充至两位
-  orderNumber.value = Number(
-    year + month + day + (Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000)
-  )
-}
-
-//选择地址
-const selectAddress = () => {
-  uni.navigateTo({
-    url: '/pages/car/ConfirmAddress',
-  })
-}
-//修改地址
-const updateAddress = (obj) => {
-  address.value = obj
-}
-
-//确认订单
-const payHandler = async () => {
-  // 校验地址
-  if (!address.value) {
-    return uni.showToast({ title: '请检查您的地址', icon: 'none' })
-  }
-  // 校验订单,校验不能为空
-  if (!carStore.checkOutCar) {
-    return uni.showToast({ title: '请检查您的商品', icon: 'none' })
-  }
-  // 封装数据，用户id
-  let obj = {
-    shipping_address: address.value.address_area + address.value.address_details, //地址
-    goodList: carStore.checkOutCar, //商品数据
-    user_id: userStore.user.user_id, //用户id
-    create_date: orderTime.value,
-    order_number:orderNumber.value
-  }
-  const result = await confirmOrder(obj)
-  if (result.code === 1000) {
-    //对后端返回的订单存储到pinia中,清除购物车
-    console.log(result)
-  } else {
-    return uni.showToast({ title: '确认订单失败', icon: 'none' })
-  }
-}
-
-//支付处理
-onMounted(() => {
-  orderTime.value = getCurrentTimeFormatted()
-  getOrderNum()
-  getDefaultAddress()
-})
-onLoad(() => {
-  uni.$on('confirmAddress', updateAddress)
-})
 </script>
 
 <style lang="scss" scoped>

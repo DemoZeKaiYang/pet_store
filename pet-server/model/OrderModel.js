@@ -33,7 +33,13 @@ const orderModel = sequelize.define(
       type: DataTypes.INTEGER
     },
     order_number: {
-      type: DataTypes.INTEGER
+      type: DataTypes.STRING
+    },
+    address_name: {
+      type: DataTypes.STRING
+    },
+    address_number: {
+      type: DataTypes.STRING
     }
   },
   {

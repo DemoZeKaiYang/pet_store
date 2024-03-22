@@ -46,7 +46,7 @@ const userStore = useUserStore()
 const addressList = ref([])
 //编辑地址:要传递props
 const editAddress = (item) => {
-  const targetPage = '/pages/my/EditAddress'
+  const targetPage = '/pages/my/EditAddress'  
   // 拼接查询字符串
   const queryString = Object.keys(item)
     .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(item[key])}`)

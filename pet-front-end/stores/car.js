@@ -121,6 +121,7 @@ export const useCarStore = defineStore('car', () => {
   }
 
 
+
   return {
     insideCarGoods,
     carNum,

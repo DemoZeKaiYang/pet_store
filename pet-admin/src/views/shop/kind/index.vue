@@ -1,6 +1,16 @@
 <template>
-  <el-card>
-    <el-button type="primary">添加</el-button>
+  <el-card class="top-edit">
+    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind">添加种类</el-button>
+    <el-button type="danger" size="large" style="font-size: 20px" @click="delSelectKind">删除选中</el-button>
+    <!-- 搜索框 -->
+    <el-input
+      v-model.trim="search"
+      placeholder="请输入要搜素的种类名称"
+      size="large"
+      class="pet-search"
+      prefix-icon="Search"
+    />
+    <el-button type="primary" size="large" style="font-size: 20px" @click="searchBtn">搜索</el-button>
   </el-card>
   <!-- 内容 -->
   <el-card class="contain">
@@ -8,48 +18,132 @@
       ref="multipleTableRef"
       :data="tableData"
       style="width: 100%"
-      @selection-change="handleSelectionChange"
+      size="large"
+      :border="true"
+      stripe
+      class="kind-table"
+      @selection-change="selectChange"
+      height="600"
     >
-      <el-table-column type="selection" width="55" />
-      <el-table-column label="种类名称" width="120" prop="name" />
-      <el-table-column label="等级" width="120" prop="level" />
-      <el-table-column label="种类排序" width="120" prop="name" />
-      <el-table-column label="种类显示" width="120" prop="level" />
+      <el-table-column type="selection" width="100" label="序号" fixed />
+      <el-table-column label="种类名称" width="300" prop="good_kind_name" />
+      <el-table-column label="等级" width="300" prop="level" />
+      <el-table-column label="种类排序" width="300" prop="good_kind_order" sortable />
+      <el-table-column label="种类显示" width="300" prop="good_display" />
+      <el-table-column label="编辑" width="200">
+        <template #default="scope">
+          <el-button size="large" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-button size="large" type="danger" @click="delKind(scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
     </el-table>
   </el-card>
+
+  <!-- 编辑对话框 -->
+  <EditKind
+    :dialogFormVisible="dialogFormVisible"
+    @cancelDialog="cancelDialog"
+    :editData="editData"
+    @renderData="getData"
+  ></EditKind>
 </template>
 
 <script setup>
-import { getKind } from '@/apis/shop/good_kind/index.js'
+import { delShopKindAPI, getShopKindAPI, searchShopKindAPI } from '@/apis/shop/good_kind/index.js'
+import { delMessageBox } from '@/utils/messageBox.js'
+import EditKind from './components/EditKind.vue'
+import { successMessage, failMessage } from '@/utils/message'
+//实例
 const multipleTableRef = ref()
-const multipleSelection = ref([])
 
+//搜索框的数据
+const search = ref()
+
+//获取种类
 const getData = async () => {
-  const result = await getKind()
-  console.log(result)
-}
-const tableData = [
-  {
-    date: '2016-05-03',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles'
-  },
-  {
-    date: '2016-05-02',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles'
-  },
-  {
-    date: '2016-05-04',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles'
-  },
-  {
-    date: '2016-05-01',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles'
+  const result = await getShopKindAPI()
+  if (result.code === 2000) {
+    tableData.value = result.data
   }
-]
+}
+
+//选中的数据
+const selectData = ref()
+
+//测试数据
+const tableData = ref([])
+
+//编辑框的显示
+const dialogFormVisible = ref(false)
+
+//编辑传递的数据
+const editData = ref({})
+
+//删除选中得数据
+const delSelectKind = async () => {
+  const confirmDel = await delMessageBox()
+  if (confirmDel) {
+    const good_kind_id_arr = selectData.value.map((item) => item.good_kind_id)
+    const result = await delShopKindAPI(good_kind_id_arr)
+    if (result.code === 2000) {
+      successMessage('删除成功')
+      getData()
+    } else {
+      failMessage(result.message)
+    }
+  }
+}
+
+//删除单个种类
+const delKind = async (row) => {
+  const confirmDel = await delMessageBox()
+  if (confirmDel) {
+    const result = await delShopKindAPI(row.good_kind_id)
+    if (result.code === 2000) {
+      successMessage('删除成功')
+      getData()
+    } else {
+      failMessage(result.message)
+    }
+  }
+}
+
+//搜索框事件
+const searchBtn = async () => {
+  if (!search.value) {
+    getData()
+    return
+  }
+  const result = await searchShopKindAPI(search.value)
+  if (result.code === 2000) {
+    tableData.value = result.data
+    successMessage('查询成功')
+  } else {
+    failMessage(result.message)
+  }
+}
+
+//编辑事件
+const handleEdit = (index, row) => {
+  let obj = { ...row }
+  editData.value = obj
+  dialogFormVisible.value = true
+}
+
+//添加
+const addKind = () => {
+  dialogFormVisible.value = true
+}
+
+//取消对话框
+const cancelDialog = () => {
+  dialogFormVisible.value = false
+}
+
+//多选表格改变事件
+const selectChange = (val) => {
+  selectData.value = val
+}
 onMounted(() => {
   getData()
 })
@@ -58,5 +152,32 @@ onMounted(() => {
 <style lang="scss" scoped>
 .contain {
   margin-top: 20px;
+  .kind-table {
+    font-size: 20px;
+  }
+  .select-check {
+    font-size: 20px;
+  }
+
+  /* 如果需要调整选中后的图标大小，可以添加以下样式 */
+  :deep(.el-checkbox__inner) {
+    width: 28px; /* 修改选中状态下选择框的宽度 */
+    height: 28px; /* 修改选中状态下选择框的高度 */
+  }
+  :deep(.el-checkbox__inner::after) {
+    height: 14px;
+    width: 6px;
+    left: 10px;
+  }
+  :deep(.el-checkbox__inner::before) {
+    top: 10px;
+  }
+}
+
+.pet-search {
+  margin-left: 750px;
+  width: 400px;
+  font-size: 20px;
+  margin-right: 20px;
 }
 </style>

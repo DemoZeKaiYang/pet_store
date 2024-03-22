@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid')
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const secret = require('../secret')
+
 // 添加用户处理
 const addUser = async (req, res) => {
   //验证请求体携带的phone和password的格式是否正确
@@ -87,8 +88,6 @@ const uploadAvatar = async (req, res) => {
 
 //修改用户
 const updateUser = async (req, res) => {
-  console.log(req.body)
-
   //校验用户提交的数据
   if (!updateUserValidate(req.body))
     return res
@@ -113,7 +112,6 @@ const updateUser = async (req, res) => {
       data: result[0].dataValues
     })
   } catch (error) {
-    console.log(error)
     return res.status(401).json({
       code: 401,
       message: '修改用户失败',
@@ -121,6 +119,7 @@ const updateUser = async (req, res) => {
     })
   }
 }
+
 module.exports = {
   addUser,
   loginUser,
