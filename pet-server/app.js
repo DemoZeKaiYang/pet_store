@@ -5,9 +5,12 @@ const fs = require('fs')
 const path = require('path')
 const expressWs = require('express-ws')
 const { JsonWebTokenError } = require('jsonwebtoken')
+const server = require('http').createServer(app)
+const io = require('socket.io')(server, {})
 
 //应用express
 expressWs(app)
+//应用socket.io
 
 app.use(cors())
 app.use(express.json())
@@ -46,6 +49,9 @@ app.use(function (err, req, res, next) {
   }
 })
 
-app.listen(9000, () => {
+//引入socket
+require('./websocket/index.js')(io)
+
+server.listen(9000, () => {
   console.log('服务已经启动，端口9000')
 })

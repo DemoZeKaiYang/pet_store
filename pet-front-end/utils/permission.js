@@ -18,8 +18,6 @@ export default function initPermission() {
         //获取用户的token
         let token = null
         token=uni.getStorageSync("token")
-
-
         //获取要跳转的页面路径（url去掉"?"和"?"后的参数）
         let url = e.url.split('?')[0];
         let notNeed = whiteList.includes(url)

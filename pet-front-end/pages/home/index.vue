@@ -11,25 +11,28 @@
         bgColor="#2979FF"
         type="zhongyiguan"
         icColor="#fff"
-        
+        @tap="gotoDetailService('62f84788-252f-4908-ba43-a19001052418')"
       ></ServiceSelect>
       <ServiceSelect
         title="上门喂狗"
         bgColor="#2979FF"
         type="liugou"
         icColor="#fff"
+           @tap="gotoDetailService('65d55764-1230-423d-8424-a5f1c9b75425')"
       ></ServiceSelect>
       <ServiceSelect
-        title="预约服务"
+        title="上门喂食"
         bgColor="#2979FF"
         type="yuyuedingdan"
         icColor="#fff"
+           @tap="gotoDetailService('156b135f-338c-462c-a199-03f138166828')"
       ></ServiceSelect>
       <ServiceSelect
         title="领养宠物"
         bgColor="#2979FF"
         type="aixinlingyanghover"
         icColor="#fff"
+        @tap="jumpAdopt"
       ></ServiceSelect>
     </view>
 
@@ -51,7 +54,7 @@
       <view class="type-service">
         <SelectType
           class="service-type"
-          @click="gotoDetailService"
+          @click="gotoDetailService(service.service_id)"
           v-for="service in serviceList"
           :title="service.service_name"
           :imgurl="service.service_image"
@@ -67,14 +70,16 @@ import ServiceSelect from './components/ServiceSelect.vue'
 import SelectItem from './components/SelectItem.vue'
 import SelectType from './components/SelectType.vue'
 import { getServiceTypeApi, getServiceAPI } from '@/apis/service.js'
+import { reqParams } from '../../utils/reqParams'
 
 const serviceTypeList = ref([])
 const serviceList = ref([])
-const gotoDetailService = () => {
-  //传递id
-  uni.navigateTo({
-    url: '/pages/home/DetailService',
+const gotoDetailService = (service_id) => {
+  const url = reqParams('/pages/home/DetailService', {
+    service_id,
   })
+  //传递id
+  uni.navigateTo({ url })
 }
 
 //获取服务类型
@@ -95,10 +100,14 @@ const getServiceData = async (service_type_id) => {
   }
 }
 
-
-
 //跳转到详细服务
-const gotoDetail=()=>{
+const gotoDetail = () => {}
+
+//跳转的领养宠物
+const jumpAdopt=()=>{
+  uni.switchTab({
+    url:'/pages/messages/index'
+  })
 }
 
 //获取对应的宠物类型

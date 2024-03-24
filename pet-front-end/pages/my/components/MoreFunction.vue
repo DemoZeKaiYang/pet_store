@@ -6,6 +6,7 @@
 					size: '22',
 					type: 'gear-filled'
 				}" title="设置" @click="" />
+
       <uni-list-item :show-extra-icon="true" showArrow :extra-icon="{
       		color: '#2979ff',
       		size: '22',

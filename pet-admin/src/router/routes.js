@@ -70,6 +70,13 @@ const routes = [
             }
           }
         ]
+      },
+      {
+        path: 'message',
+        component: () => import('@/views/message/index.vue'),
+        meta: {
+          title: '客户处理'
+        }
       }
     ]
   },

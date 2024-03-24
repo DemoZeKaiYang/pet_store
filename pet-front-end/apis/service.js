@@ -13,3 +13,10 @@ export const getServiceAPI = async (service_type_id) => {
     method: 'post'
   })
 }
+
+//获取详细服务
+export const getServiceDetailAPI = async (service_id) => {
+  return await request('/getServiceDetail', {
+    service_id
+  })
+}

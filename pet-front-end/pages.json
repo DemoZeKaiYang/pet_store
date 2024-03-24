@@ -111,7 +111,7 @@
     {
       "path": "pages/messages/Chat",
       "style": {
-        "navigationBarTitleText": "聊天",
+        "navigationBarTitleText": "客服",
         "enablePullDownRefresh": false
       }
     },
@@ -169,12 +169,18 @@
       "path" : "pages/car/pay",
       "style" : 
       {
+        "navigationBarTitleText" : "支付",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/home/ComfirmAddress",
+      "style" : 
+      {
         "navigationBarTitleText" : "",
         "enablePullDownRefresh" : false
       }
     }
-
-
   ],
   "globalStyle": {
     "navigationBarTextStyle": "white",
@@ -213,7 +219,7 @@
         "iconPath": "static/image/xiaoxi.png",
         "selectedIconPath": "static/image/xiaoxi-selected.png",
         "pagePath": "pages/messages/index",
-        "text": "消息"
+        "text": "领养"
       },
       {
         "iconPath": "static/image/icon7.png",

@@ -9,15 +9,17 @@
     >
       <view class="scroll-view">
         <view class="news-box" v-for="(item, index) in list" :key="index">
+          <!-- 头像 -->
           <image
             class="avatar"
             :class="[item.isMe ? 'is-me' : 'avatar-right']"
             :src="item.avatar"
             mode="aspectFill"
           ></image>
+
+          <!-- 消息 -->
           <view class="message-box" :class="{ 'is-me': item.isMe }">
             <text class="message" v-if="item.type !== 2">{{ item.content || '' }}</text>
-
             <image
               class="message-image"
               :src="item.content"
@@ -30,6 +32,7 @@
       </view>
     </scroll-view>
 
+    <!-- 输入框以及按钮，发送消息部分 -->
     <view class="base-btn">
       <view class="base-con unify-flex">
         <view class="send-image iconfont icon-icon" @tap="tapTo(1)"></view>
@@ -48,11 +51,37 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref,nextTick } from 'vue'
+import { computed, onMounted, ref, nextTick } from 'vue'
+
+import { onLoad } from '@dcloudio/uni-app'
+
+import { devUrl } from '@/config'
+
+//输入框数据
 const inputValue = ref('')
+//消息列表
 const list = ref([])
+//图片
 const image = ref('')
+
+//滚动条的位置
 const scrollHeight = ref(0)
+
+
+
+
+onLoad(() => {
+  uni.connectSocket({
+    url:'ws://192.168.6.4:9000',
+    success(res){
+      console.log(res);
+    },
+    fail(err) {
+      console.log(err);
+    }
+  })
+})
+
 //获取系统的信息
 const windowObj = computed(() => {
   let obj
@@ -63,8 +92,6 @@ const windowObj = computed(() => {
   })
   return obj
 })
-
-
 
 const tabTo = (state) => {
   switch (state) {
@@ -161,10 +188,8 @@ const initChatLog = () => {
 }
 
 const connectSocket = () => {
-  
   // let param = that.data,
   //   userInfo = that.userInfo
-
   // uni.connectSocket({
   //   url: 'wss://*******/wss:8282', // 修改为自己的
   // })
@@ -198,16 +223,16 @@ const connectSocket = () => {
   // })
 }
 
-const setScrollTop=()=> {
-	// 		nextTick(() => {
-	// 			let scrollView = uni.createSelectorQuery().select('.scroll-view');
-	// 			scrollView.fields({ size: true }, data => {
-	// 				let height = data.height;
-	// 				this.scrollHeight = height;
-	// 			}).exec();
-	// 		});
-	// 	}
-	// }
+const setScrollTop = () => {
+  // 		nextTick(() => {
+  // 			let scrollView = uni.createSelectorQuery().select('.scroll-view');
+  // 			scrollView.fields({ size: true }, data => {
+  // 				let height = data.height;
+  // 				this.scrollHeight = height;
+  // 			}).exec();
+  // 		});
+  // 	}
+  // }
 }
 </script>
 

@@ -17,3 +17,8 @@ export const updateAddressApi=async (obj)=>{
 export const delAddressApi=async (id)=>{
   return  await request('/address/del', {address_id:id}, {method: 'post'})
 }
+
+//获取默认地址
+export const getDefaultAddressAPI=async (id)=>{
+  return  await request('/address/default', { user_id: id })
+}
