@@ -58,7 +58,7 @@
       const {
         data
       } = await uni.uploadFile({
-        url: 'http://192.168.2.99:9000/user/upload',
+        url: 'http://192.168.6.3:9000/user/upload',
         filePath: res.tempFilePaths[0],
         name: 'avatar',
         fileType: 'image',

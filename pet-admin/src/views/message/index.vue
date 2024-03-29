@@ -10,9 +10,24 @@
       <template v-slot>
         <div class="chat-main">
           <div class="chat">
-            <!-- 客户 -->
-            <div class="client" v-for="message in item.content">{{ message }}</div>
-            <!-- <div class="my" v-for="i in 100">1</div> -->
+            <div class="scroll-view">
+              <div class="news-box" v-for="(item, index) in socketStore.list" :key="index">
+                <!-- 头像 -->
+
+                <img
+                  class="avatar"
+                  :class="[item.message_type === 1 ? 'is-me' : 'avatar-right']"
+                  :src="`${DEVURL}/uploads/${
+                    item.message_type === 1 ? item.user.user_avatar : item.admin.admin_avatar
+                  }`"
+                />
+
+                <!-- 消息 -->
+                <div class="message-box" :class="{ 'is-me': item.message_type === 1 }">
+                  <text class="message">{{ item.message || '' }}</text>
+                </div>
+              </div>
+            </div>
           </div>
           <!-- 编辑器 -->
           <div class="editor">
@@ -35,18 +50,15 @@
   </el-tabs>
 </template>
 <script setup>
-import socket from '@/request/socket.js'
-
+import { useSocketStore } from '@/stores/socket'
+const DEVURL = import.meta.env.VITE_API_URL
+const socketStore = useSocketStore()
 //聊天消息数组
 const textarea = ref('')
 
 //发送按钮的回调事件
 const sendMessage = () => {
-  console.log(editableTabs.value)
-  editableTabs.value[tabIndex.value - 1].content.push(textarea.value)
-  socket.emit('message', textarea.value)
-  textarea.value = ''
-  getMessage()
+  socketStore.sendMessage(textarea.value)
 }
 
 const tabIndex = ref('1')
@@ -63,28 +75,8 @@ const editableTabs = ref([
   }
 ])
 
-const getMessage = () => {
-  socket.on('gbmsg', (data) => {
-    editableTabs.value[tabIndex.value].push(data)
-  })
-}
-
-//加入群里
-const join = () => {
-  console.log(editableTabs.value[tabIndex.value - 1].name)
-  socket.emit('join', editableTabs.value[tabIndex.value - 1].name)
-  welcome()
-}
-
-//欢迎加入
-const welcome = () => {
-  socket.on('welcome', (name, len) => {
-    editableTabs.value[tabIndex.value - 1].content.push(`欢迎${name},加入`)
-  })
-}
 onMounted(() => {
-  getMessage()
-  join()
+  // socketStore.onMsg()
 })
 </script>
 <style lang="scss" scoped>
@@ -130,5 +122,67 @@ onMounted(() => {
     width: 100px;
     font-size: 20px;
   }
+}
+
+//消息css
+.scroll-view,
+.base-con {
+  margin: 0 15px;
+}
+
+.scroll-view {
+  height: 100%;
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  float: left;
+  margin-top: 20px;
+}
+
+.avatar-right {
+  margin-right: 10px;
+}
+
+.message-box {
+  max-width: 76%;
+  display: inline-block;
+  word-wrap: break-word; /* 控制消息框换行 */
+}
+
+.message {
+  font-size: 24rpx;
+  background-color: #e6e6e6;
+  padding: 15px;
+  float: left;
+  border-radius: 8px;
+  overflow: hidden;
+  word-break: break-all;
+  white-space: pre-wrap;
+  margin-top: 20px;
+}
+
+.message-image {
+  width: 80px;
+  height: 130px;
+  padding: 15px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.news-box::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.news-box:last-child .message {
+  margin-bottom: 20px;
+}
+
+.is-me {
+  float: right;
+  margin-left: 10px;
 }
 </style>

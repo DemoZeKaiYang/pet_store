@@ -8,25 +8,19 @@
       @scrolltoupper="loadMores"
     >
       <view class="scroll-view">
-        <view class="news-box" v-for="(item, index) in list" :key="index">
+        <view class="news-box" v-for="(item, index) in socketStore.list" :key="index">
           <!-- 头像 -->
           <image
             class="avatar"
-            :class="[item.isMe ? 'is-me' : 'avatar-right']"
-            :src="item.avatar"
+            :class="[item.message_type===1 ? 'is-me' : 'avatar-right']"
+            
+            :src="`${devUrl}/uploads/${(item.message_type===1?item.user.user_avatar:item.admin.admin_avatar)}`"
             mode="aspectFill"
           ></image>
 
           <!-- 消息 -->
-          <view class="message-box" :class="{ 'is-me': item.isMe }">
-            <text class="message" v-if="item.type !== 2">{{ item.content || '' }}</text>
-            <image
-              class="message-image"
-              :src="item.content"
-              mode="aspectFill"
-              v-else
-              @tap="tapTo(3)"
-            ></image>
+          <view class="message-box" :class="{ 'is-me': item.message_type===1 }">
+            <text class="message">{{ item.message || '' }}</text>
           </view>
         </view>
       </view>
@@ -36,15 +30,16 @@
     <view class="base-btn">
       <view class="base-con unify-flex">
         <view class="send-image iconfont icon-icon" @tap="tapTo(1)"></view>
+        <!-- :value="inputValue" -->
         <input
           class="input-text"
           type="text"
-          :value="inputValue"
+          v-model="inputValue"
           placeholder="说些什么吧"
           @input="getInput"
           @confirm="tapTo(2)"
         />
-        <view class="send-input" @tap="tapTo(2)">发送</view>
+        <view class="send-input" @tap="sendMessage">发送</view>
       </view>
     </view>
   </view>
@@ -52,11 +47,15 @@
 
 <script setup>
 import { computed, onMounted, ref, nextTick } from 'vue'
-
-import { onLoad } from '@dcloudio/uni-app'
-
+import { onShow ,onLoad} from '@dcloudio/uni-app'
 import { devUrl } from '@/config'
+import { useUserStore } from '@/stores/user.js'
+import {useSocketStore} from '@/stores/socket.js'
+//使用用户仓库
+const userStore = useUserStore()
 
+//使用socket仓库
+const socketStore=useSocketStore()
 //输入框数据
 const inputValue = ref('')
 //消息列表
@@ -70,17 +69,6 @@ const scrollHeight = ref(0)
 
 
 
-onLoad(() => {
-  uni.connectSocket({
-    url:'ws://192.168.6.4:9000',
-    success(res){
-      console.log(res);
-    },
-    fail(err) {
-      console.log(err);
-    }
-  })
-})
 
 //获取系统的信息
 const windowObj = computed(() => {
@@ -92,148 +80,20 @@ const windowObj = computed(() => {
   })
   return obj
 })
-
-const tabTo = (state) => {
-  switch (state) {
-    case 1:
-      image.value =
-        'https://nimg.ws.126.net/?url=http%3A%2F%2Fdingyue.ws.126.net%2F2021%2F0826%2F6def4faej00qygdfw009kd200u001hcg00u001hc.jpg&thumbnail=660x2147483647&quality=80&type=jpg' // 上传的图片路径
-      newsSend(2)
-      break
-    case 2:
-      newsSend(1)
-      break
-    case 3:
-      let images = []
-      list.value.forEach((item, index) => {
-        if (item.type === 2) {
-          images.push(item.content)
-        }
-      })
-
-      uni.previewImage({
-        urls: images,
-        css: 'background-position: center;background-size:contain;',
-      })
-      break
-    default:
-      break
-  }
+//发送消息
+const sendMessage=()=>{
+  socketStore.sendMessage(inputValue.value)
+  inputValue.value=""
 }
-const newsSend = (type) => {
-  let message = {
-    type: 'say',
-    message_type: type,
-    fromid: 1,
-    toid: 2,
-    data: type !== 2 ? this.inputValue : this.image,
-    fromname: '自己的用户名',
-    toname: '对方的用户名',
-    isMe: true,
-  }
 
-  uni.sendSocketMessage({
-    data: JSON.stringify(message),
-    complete: (res) => {
-      let newsKey = 'content'
-      Object.defineProperty(message, newsKey, Object.getOwnPropertyDescriptor(message, 'data'))
-      message['type'] = type
-      message['avatar'] =
-        'https://nimg.ws.126.net/?url=http%3A%2F%2Fdingyue.ws.126.net%2F2021%2F0826%2F6def4faej00qygdfw009kd200u001hcg00u001hc.jpg&thumbnail=660x2147483647&quality=80&type=jpg' // 自己的头像
-      delete message['data']
-      list.value = list.value.concat([message])
-      inputValue.value = ''
-    },
-  })
-  setScrollTop()
-}
-onMounted(() => {
-  initChatLog()
-  connectSocket()
+  
+onLoad(()=>{
+   socketStore.initSocket()
+   socketStore.onMes()
 })
-//初始化对话框
-const initChatLog = () => {
-  list.value = [
-    {
-      avatar:
-        'https://nimg.ws.126.net/?url=http%3A%2F%2Fdingyue.ws.126.net%2F2021%2F0826%2F890ee899j00qygdfw0028d200u000gwg00zk00k0.jpg&thumbnail=660x2147483647&quality=80&type=jpg',
-      isMe: false,
-      content: '对方回复的消息',
-      type: 1,
-    },
-    {
-      avatar:
-        'https://nimg.ws.126.net/?url=http%3A%2F%2Fdingyue.ws.126.net%2F2021%2F0826%2F6def4faej00qygdfw009kd200u001hcg00u001hc.jpg&thumbnail=660x2147483647&quality=80&type=jpg',
-      isMe: true,
-      content: '我发的消息',
-      type: 1,
-    },
-    {
-      avatar:
-        'https://nimg.ws.126.net/?url=http%3A%2F%2Fdingyue.ws.126.net%2F2021%2F0826%2F890ee899j00qygdfw0028d200u000gwg00zk00k0.jpg&thumbnail=660x2147483647&quality=80&type=jpg',
-      isMe: false,
-      content:
-        'https://nimg.ws.126.net/?url=http%3A%2F%2Fdingyue.ws.126.net%2F2021%2F0826%2F6def4faej00qygdfw009kd200u001hcg00u001hc.jpg&thumbnail=660x2147483647&quality=80&type=jpg',
-      type: 2,
-    },
-    {
-      avatar:
-        'https://nimg.ws.126.net/?url=http%3A%2F%2Fdingyue.ws.126.net%2F2021%2F0826%2F6def4faej00qygdfw009kd200u001hcg00u001hc.jpg&thumbnail=660x2147483647&quality=80&type=jpg',
-      isMe: true,
-      content:
-        'https://nimg.ws.126.net/?url=http%3A%2F%2Fdingyue.ws.126.net%2F2021%2F0826%2F6def4faej00qygdfw009kd200u001hcg00u001hc.jpg&thumbnail=660x2147483647&quality=80&type=jpg',
-      type: 2,
-    },
-  ]
-}
 
-const connectSocket = () => {
-  // let param = that.data,
-  //   userInfo = that.userInfo
-  // uni.connectSocket({
-  //   url: 'wss://*******/wss:8282', // 修改为自己的
-  // })
-  // uni.onSocketOpen(function (res) {
-  //   // console.log('WebSocket连接已打开！', res);
-  // })
-  // uni.onSocketMessage(function (res) {
-  //   var data = JSON.parse(res.data)
-  //   switch (data['type']) {
-  //     // 绑定id
-  //     case 'init':
-  //       var bind = {
-  //         type: 'bind',
-  //         fromid: 2,
-  //       }
-  //       uni.sendSocketMessage({
-  //         data: JSON.stringify(bind),
-  //         complete: (res) => {
-  //           // console.log(res)
-  //         },
-  //       })
-  //       break
-  //     // 接收消息
-  //     case 'text':
-  //       data['isMe'] = false
-  //       data['type'] = data.message_type
-  //       that.list = that.list.concat([data])
-  //       that.setScrollTop()
-  //       break
-  //   }
-  // })
-}
 
-const setScrollTop = () => {
-  // 		nextTick(() => {
-  // 			let scrollView = uni.createSelectorQuery().select('.scroll-view');
-  // 			scrollView.fields({ size: true }, data => {
-  // 				let height = data.height;
-  // 				this.scrollHeight = height;
-  // 			}).exec();
-  // 		});
-  // 	}
-  // }
-}
+
 </script>
 
 <style lang="scss" scoped>

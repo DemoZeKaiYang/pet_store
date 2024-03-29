@@ -14,12 +14,15 @@ const adminModel = sequelize.define(
     },
     admin_password: {
       type: DataTypes.STRING
+    },
+    admin_avatar: {
+      type: DataTypes.STRING
     }
   },
   {
     // 这是其他模型参数
     sequelize,
-    modelName: 'address',
+    modelName: 'admins',
     timestamps: true,
     createdAt: false,
     updatedAt: false,

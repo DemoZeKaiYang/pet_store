@@ -3,17 +3,11 @@ const app = express()
 const cors = require('cors')
 const fs = require('fs')
 const path = require('path')
-const expressWs = require('express-ws')
+const expressWS = require('express-ws')(app)
 const { JsonWebTokenError } = require('jsonwebtoken')
-const server = require('http').createServer(app)
-const io = require('socket.io')(server, {})
 
-//应用express
-expressWs(app)
-//应用socket.io
-
-app.use(cors())
-app.use(express.json())
+app.use(cors()) //跨域
+app.use(express.json()) //请求体json格式
 //图片静态资源
 app.use('/uploads', express.static('./uploads'))
 app.use('/pet_uploads', express.static('./pet_uploads'))
@@ -26,11 +20,10 @@ const PetRouter = require('./router/PetRouter')
 const PetKindRouter = require('./router/PetKindRouter.js')
 const ShopRouter = require('./router/ShopRouter')
 const GoodRouter = require('./router/GoodRouter')
-const SocketRouter = require('./router/SocketRouter.js')
 const OrderRouter = require('./router/OrderRouter')
 const AdminRouter = require('./router/AdminRouter')
 const ServiceRouter = require('./router/ServiceRouter.js')
-
+const WebsocketRouter = require('./router/WebSocketRouter.js')
 app.use(UserRouter)
 app.use(AddressRouter)
 app.use(PetRouter)
@@ -40,7 +33,7 @@ app.use(GoodRouter)
 app.use(OrderRouter)
 app.use(AdminRouter)
 app.use(ServiceRouter)
-app.use('/socket', SocketRouter)
+app.use(WebsocketRouter)
 app.use(function (err, req, res, next) {
   if (err.name === 'UnauthorizedError') {
     res.status(401).json({ code: 401, message: 'token过期了' })
@@ -49,9 +42,6 @@ app.use(function (err, req, res, next) {
   }
 })
 
-//引入socket
-require('./websocket/index.js')(io)
-
-server.listen(9000, () => {
+app.listen(9000, () => {
   console.log('服务已经启动，端口9000')
 })

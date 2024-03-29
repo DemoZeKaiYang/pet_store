@@ -16,7 +16,7 @@
     "path": "^0.12.7",
     "pinia": "^2.1.7",
     "reset-css": "^5.0.2",
-    "socket.io": "^2.5.0",
+    "socket.io-client": "^2.5.0",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5"
   },

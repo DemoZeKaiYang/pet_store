@@ -180,6 +180,14 @@
         "navigationBarTitleText" : "",
         "enablePullDownRefresh" : false
       }
+    },
+    {
+      "path" : "pages/adopt/index",
+      "style" : 
+      {
+        "navigationBarTitleText" : "领养中心",
+        "enablePullDownRefresh" : false
+      }
     }
   ],
   "globalStyle": {
@@ -218,7 +226,7 @@
       {
         "iconPath": "static/image/xiaoxi.png",
         "selectedIconPath": "static/image/xiaoxi-selected.png",
-        "pagePath": "pages/messages/index",
+        "pagePath": "pages/adopt/index",
         "text": "领养"
       },
       {
