@@ -10,7 +10,9 @@ class WebSocket {
   connect() {
     this.instance = uni.connectSocket({
       url: this.url,
-      complete: () => {}
+      complete: () => {
+        
+      }
     })
   }
   send(data) {
@@ -24,7 +26,7 @@ class WebSocket {
       code: 1000,
       reason: '正常关闭',
       success: () => {
-
+        
       }
     })
   }
@@ -34,7 +36,7 @@ class WebSocket {
       callback && callback(res)
     })
   }
-  
+
   onMessage(callback) {
     uni.onSocketMessage((res) => {
       callback && callback(res)

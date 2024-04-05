@@ -163,15 +163,18 @@ const payHandler = async () => {
   // 封装数据，用户id
   let obj = {
     shipping_address: address.value.address_area + address.value.address_details, //地址
-    address_name:address.value.address_name,
-    address_number:address.value.address_phone,
+    address_name: address.value.address_name,
+    address_number: address.value.address_phone,
     goodList: carStore.checkOutCar, //商品数据
     user_id: userStore.user.user_id, //用户id
     create_date: orderTime.value,
     order_number: orderNumber.value,
+    order_price: carStore.sumPrice,
   }
+  console.log(obj.goodList);
   const result = await confirmOrder(obj)
   if (result.code === 2000) {
+    
     //对后端返回的订单存储到orderStore中
     orderStore.updateOrder(result.data)
 
@@ -184,10 +187,9 @@ const payHandler = async () => {
     }
     uni.showToast({ title: '订单确认成功', icon: 'none' })
     //跳转支付页面
-    uni.navigateTo({
+    uni.redirectTo({
       url: '/pages/car/pay',
     })
-    
   } else {
     return uni.showToast({ title: '确认订单失败,请联系客服', icon: 'none' })
   }

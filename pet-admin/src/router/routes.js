@@ -13,25 +13,17 @@ const routes = [
         name: 'pet',
         redirect: { name: 'addPet' },
         meta: {
-          title: '宠物管理',
+          title: '宠物',
           icon: 'aim',
           disabled: false
         },
         children: [
           {
-            path: 'add',
-            name: 'addPet',
+            path: 'managerpet',
+            name: 'managerpet',
+            component: () => import('@/views/pet/index.vue'),
             meta: {
-              title: '添加宠物',
-              icon: '',
-              disabled: false
-            }
-          },
-          {
-            path: 'del',
-            name: 'delPet',
-            meta: {
-              title: '添加宠物',
+              title: '宠物管理',
               icon: '',
               disabled: false
             }

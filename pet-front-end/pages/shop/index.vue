@@ -6,7 +6,7 @@
   <!-- 分类选项 -->
   <view class="category-select">
     <CategorySelect bgColor="#2979FF" type="gouliang" title="狗狗主粮" icColor="#fff"
-      @tap="selectType('5ac481da-1eb6-4694-a3ee-42a74992c903')"></CategorySelect>
+      @tap="selectType('e4b6f30f-4770-4f64-bc28-d4bbc373e55f')"></CategorySelect>
     <CategorySelect bgColor="#2979FF" type="maoliang" title="猫咪主粮" icColor="#fff"
       @tap="selectType('563c3b0e-9362-467b-8937-924694e258c2')"></CategorySelect>
     <CategorySelect bgColor="#2979FF" type="lingshi" title="肉类零食" icColor="#fff"

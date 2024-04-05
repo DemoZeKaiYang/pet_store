@@ -18,15 +18,24 @@ const orderGoodModel = sequelize.define(
         key: 'good_id'
       }
     },
+    good_name: {
+      type: DataTypes.STRING
+    },
+    good_price: {
+      type: DataTypes.STRING
+    },
+    good_number: {
+      type: DataTypes.INTEGER
+    },
+    good_image: {
+      type: DataTypes.STRING
+    },
     order_id: {
       type: DataTypes.STRING,
       references: {
         model: orderModel,
         key: 'order_id'
       }
-    },
-    quantity: {
-      type: DataTypes.INTEGER
     },
     total_price: {
       type: DataTypes.DOUBLE

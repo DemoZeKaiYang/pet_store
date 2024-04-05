@@ -188,6 +188,22 @@
         "navigationBarTitleText" : "领养中心",
         "enablePullDownRefresh" : false
       }
+    },
+    {
+      "path" : "pages/medical/index",
+      "style" : 
+      {
+        "navigationBarTitleText" : "附近医院",
+        "enablePullDownRefresh" : false
+      }
+    },
+    {
+      "path" : "pages/my/ServiceOrder",
+      "style" : 
+      {
+        "navigationBarTitleText" : "服务订单",
+        "enablePullDownRefresh" : false
+      }
     }
   ],
   "globalStyle": {
@@ -220,8 +236,8 @@
       {
         "iconPath": "static/image/faxian.png",
         "selectedIconPath": "static/image/faxian-selected.png",
-        "pagePath": "pages/community/index",
-        "text": "发现"
+        "pagePath": "pages/medical/index",
+        "text": "医疗"
       },
       {
         "iconPath": "static/image/xiaoxi.png",

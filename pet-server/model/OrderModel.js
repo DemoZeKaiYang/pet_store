@@ -40,6 +40,9 @@ const orderModel = sequelize.define(
     },
     address_number: {
       type: DataTypes.STRING
+    },
+    order_price: {
+      type: DataTypes.DOUBLE
     }
   },
   {

@@ -20,7 +20,11 @@
             "autoclose" : true,
             "delay" : 0
         },
-        "modules" : {},
+        "modules" : {
+            "Maps" : {},
+            "Geolocation" : {},
+            "Payment" : {}
+        },
         /* 模块配置 */
         "distribute" : {
             /* 应用发布信息 */
@@ -44,9 +48,36 @@
                     "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
                 ]
             },
-            "ios" : {},
+            "ios" : {
+                "dSYMs" : false
+            },
             /* ios打包配置 */
-            "sdkConfigs" : {},
+            "sdkConfigs" : {
+                "maps" : {
+                    "amap" : {
+                        "name" : "amap5m7r6gw5",
+                        "appkey_ios" : "8ea2cedfafd0bfd1f82339384be8ac4b",
+                        "appkey_android" : "8ea2cedfafd0bfd1f82339384be8ac4b"
+                    }
+                },
+                "geolocation" : {
+                    "amap" : {
+                        "name" : "amap5m7r6gw5",
+                        "__platform__" : [ "ios", "android" ],
+                        "appkey_ios" : "8ea2cedfafd0bfd1f82339384be8ac4b",
+                        "appkey_android" : "8ea2cedfafd0bfd1f82339384be8ac4b"
+                    },
+                    "system" : {
+                        "__platform__" : [ "ios", "android" ]
+                    }
+                },
+                "ad" : {},
+                "payment" : {
+                    "alipay" : {
+                        "__platform__" : [ "ios", "android" ]
+                    }
+                }
+            },
             "icons" : {
                 "android" : {
                     "hdpi" : "unpackage/res/icons/72x72.png",

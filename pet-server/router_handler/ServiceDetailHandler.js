@@ -16,6 +16,7 @@ const getServiceDetail = async (req, res) => {
       },
       include: [{ model: serviceImageModel }, { model: serviceDetailCommentModel }]
     })
+
     const data = result[0].dataValues
     return res.json({ code: 2000, message: '获取数据成功', data })
   } catch (error) {

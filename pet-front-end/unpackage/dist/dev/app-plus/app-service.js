@@ -1238,7 +1238,7 @@ if (uni.restoreGlobal) {
     const reg = /^[0-9]*$/g;
     return typeof val === "number" || reg.test(val) ? val + "px" : val;
   };
-  const _sfc_main$15 = {
+  const _sfc_main$17 = {
     name: "UniIcons",
     emits: ["click"],
     props: {
@@ -1282,7 +1282,7 @@ if (uni.restoreGlobal) {
       }
     }
   };
-  function _sfc_render$v(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$u(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock(
       "text",
       {
@@ -1295,9 +1295,9 @@ if (uni.restoreGlobal) {
       /* CLASS, STYLE */
     );
   }
-  const __easycom_0$d = /* @__PURE__ */ _export_sfc(_sfc_main$15, [["render", _sfc_render$v], ["__scopeId", "data-v-d31e1c47"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-icons/components/uni-icons/uni-icons.vue"]]);
+  const __easycom_0$d = /* @__PURE__ */ _export_sfc(_sfc_main$17, [["render", _sfc_render$u], ["__scopeId", "data-v-d31e1c47"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-icons/components/uni-icons/uni-icons.vue"]]);
   let platform$1 = "other";
-  const _sfc_main$14 = {
+  const _sfc_main$16 = {
     name: "UniFab",
     emits: ["fabClick", "trigger"],
     props: {
@@ -1454,7 +1454,7 @@ if (uni.restoreGlobal) {
       }
     }
   };
-  function _sfc_render$u(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$t(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-cursor-point" }, [
       $props.popMenu && ($options.leftBottom || $options.rightBottom || $options.leftTop || $options.rightTop) && $props.content.length > 0 ? (vue.openBlock(), vue.createElementBlock(
@@ -1558,7 +1558,7 @@ if (uni.restoreGlobal) {
       )
     ]);
   }
-  const __easycom_0$c = /* @__PURE__ */ _export_sfc(_sfc_main$14, [["render", _sfc_render$u], ["__scopeId", "data-v-85f34dfc"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-fab/components/uni-fab/uni-fab.vue"]]);
+  const __easycom_0$c = /* @__PURE__ */ _export_sfc(_sfc_main$16, [["render", _sfc_render$t], ["__scopeId", "data-v-85f34dfc"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-fab/components/uni-fab/uni-fab.vue"]]);
   var isVue2 = false;
   function set$1(target, key, val) {
     if (Array.isArray(target)) {
@@ -1895,8 +1895,8 @@ if (uni.restoreGlobal) {
       return true;
     }
   }
-  function checkNotFocusedError(error) {
-    if (error instanceof Error && error.message.toLowerCase().includes("document is not focused")) {
+  function checkNotFocusedError(error2) {
+    if (error2 instanceof Error && error2.message.toLowerCase().includes("document is not focused")) {
       toastMessage('You need to activate the "Emulate a focused page" setting in the "Rendering" panel of devtools.', "warn");
       return true;
     }
@@ -1908,11 +1908,11 @@ if (uni.restoreGlobal) {
     try {
       await navigator.clipboard.writeText(JSON.stringify(pinia.state.value));
       toastMessage("Global state copied to clipboard.");
-    } catch (error) {
-      if (checkNotFocusedError(error))
+    } catch (error2) {
+      if (checkNotFocusedError(error2))
         return;
       toastMessage(`Failed to serialize the state. Check the console for more details.`, "error");
-      console.error(error);
+      console.error(error2);
     }
   }
   async function actionGlobalPasteState(pinia) {
@@ -1921,11 +1921,11 @@ if (uni.restoreGlobal) {
     try {
       pinia.state.value = JSON.parse(await navigator.clipboard.readText());
       toastMessage("Global state pasted from clipboard.");
-    } catch (error) {
-      if (checkNotFocusedError(error))
+    } catch (error2) {
+      if (checkNotFocusedError(error2))
         return;
       toastMessage(`Failed to deserialize the state from clipboard. Check the console for more details.`, "error");
-      console.error(error);
+      console.error(error2);
     }
   }
   async function actionGlobalSaveState(pinia) {
@@ -1933,9 +1933,9 @@ if (uni.restoreGlobal) {
       saveAs(new Blob([JSON.stringify(pinia.state.value)], {
         type: "text/plain;charset=utf-8"
       }), "pinia-state.json");
-    } catch (error) {
+    } catch (error2) {
       toastMessage(`Failed to export the state as JSON. Check the console for more details.`, "error");
-      console.error(error);
+      console.error(error2);
     }
   }
   let fileInput;
@@ -1972,9 +1972,9 @@ if (uni.restoreGlobal) {
       const { text, file } = result;
       pinia.state.value = JSON.parse(text);
       toastMessage(`Global state imported from "${file.name}".`);
-    } catch (error) {
+    } catch (error2) {
       toastMessage(`Failed to export the state as JSON. Check the console for more details.`, "error");
-      console.error(error);
+      console.error(error2);
     }
   }
   function formatDisplay(display) {
@@ -2196,8 +2196,8 @@ if (uni.restoreGlobal) {
                 value: store._getters.reduce((getters, key) => {
                   try {
                     getters[key] = store[key];
-                  } catch (error) {
-                    getters[key] = error;
+                  } catch (error2) {
+                    getters[key] = error2;
                   }
                   return getters;
                 }, {})
@@ -2324,7 +2324,7 @@ Only state can be modified.`);
             }
           });
         });
-        onError((error) => {
+        onError((error2) => {
           activeAction = void 0;
           api.addTimelineEvent({
             layerId: MUTATIONS_LAYER_ID,
@@ -2337,7 +2337,7 @@ Only state can be modified.`);
                 store: formatDisplay(store.$id),
                 action: formatDisplay(name),
                 args,
-                error
+                error: error2
               },
               groupId
             }
@@ -2754,17 +2754,17 @@ Only state can be modified.`);
         let ret;
         try {
           ret = action.apply(this && this.$id === $id ? this : store, args);
-        } catch (error) {
-          triggerSubscriptions(onErrorCallbackList, error);
-          throw error;
+        } catch (error2) {
+          triggerSubscriptions(onErrorCallbackList, error2);
+          throw error2;
         }
         if (ret instanceof Promise) {
           return ret.then((value) => {
             triggerSubscriptions(afterCallbackList, value);
             return value;
-          }).catch((error) => {
-            triggerSubscriptions(onErrorCallbackList, error);
-            return Promise.reject(error);
+          }).catch((error2) => {
+            triggerSubscriptions(onErrorCallbackList, error2);
+            return Promise.reject(error2);
           });
         }
         triggerSubscriptions(afterCallbackList, ret);
@@ -3167,8 +3167,8 @@ This will fail in production if not fixed.`);
     skipHydrate,
     storeToRefs
   }, Symbol.toStringTag, { value: "Module" }));
-  const devUrl = "http://192.168.6.3:9000";
-  const WEBSOCKETURL = "ws://192.168.6.3:9000/chat";
+  const devUrl = "http://192.168.6.4:9000";
+  const WEBSOCKETURL = "ws://192.168.6.4:9000/chat";
   function request(path, params = {}, options = {}) {
     let token = null;
     token = uni.getStorageSync("token");
@@ -3246,9 +3246,10 @@ This will fail in production if not fixed.`);
       user.value.user_avatar = newValue;
     }
     async function saveInfo() {
-      const result = updateUserApi(user.value);
+      const result = await updateUserApi(user.value);
       if (result.code === 200) {
         user.value = result.data;
+        uni.removeStorageSync("user");
         uni.setStorageSync("user", user.value);
         return true;
       }
@@ -3266,7 +3267,7 @@ This will fail in production if not fixed.`);
       saveInfo
     };
   });
-  const _sfc_main$13 = {
+  const _sfc_main$15 = {
     __name: "PersonInfo",
     setup(__props) {
       const store = useUserStore();
@@ -3299,7 +3300,7 @@ This will fail in production if not fixed.`);
             ),
             vue.createElementVNode(
               "p",
-              null,
+              { class: "signature" },
               vue.toDisplayString(vue.unref(store).user.user_signature),
               1
               /* TEXT */
@@ -3317,8 +3318,8 @@ This will fail in production if not fixed.`);
       };
     }
   };
-  const PersonInfo = /* @__PURE__ */ _export_sfc(_sfc_main$13, [["__scopeId", "data-v-a476a3a8"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/PersonInfo.vue"]]);
-  const _sfc_main$12 = {
+  const PersonInfo = /* @__PURE__ */ _export_sfc(_sfc_main$15, [["__scopeId", "data-v-a476a3a8"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/PersonInfo.vue"]]);
+  const _sfc_main$14 = {
     __name: "icon-base",
     props: ["type", "size", "color"],
     setup(__props) {
@@ -3340,8 +3341,8 @@ This will fail in production if not fixed.`);
       };
     }
   };
-  const __easycom_0$b = /* @__PURE__ */ _export_sfc(_sfc_main$12, [["__file", "D:/graduationProject/pet-front-end/components/icon-base/icon-base.vue"]]);
-  const _sfc_main$11 = {
+  const __easycom_0$b = /* @__PURE__ */ _export_sfc(_sfc_main$14, [["__file", "D:/graduationProject/pet-front-end/components/icon-base/icon-base.vue"]]);
+  const _sfc_main$13 = {
     name: "UniGridItem",
     inject: ["grid"],
     props: {
@@ -3391,7 +3392,7 @@ This will fail in production if not fixed.`);
       }
     }
   };
-  function _sfc_render$t(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$s(_ctx, _cache, $props, $setup, $data, $options) {
     return $data.width ? (vue.openBlock(), vue.createElementBlock(
       "view",
       {
@@ -3418,8 +3419,8 @@ This will fail in production if not fixed.`);
       /* STYLE */
     )) : vue.createCommentVNode("v-if", true);
   }
-  const __easycom_1$5 = /* @__PURE__ */ _export_sfc(_sfc_main$11, [["render", _sfc_render$t], ["__scopeId", "data-v-7a807eb7"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-grid/components/uni-grid-item/uni-grid-item.vue"]]);
-  const _sfc_main$10 = {
+  const __easycom_1$5 = /* @__PURE__ */ _export_sfc(_sfc_main$13, [["render", _sfc_render$s], ["__scopeId", "data-v-7a807eb7"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-grid/components/uni-grid-item/uni-grid-item.vue"]]);
+  const _sfc_main$12 = {
     name: "UniGrid",
     emits: ["change"],
     props: {
@@ -3489,7 +3490,7 @@ This will fail in production if not fixed.`);
       }
     }
   };
-  function _sfc_render$s(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$r(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-grid-wrap" }, [
       vue.createElementVNode("view", {
         id: $data.elId,
@@ -3501,8 +3502,8 @@ This will fail in production if not fixed.`);
       ], 14, ["id"])
     ]);
   }
-  const __easycom_2$1 = /* @__PURE__ */ _export_sfc(_sfc_main$10, [["render", _sfc_render$s], ["__scopeId", "data-v-07acefee"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-grid/components/uni-grid/uni-grid.vue"]]);
-  const _sfc_main$$ = {
+  const __easycom_2$1 = /* @__PURE__ */ _export_sfc(_sfc_main$12, [["render", _sfc_render$r], ["__scopeId", "data-v-07acefee"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-grid/components/uni-grid/uni-grid.vue"]]);
+  const _sfc_main$11 = {
     name: "UniSection",
     emits: ["click"],
     props: {
@@ -3561,7 +3562,7 @@ This will fail in production if not fixed.`);
       }
     }
   };
-  function _sfc_render$r(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$q(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-section" }, [
       vue.createElementVNode("view", {
         class: "uni-section-header",
@@ -3618,13 +3619,21 @@ This will fail in production if not fixed.`);
       )
     ]);
   }
-  const __easycom_1$4 = /* @__PURE__ */ _export_sfc(_sfc_main$$, [["render", _sfc_render$r], ["__scopeId", "data-v-637fd36b"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-section/components/uni-section/uni-section.vue"]]);
-  const _sfc_main$_ = {
+  const __easycom_1$4 = /* @__PURE__ */ _export_sfc(_sfc_main$11, [["render", _sfc_render$q], ["__scopeId", "data-v-637fd36b"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-section/components/uni-section/uni-section.vue"]]);
+  const reqParams = (tragetUrl, params) => {
+    const queryString = Object.keys(params).map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`).join("&");
+    return `${tragetUrl}?${queryString}`;
+  };
+  const _sfc_main$10 = {
     __name: "OrderList",
     setup(__props) {
-      const gotoOrderDetail = () => {
+      const gotoOrderDetail = (order_status) => {
+        const url = reqParams("/pages/my/OrderDetail", { order_status });
+        uni.navigateTo({ url });
+      };
+      const gotoServiceOrder = () => {
         uni.navigateTo({
-          url: "/pages/my/OrderDetail"
+          url: "/pages/my/ServiceOrder"
         });
       };
       return (_ctx, _cache) => {
@@ -3653,7 +3662,7 @@ This will fail in production if not fixed.`);
                     vue.createElementVNode("view", {
                       class: "grid-item-box",
                       style: { "background-color": "#fff" },
-                      onClick: gotoOrderDetail
+                      onClick: _cache[0] || (_cache[0] = ($event) => gotoOrderDetail(0))
                     }, [
                       vue.createVNode(_component_icon_base, {
                         type: "huodaofukuan",
@@ -3669,7 +3678,8 @@ This will fail in production if not fixed.`);
                   default: vue.withCtx(() => [
                     vue.createElementVNode("view", {
                       class: "grid-item-box",
-                      style: { "background-color": "#fff" }
+                      style: { "background-color": "#fff" },
+                      onClick: _cache[1] || (_cache[1] = ($event) => gotoOrderDetail(1))
                     }, [
                       vue.createVNode(_component_icon_base, {
                         type: "wuliyoutuihuo",
@@ -3685,7 +3695,8 @@ This will fail in production if not fixed.`);
                   default: vue.withCtx(() => [
                     vue.createElementVNode("view", {
                       class: "grid-item-box",
-                      style: { "background-color": "#fff" }
+                      style: { "background-color": "#fff" },
+                      onClick: _cache[2] || (_cache[2] = ($event) => gotoOrderDetail(2))
                     }, [
                       vue.createVNode(_component_icon_base, {
                         type: "quanchangbaoyou",
@@ -3701,13 +3712,14 @@ This will fail in production if not fixed.`);
                   default: vue.withCtx(() => [
                     vue.createElementVNode("view", {
                       class: "grid-item-box",
-                      style: { "background-color": "#fff" }
+                      style: { "background-color": "#fff" },
+                      onClick: gotoServiceOrder
                     }, [
                       vue.createVNode(_component_icon_base, {
                         type: "zhengguifapiao",
                         size: "50"
                       }),
-                      vue.createElementVNode("text", { class: "text" }, "已完成")
+                      vue.createElementVNode("text", { class: "text" }, "服务订单")
                     ])
                   ]),
                   _: 1
@@ -3724,8 +3736,7 @@ This will fail in production if not fixed.`);
       };
     }
   };
-  const OrderList = /* @__PURE__ */ _export_sfc(_sfc_main$_, [["__scopeId", "data-v-98ac0607"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/OrderList.vue"]]);
-  const _imports_0 = "/static/image/addCat.png";
+  const OrderList = /* @__PURE__ */ _export_sfc(_sfc_main$10, [["__scopeId", "data-v-98ac0607"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/OrderList.vue"]]);
   const getPetApi = async (user_id) => {
     return await request("/pet", {
       user_id
@@ -3746,11 +3757,7 @@ This will fail in production if not fixed.`);
       method: "post"
     });
   };
-  const reqParams = (tragetUrl, params) => {
-    const queryString = Object.keys(params).map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`).join("&");
-    return `${tragetUrl}?${queryString}`;
-  };
-  const _sfc_main$Z = {
+  const _sfc_main$$ = {
     __name: "MyPet",
     setup(__props) {
       const userStore = useUserStore();
@@ -3819,10 +3826,10 @@ This will fail in production if not fixed.`);
                   vue.createElementVNode("view", null, " 请添加一只宠物 "),
                   vue.createCommentVNode(" 图标 "),
                   vue.createElementVNode("img", {
-                    src: _imports_0,
+                    src: `./static/image/addCat.png`,
                     alt: "",
                     class: "add-pet-img"
-                  })
+                  }, null, 8, ["src"])
                 ])
               ])) : (vue.openBlock(true), vue.createElementBlock(
                 vue.Fragment,
@@ -3869,8 +3876,8 @@ This will fail in production if not fixed.`);
       };
     }
   };
-  const MyPet = /* @__PURE__ */ _export_sfc(_sfc_main$Z, [["__scopeId", "data-v-bfd5e8ec"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/MyPet.vue"]]);
-  const _sfc_main$Y = {
+  const MyPet = /* @__PURE__ */ _export_sfc(_sfc_main$$, [["__scopeId", "data-v-bfd5e8ec"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/MyPet.vue"]]);
+  const _sfc_main$_ = {
     name: "UniBadge",
     emits: ["click"],
     props: {
@@ -3993,7 +4000,7 @@ This will fail in production if not fixed.`);
       }
     }
   };
-  function _sfc_render$q(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$p(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-badge--x" }, [
       vue.renderSlot(_ctx.$slots, "default", {}, void 0, true),
       $props.text ? (vue.openBlock(), vue.createElementBlock(
@@ -4010,8 +4017,8 @@ This will fail in production if not fixed.`);
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_1$3 = /* @__PURE__ */ _export_sfc(_sfc_main$Y, [["render", _sfc_render$q], ["__scopeId", "data-v-c97cb896"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-badge/components/uni-badge/uni-badge.vue"]]);
-  const _sfc_main$X = {
+  const __easycom_1$3 = /* @__PURE__ */ _export_sfc(_sfc_main$_, [["render", _sfc_render$p], ["__scopeId", "data-v-c97cb896"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-badge/components/uni-badge/uni-badge.vue"]]);
+  const _sfc_main$Z = {
     name: "UniListItem",
     emits: ["click", "switchChange"],
     props: {
@@ -4248,7 +4255,7 @@ This will fail in production if not fixed.`);
       }
     }
   };
-  function _sfc_render$p(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$o(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     const _component_uni_badge = resolveEasycom(vue.resolveDynamicComponent("uni-badge"), __easycom_1$3);
     return vue.openBlock(), vue.createElementBlock("view", {
@@ -4377,8 +4384,8 @@ This will fail in production if not fixed.`);
       })) : vue.createCommentVNode("v-if", true)
     ], 14, ["hover-class"]);
   }
-  const __easycom_0$a = /* @__PURE__ */ _export_sfc(_sfc_main$X, [["render", _sfc_render$p], ["__scopeId", "data-v-c7524739"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list-item/uni-list-item.vue"]]);
-  const _sfc_main$W = {
+  const __easycom_0$a = /* @__PURE__ */ _export_sfc(_sfc_main$Z, [["render", _sfc_render$o], ["__scopeId", "data-v-c7524739"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list-item/uni-list-item.vue"]]);
+  const _sfc_main$Y = {
     name: "uniList",
     "mp-weixin": {
       options: {
@@ -4424,7 +4431,7 @@ This will fail in production if not fixed.`);
       }
     }
   };
-  function _sfc_render$o(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$n(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-list uni-border-top-bottom" }, [
       $props.border ? (vue.openBlock(), vue.createElementBlock("view", {
         key: 0,
@@ -4437,8 +4444,8 @@ This will fail in production if not fixed.`);
       })) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_1$2 = /* @__PURE__ */ _export_sfc(_sfc_main$W, [["render", _sfc_render$o], ["__scopeId", "data-v-c2f1266a"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list/uni-list.vue"]]);
-  const _sfc_main$V = {
+  const __easycom_1$2 = /* @__PURE__ */ _export_sfc(_sfc_main$Y, [["render", _sfc_render$n], ["__scopeId", "data-v-c2f1266a"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list/uni-list.vue"]]);
+  const _sfc_main$X = {
     __name: "MoreFunction",
     setup(__props) {
       return (_ctx, _cache) => {
@@ -4497,39 +4504,45 @@ This will fail in production if not fixed.`);
       };
     }
   };
-  const MoreFunction = /* @__PURE__ */ _export_sfc(_sfc_main$V, [["__file", "D:/graduationProject/pet-front-end/pages/my/components/MoreFunction.vue"]]);
-  const _sfc_main$U = {
+  const MoreFunction = /* @__PURE__ */ _export_sfc(_sfc_main$X, [["__file", "D:/graduationProject/pet-front-end/pages/my/components/MoreFunction.vue"]]);
+  const _sfc_main$W = {
     __name: "index",
     setup(__props) {
-      const content = vue.ref([{
-        text: "客服",
-        iconPath: "/static/image/kefu.png",
-        selectedIconPath: "/static/image/selectkefu.png",
-        active: false
-      }]);
+      const content = vue.ref([
+        {
+          text: "客服",
+          iconPath: "/static/image/kefu.png",
+          selectedIconPath: "/static/image/selectkefu.png",
+          active: false
+        }
+      ]);
       const store = useUserStore();
       const loginOut = () => {
         store.resetUser();
         try {
+          za;
           uni.removeStorageSync("token");
           uni.removeStorageSync("user");
         } catch (e2) {
-          formatAppLog("log", "at pages/my/index.vue:50", e2);
+          formatAppLog("log", "at pages/my/index.vue:48", e2);
         }
         uni.switchTab({
           url: "/pages/home/index"
         });
       };
       const fabClick = () => {
-        formatAppLog("log", "at pages/my/index.vue:59", 1);
+        formatAppLog("log", "at pages/my/index.vue:56", 1);
       };
       const trigger = (e2) => {
         content.value[e2.index].active = !e2.item.active;
         uni.navigateTo({
           url: "/pages/messages/Chat"
         });
-        formatAppLog("log", "at pages/my/index.vue:68", e2);
+        formatAppLog("log", "at pages/my/index.vue:65", e2);
       };
+      onLoad(() => {
+        uni.getStorageSync("user");
+      });
       return (_ctx, _cache) => {
         const _component_uni_fab = resolveEasycom(vue.resolveDynamicComponent("uni-fab"), __easycom_0$c);
         return vue.openBlock(), vue.createElementBlock(
@@ -4563,8 +4576,8 @@ This will fail in production if not fixed.`);
       };
     }
   };
-  const PagesMyIndex = /* @__PURE__ */ _export_sfc(_sfc_main$U, [["__scopeId", "data-v-f97bc692"], ["__file", "D:/graduationProject/pet-front-end/pages/my/index.vue"]]);
-  const _sfc_main$T = {
+  const PagesMyIndex = /* @__PURE__ */ _export_sfc(_sfc_main$W, [["__scopeId", "data-v-f97bc692"], ["__file", "D:/graduationProject/pet-front-end/pages/my/index.vue"]]);
+  const _sfc_main$V = {
     name: "UniNoticeBar",
     emits: ["click", "getmore", "close"],
     props: {
@@ -4702,7 +4715,7 @@ This will fail in production if not fixed.`);
       }
     }
   };
-  function _sfc_render$n(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$m(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return $data.show ? (vue.openBlock(), vue.createElementBlock(
       "view",
@@ -4800,8 +4813,8 @@ This will fail in production if not fixed.`);
       /* STYLE */
     )) : vue.createCommentVNode("v-if", true);
   }
-  const __easycom_0$9 = /* @__PURE__ */ _export_sfc(_sfc_main$T, [["render", _sfc_render$n], ["__scopeId", "data-v-c3453ea3"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-notice-bar/components/uni-notice-bar/uni-notice-bar.vue"]]);
-  const _sfc_main$S = {
+  const __easycom_0$9 = /* @__PURE__ */ _export_sfc(_sfc_main$V, [["render", _sfc_render$m], ["__scopeId", "data-v-c3453ea3"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-notice-bar/components/uni-notice-bar/uni-notice-bar.vue"]]);
+  const _sfc_main$U = {
     __name: "ServiceSelect",
     props: {
       title: String,
@@ -4841,8 +4854,8 @@ This will fail in production if not fixed.`);
       };
     }
   };
-  const ServiceSelect = /* @__PURE__ */ _export_sfc(_sfc_main$S, [["__scopeId", "data-v-fbb6c4ac"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/ServiceSelect.vue"]]);
-  const _sfc_main$R = {
+  const ServiceSelect = /* @__PURE__ */ _export_sfc(_sfc_main$U, [["__scopeId", "data-v-fbb6c4ac"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/ServiceSelect.vue"]]);
+  const _sfc_main$T = {
     __name: "SelectItem",
     props: {
       title: String
@@ -4859,8 +4872,8 @@ This will fail in production if not fixed.`);
       };
     }
   };
-  const SelectItem = /* @__PURE__ */ _export_sfc(_sfc_main$R, [["__scopeId", "data-v-72203b0b"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/SelectItem.vue"]]);
-  const _sfc_main$Q = {
+  const SelectItem = /* @__PURE__ */ _export_sfc(_sfc_main$T, [["__scopeId", "data-v-72203b0b"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/SelectItem.vue"]]);
+  const _sfc_main$S = {
     __name: "SelectType",
     props: ["title", "imgurl"],
     setup(__props) {
@@ -4890,7 +4903,7 @@ This will fail in production if not fixed.`);
       };
     }
   };
-  const SelectType = /* @__PURE__ */ _export_sfc(_sfc_main$Q, [["__scopeId", "data-v-9e8eefd2"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/SelectType.vue"]]);
+  const SelectType = /* @__PURE__ */ _export_sfc(_sfc_main$S, [["__scopeId", "data-v-9e8eefd2"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/SelectType.vue"]]);
   const getServiceTypeApi = async () => {
     return await request("/getServiceType");
   };
@@ -4906,7 +4919,25 @@ This will fail in production if not fixed.`);
       service_id
     });
   };
-  const _sfc_main$P = {
+  const confirmServiceAPI = async (data) => {
+    return await request("/confirmService", data, {
+      method: "post"
+    });
+  };
+  const getServiceOrder = async (data) => {
+    return await request("/getServiceOrder", data);
+  };
+  const cancelServiceOrderAPI = async (data) => {
+    return await request("/cancelServiceOrder", data, {
+      method: "post"
+    });
+  };
+  const successServiceOrderAPI = async (data) => {
+    return await request("/successServiceOrder", data, {
+      method: "post"
+    });
+  };
+  const _sfc_main$R = {
     __name: "index",
     setup(__props) {
       const serviceTypeList = vue.ref([]);
@@ -5037,7 +5068,7 @@ This will fail in production if not fixed.`);
       };
     }
   };
-  const PagesHomeIndex = /* @__PURE__ */ _export_sfc(_sfc_main$P, [["__scopeId", "data-v-4978fed5"], ["__file", "D:/graduationProject/pet-front-end/pages/home/index.vue"]]);
+  const PagesHomeIndex = /* @__PURE__ */ _export_sfc(_sfc_main$R, [["__scopeId", "data-v-4978fed5"], ["__file", "D:/graduationProject/pet-front-end/pages/home/index.vue"]]);
   const easycom = {
     autoscan: true
   };
@@ -5222,6 +5253,20 @@ This will fail in production if not fixed.`);
         navigationBarTitleText: "领养中心",
         enablePullDownRefresh: false
       }
+    },
+    {
+      path: "pages/medical/index",
+      style: {
+        navigationBarTitleText: "附近医院",
+        enablePullDownRefresh: false
+      }
+    },
+    {
+      path: "pages/my/ServiceOrder",
+      style: {
+        navigationBarTitleText: "服务订单",
+        enablePullDownRefresh: false
+      }
     }
   ];
   const globalStyle = {
@@ -5255,8 +5300,8 @@ This will fail in production if not fixed.`);
       {
         iconPath: "static/image/faxian.png",
         selectedIconPath: "static/image/faxian-selected.png",
-        pagePath: "pages/community/index",
-        text: "发现"
+        pagePath: "pages/medical/index",
+        text: "医疗"
       },
       {
         iconPath: "static/image/xiaoxi.png",
@@ -7973,7 +8018,7 @@ ${i3}
   })();
   var Ws = Bs;
   const avatarWidth = 45;
-  const _sfc_main$O = {
+  const _sfc_main$Q = {
     name: "UniListChat",
     emits: ["click"],
     props: {
@@ -8156,7 +8201,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$m(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$l(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", {
       "hover-class": !$props.clickable && !$props.link ? "" : "uni-list-chat--hover",
       class: "uni-list-chat",
@@ -8301,8 +8346,8 @@ ${i3}
       ])
     ], 8, ["hover-class"]);
   }
-  const __easycom_0$8 = /* @__PURE__ */ _export_sfc(_sfc_main$O, [["render", _sfc_render$m], ["__scopeId", "data-v-20df4ef0"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list-chat/uni-list-chat.vue"]]);
-  const _sfc_main$N = {
+  const __easycom_0$8 = /* @__PURE__ */ _export_sfc(_sfc_main$Q, [["render", _sfc_render$l], ["__scopeId", "data-v-20df4ef0"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-list/components/uni-list-chat/uni-list-chat.vue"]]);
+  const _sfc_main$P = {
     __name: "index",
     setup(__props) {
       return (_ctx, _cache) => {
@@ -8351,7 +8396,7 @@ ${i3}
       };
     }
   };
-  const PagesMessagesIndex = /* @__PURE__ */ _export_sfc(_sfc_main$N, [["__file", "D:/graduationProject/pet-front-end/pages/messages/index.vue"]]);
+  const PagesMessagesIndex = /* @__PURE__ */ _export_sfc(_sfc_main$P, [["__file", "D:/graduationProject/pet-front-end/pages/messages/index.vue"]]);
   const isObject$1 = (val) => val !== null && typeof val === "object";
   const defaultDelimiters = ["{", "}"];
   class BaseFormatter {
@@ -8656,7 +8701,7 @@ ${i3}
   const {
     t: t$4
   } = initVueI18n(messages$2);
-  const _sfc_main$M = {
+  const _sfc_main$O = {
     name: "UniSearchBar",
     emits: ["input", "update:modelValue", "clear", "cancel", "confirm", "blur", "focus"],
     props: {
@@ -8794,7 +8839,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$l(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$k(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-searchbar" }, [
       vue.createElementVNode(
@@ -8869,8 +8914,8 @@ ${i3}
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_0$7 = /* @__PURE__ */ _export_sfc(_sfc_main$M, [["render", _sfc_render$l], ["__scopeId", "data-v-f07ef577"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar.vue"]]);
-  const _sfc_main$L = {
+  const __easycom_0$7 = /* @__PURE__ */ _export_sfc(_sfc_main$O, [["render", _sfc_render$k], ["__scopeId", "data-v-f07ef577"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar.vue"]]);
+  const _sfc_main$N = {
     __name: "ShopList",
     props: {
       goodList: Array
@@ -9000,8 +9045,8 @@ ${i3}
       };
     }
   };
-  const ShopList = /* @__PURE__ */ _export_sfc(_sfc_main$L, [["__scopeId", "data-v-419b7e21"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/ShopList.vue"]]);
-  const _sfc_main$K = {
+  const ShopList = /* @__PURE__ */ _export_sfc(_sfc_main$N, [["__scopeId", "data-v-419b7e21"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/ShopList.vue"]]);
+  const _sfc_main$M = {
     __name: "CategorySelect",
     props: {
       title: String,
@@ -9041,11 +9086,11 @@ ${i3}
       };
     }
   };
-  const CategorySelect = /* @__PURE__ */ _export_sfc(_sfc_main$K, [["__scopeId", "data-v-b536a4fa"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/CategorySelect.vue"]]);
+  const CategorySelect = /* @__PURE__ */ _export_sfc(_sfc_main$M, [["__scopeId", "data-v-b536a4fa"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/CategorySelect.vue"]]);
   const getGoodApi = async (obj) => {
     return await request("/good", obj);
   };
-  const _sfc_main$J = {
+  const _sfc_main$L = {
     __name: "index",
     setup(__props) {
       const searchRef = vue.ref();
@@ -9127,7 +9172,7 @@ ${i3}
                 type: "gouliang",
                 title: "狗狗主粮",
                 icColor: "#fff",
-                onClick: _cache[0] || (_cache[0] = ($event) => selectType("5ac481da-1eb6-4694-a3ee-42a74992c903"))
+                onClick: _cache[0] || (_cache[0] = ($event) => selectType("e4b6f30f-4770-4f64-bc28-d4bbc373e55f"))
               }),
               vue.createVNode(CategorySelect, {
                 bgColor: "#2979FF",
@@ -9181,8 +9226,8 @@ ${i3}
       };
     }
   };
-  const PagesShopIndex = /* @__PURE__ */ _export_sfc(_sfc_main$J, [["__scopeId", "data-v-7db6cc15"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/index.vue"]]);
-  const _sfc_main$I = {
+  const PagesShopIndex = /* @__PURE__ */ _export_sfc(_sfc_main$L, [["__scopeId", "data-v-7db6cc15"], ["__file", "D:/graduationProject/pet-front-end/pages/shop/index.vue"]]);
+  const _sfc_main$K = {
     __name: "index",
     emits: ["itemClick"],
     setup(__props, { emit }) {
@@ -9338,8 +9383,8 @@ ${i3}
       };
     }
   };
-  const PagesCategoryIndex = /* @__PURE__ */ _export_sfc(_sfc_main$I, [["__file", "D:/graduationProject/pet-front-end/pages/category/index.vue"]]);
-  const _sfc_main$H = {
+  const PagesCategoryIndex = /* @__PURE__ */ _export_sfc(_sfc_main$K, [["__file", "D:/graduationProject/pet-front-end/pages/category/index.vue"]]);
+  const _sfc_main$J = {
     __name: "categoryproductlist",
     setup(__props) {
       const goodList = vue.ref([]);
@@ -9486,7 +9531,7 @@ ${i3}
       };
     }
   };
-  const PagesCategoryCategoryproductlist = /* @__PURE__ */ _export_sfc(_sfc_main$H, [["__scopeId", "data-v-e66e2993"], ["__file", "D:/graduationProject/pet-front-end/pages/category/categoryproductlist.vue"]]);
+  const PagesCategoryCategoryproductlist = /* @__PURE__ */ _export_sfc(_sfc_main$J, [["__scopeId", "data-v-e66e2993"], ["__file", "D:/graduationProject/pet-front-end/pages/category/categoryproductlist.vue"]]);
   const en$2 = {
     "uni-goods-nav.options.shop": "shop",
     "uni-goods-nav.options.cart": "cart",
@@ -9511,7 +9556,7 @@ ${i3}
     "zh-Hant": zhHant$2
   };
   const { t: t$3 } = initVueI18n(messages$1);
-  const _sfc_main$G = {
+  const _sfc_main$I = {
     name: "UniGoodsNav",
     emits: ["click", "buttonClick"],
     props: {
@@ -9571,7 +9616,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$k(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$j(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-goods-nav" }, [
       vue.createCommentVNode(" 底部占位 "),
@@ -9662,7 +9707,7 @@ ${i3}
       ])
     ]);
   }
-  const __easycom_0$6 = /* @__PURE__ */ _export_sfc(_sfc_main$G, [["render", _sfc_render$k], ["__scopeId", "data-v-8226c5e1"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-goods-nav/components/uni-goods-nav/uni-goods-nav.vue"]]);
+  const __easycom_0$6 = /* @__PURE__ */ _export_sfc(_sfc_main$I, [["render", _sfc_render$j], ["__scopeId", "data-v-8226c5e1"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-goods-nav/components/uni-goods-nav/uni-goods-nav.vue"]]);
   const useCarStore = defineStore("car", () => {
     const insideCarGoods2 = vue.ref([]);
     const checkOutCar = vue.computed(() => {
@@ -9763,7 +9808,7 @@ ${i3}
   }, {
     unistorage: true
   });
-  const _sfc_main$F = {
+  const _sfc_main$H = {
     __name: "productdetail",
     setup(__props) {
       const store = useCarStore();
@@ -9777,11 +9822,6 @@ ${i3}
       const buttonGroup = vue.ref([
         {
           text: "加入购物车",
-          backgroundColor: "#ff0000",
-          color: "#fff"
-        },
-        {
-          text: "立即购买",
           backgroundColor: "#ffa200",
           color: "#fff"
         }
@@ -9954,8 +9994,8 @@ ${i3}
       };
     }
   };
-  const PagesCategoryProductdetail = /* @__PURE__ */ _export_sfc(_sfc_main$F, [["__scopeId", "data-v-27533a8f"], ["__file", "D:/graduationProject/pet-front-end/pages/category/productdetail.vue"]]);
-  const _sfc_main$E = {
+  const PagesCategoryProductdetail = /* @__PURE__ */ _export_sfc(_sfc_main$H, [["__scopeId", "data-v-27533a8f"], ["__file", "D:/graduationProject/pet-front-end/pages/category/productdetail.vue"]]);
+  const _sfc_main$G = {
     name: "UniNumberBox",
     emits: ["change", "input", "update:modelValue", "blur", "focus"],
     props: {
@@ -10075,7 +10115,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$j(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$i(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-numbox" }, [
       vue.createElementVNode(
         "view",
@@ -10134,8 +10174,8 @@ ${i3}
       )
     ]);
   }
-  const __easycom_0$5 = /* @__PURE__ */ _export_sfc(_sfc_main$E, [["render", _sfc_render$j], ["__scopeId", "data-v-7ae2ee72"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-number-box/components/uni-number-box/uni-number-box.vue"]]);
-  const _sfc_main$D = {
+  const __easycom_0$5 = /* @__PURE__ */ _export_sfc(_sfc_main$G, [["render", _sfc_render$i], ["__scopeId", "data-v-7ae2ee72"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-number-box/components/uni-number-box/uni-number-box.vue"]]);
+  const _sfc_main$F = {
     __name: "car",
     setup(__props) {
       const store = useCarStore();
@@ -10206,17 +10246,6 @@ ${i3}
         }
         uni.navigateTo({
           url: "/pages/car/ConfirmOrder"
-        });
-        uni.showModal({
-          title: "温馨提示",
-          content: "支付后续更新调用微信支付",
-          showCancel: false,
-          confirmText: "确定",
-          confirmColor: "#458bd0",
-          success: (res) => {
-            if (res.confirm)
-              ;
-          }
         });
       };
       return (_ctx, _cache) => {
@@ -10370,7 +10399,7 @@ ${i3}
       };
     }
   };
-  const PagesCarCar = /* @__PURE__ */ _export_sfc(_sfc_main$D, [["__scopeId", "data-v-b498d100"], ["__file", "D:/graduationProject/pet-front-end/pages/car/car.vue"]]);
+  const PagesCarCar = /* @__PURE__ */ _export_sfc(_sfc_main$F, [["__scopeId", "data-v-b498d100"], ["__file", "D:/graduationProject/pet-front-end/pages/car/car.vue"]]);
   const getAddressApi = async (user_id) => {
     return await request("/address", { user_id });
   };
@@ -10385,7 +10414,7 @@ ${i3}
   const getDefaultAddressAPI = async (id) => {
     return await request("/address/default", { user_id: id });
   };
-  const _sfc_main$C = {
+  const _sfc_main$E = {
     __name: "Address",
     emits: ["editClick", "chooseClick"],
     setup(__props, { emit }) {
@@ -10546,8 +10575,8 @@ ${i3}
       };
     }
   };
-  const PagesMyAddress = /* @__PURE__ */ _export_sfc(_sfc_main$C, [["__scopeId", "data-v-eda7be84"], ["__file", "D:/graduationProject/pet-front-end/pages/my/Address.vue"]]);
-  const _sfc_main$B = {
+  const PagesMyAddress = /* @__PURE__ */ _export_sfc(_sfc_main$E, [["__scopeId", "data-v-eda7be84"], ["__file", "D:/graduationProject/pet-front-end/pages/my/Address.vue"]]);
+  const _sfc_main$D = {
     name: "uniFormsItem",
     options: {
       virtualHost: true
@@ -10879,7 +10908,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$i(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$h(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock(
       "view",
       {
@@ -10935,7 +10964,7 @@ ${i3}
       /* CLASS */
     );
   }
-  const __easycom_0$4 = /* @__PURE__ */ _export_sfc(_sfc_main$B, [["render", _sfc_render$i], ["__scopeId", "data-v-462874dd"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.vue"]]);
+  const __easycom_0$4 = /* @__PURE__ */ _export_sfc(_sfc_main$D, [["render", _sfc_render$h], ["__scopeId", "data-v-462874dd"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.vue"]]);
   var pattern = {
     email: /^\S+?@\S+?\.\S+?$/,
     idcard: /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/,
@@ -11499,7 +11528,7 @@ ${i3}
       return false;
     }
   };
-  const _sfc_main$A = {
+  const _sfc_main$C = {
     name: "uniForms",
     emits: ["validate", "submit"],
     options: {
@@ -11796,14 +11825,14 @@ ${i3}
       _isEqual: isEqual
     }
   };
-  function _sfc_render$h(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$g(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "uni-forms" }, [
       vue.createElementVNode("form", null, [
         vue.renderSlot(_ctx.$slots, "default", {}, void 0, true)
       ])
     ]);
   }
-  const __easycom_1$1 = /* @__PURE__ */ _export_sfc(_sfc_main$A, [["render", _sfc_render$h], ["__scopeId", "data-v-9a1e3c32"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-forms/components/uni-forms/uni-forms.vue"]]);
+  const __easycom_1$1 = /* @__PURE__ */ _export_sfc(_sfc_main$C, [["render", _sfc_render$g], ["__scopeId", "data-v-9a1e3c32"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-forms/components/uni-forms/uni-forms.vue"]]);
   let AreaJson = [
     {
       "name": "北京市",
@@ -17374,7 +17403,7 @@ ${i3}
     areas = AreaJson[provinceIndex].city[cityIndex].area;
     return areas;
   }
-  const _sfc_main$z = {
+  const _sfc_main$B = {
     __name: "SelectCity",
     props: {
       show: {
@@ -17525,7 +17554,7 @@ ${i3}
       };
     }
   };
-  const SelectCit = /* @__PURE__ */ _export_sfc(_sfc_main$z, [["__scopeId", "data-v-79233ee6"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/SelectCity.vue"]]);
+  const SelectCit = /* @__PURE__ */ _export_sfc(_sfc_main$B, [["__scopeId", "data-v-79233ee6"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/SelectCity.vue"]]);
   const rules$1 = {
     address_name: {
       rules: [{
@@ -17566,7 +17595,7 @@ ${i3}
       ]
     }
   };
-  const _sfc_main$y = {
+  const _sfc_main$A = {
     __name: "EditAddress",
     setup(__props) {
       const store = useUserStore();
@@ -17584,6 +17613,7 @@ ${i3}
       vue.ref(true);
       const saveAddress = async () => {
         try {
+          formatAppLog("log", "at pages/my/EditAddress.vue:118", formData.value);
           await form.value.validate();
           const result = await updateAddressApi(formData.value);
           if (result.code === 200) {
@@ -17602,11 +17632,11 @@ ${i3}
             });
           }
         } catch (e2) {
-          formatAppLog("log", "at pages/my/EditAddress.vue:136", e2);
+          formatAppLog("log", "at pages/my/EditAddress.vue:137", e2);
         }
       };
       const openPicker = () => {
-        formatAppLog("log", "at pages/my/EditAddress.vue:141", "执行打开地址选择器");
+        formatAppLog("log", "at pages/my/EditAddress.vue:142", "执行打开地址选择器");
         show.value = true;
       };
       const changeClick = (value, value2, value3) => {
@@ -17614,7 +17644,7 @@ ${i3}
       };
       const onhideShow = () => {
         show.value = false;
-        formatAppLog("log", "at pages/my/EditAddress.vue:149", "执行了关闭地址选择器");
+        formatAppLog("log", "at pages/my/EditAddress.vue:150", "执行了关闭地址选择器");
       };
       const switchChange = (e2) => {
         if (e2.detail.value) {
@@ -17771,11 +17801,10 @@ ${i3}
                         }, "设为默认地址"),
                         vue.createElementVNode("view", { class: "input switch" }, [
                           vue.createElementVNode("switch", {
-                            color: _ctx.colors,
                             style: { "transform": "scale(0.8)" },
                             onChange: switchChange,
                             checked: formData.value.address_default == 1
-                          }, null, 40, ["color", "checked"])
+                          }, null, 40, ["checked"])
                         ])
                       ])
                     ]),
@@ -17788,17 +17817,10 @@ ${i3}
               }, 8, ["modelValue"])
             ]),
             vue.createElementVNode("view", { class: "save" }, [
-              vue.createElementVNode(
-                "view",
-                {
-                  class: "btn",
-                  style: vue.normalizeStyle("background:" + _ctx.colors),
-                  onClick: saveAddress
-                },
-                "保存地址",
-                4
-                /* STYLE */
-              )
+              vue.createElementVNode("view", {
+                class: "btn",
+                onClick: saveAddress
+              }, "保存地址")
             ]),
             vue.createCommentVNode(" 省市区选择 province city area初始省市区设置 show:是否显示  @sureSelectArea：确认事件 @hideShow：隐藏事件"),
             vue.createVNode(SelectCit, {
@@ -17812,8 +17834,46 @@ ${i3}
       };
     }
   };
-  const PagesMyEditAddress = /* @__PURE__ */ _export_sfc(_sfc_main$y, [["__scopeId", "data-v-039ae533"], ["__file", "D:/graduationProject/pet-front-end/pages/my/EditAddress.vue"]]);
-  const _sfc_main$x = {
+  const PagesMyEditAddress = /* @__PURE__ */ _export_sfc(_sfc_main$A, [["__scopeId", "data-v-039ae533"], ["__file", "D:/graduationProject/pet-front-end/pages/my/EditAddress.vue"]]);
+  function uploadFile$1(options) {
+    return new Promise((resolve, reject) => {
+      uni.chooseImage({
+        count: 1,
+        // 默认9  
+        sizeType: ["original", "compressed"],
+        // 可以指定是原图还是压缩图，默认二者都有  
+        sourceType: ["album", "camera"],
+        // 可以指定来源是相册还是相机，默认二者都有  
+        success: function(res) {
+          const tempFilePaths = res.tempFilePaths;
+          const token = uni.getStorageSync("token");
+          uni.uploadFile({
+            url: options.url,
+            // 上传地址  
+            filePath: tempFilePaths[0],
+            // 文件路径  
+            name: options.name,
+            // 后端通过这个字段接收文件 
+            fileType: "image",
+            header: {
+              Authorization: token
+            },
+            formData: {
+              // 其他表单信息，比如用户id等  
+              ...options.formData
+            },
+            success: (uploadFileRes) => {
+              resolve(JSON.parse(uploadFileRes.data));
+            },
+            fail: (uploadFileError) => {
+              reject(uploadFileError);
+            }
+          });
+        }
+      });
+    });
+  }
+  const _sfc_main$z = {
     __name: "EditPerson",
     setup(__props) {
       const store = useUserStore();
@@ -17821,26 +17881,11 @@ ${i3}
         store.updateDate(e2.detail.value);
       };
       const avatarChoose = async () => {
-        const res = await uni.chooseImage({
-          count: 1,
-          sizeType: ["original", "compressed"],
-          sourceType: ["album", "camera"]
+        const result = await uploadFile$1({
+          url: devUrl + "/user/upload",
+          name: "avatar"
         });
-        if (res) {
-          let token = null;
-          token = uni.getStorageSync("token");
-          const {
-            data
-          } = await uni.uploadFile({
-            url: "http://192.168.6.3:9000/user/upload",
-            filePath: res.tempFilePaths[0],
-            name: "avatar",
-            fileType: "image",
-            header: {
-              "Authorization": token
-            }
-          });
-          const result = JSON.parse(data);
+        if (result.code === 200) {
           store.updateAvatar(result.data.user_avatar);
           uni.showToast({
             title: "上传图像成功"
@@ -17980,8 +18025,8 @@ ${i3}
       };
     }
   };
-  const PagesMyEditPerson = /* @__PURE__ */ _export_sfc(_sfc_main$x, [["__file", "D:/graduationProject/pet-front-end/pages/my/EditPerson.vue"]]);
-  const _sfc_main$w = {
+  const PagesMyEditPerson = /* @__PURE__ */ _export_sfc(_sfc_main$z, [["__file", "D:/graduationProject/pet-front-end/pages/my/EditPerson.vue"]]);
+  const _sfc_main$y = {
     name: "UniRate",
     props: {
       isFill: {
@@ -18187,7 +18232,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$g(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$f(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
     return vue.openBlock(), vue.createElementBlock("view", null, [
       vue.createElementVNode(
@@ -18249,8 +18294,8 @@ ${i3}
       )
     ]);
   }
-  const __easycom_0$3 = /* @__PURE__ */ _export_sfc(_sfc_main$w, [["render", _sfc_render$g], ["__scopeId", "data-v-5c8fbdf3"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-rate/components/uni-rate/uni-rate.vue"]]);
-  const _sfc_main$v = {
+  const __easycom_0$3 = /* @__PURE__ */ _export_sfc(_sfc_main$y, [["render", _sfc_render$f], ["__scopeId", "data-v-5c8fbdf3"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-rate/components/uni-rate/uni-rate.vue"]]);
+  const _sfc_main$x = {
     __name: "Evaluate",
     props: {
       service_comments: {
@@ -18323,12 +18368,23 @@ ${i3}
       };
     }
   };
-  const Evaluate = /* @__PURE__ */ _export_sfc(_sfc_main$v, [["__scopeId", "data-v-32f129a4"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/Evaluate.vue"]]);
-  const _sfc_main$u = {
+  const Evaluate = /* @__PURE__ */ _export_sfc(_sfc_main$x, [["__scopeId", "data-v-32f129a4"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/Evaluate.vue"]]);
+  const useServiceStore = defineStore("service", () => {
+    const service = vue.ref({});
+    const updateService = (data) => {
+      service.value = data;
+    };
+    return {
+      service,
+      updateService
+    };
+  });
+  const _sfc_main$w = {
     __name: "DetailService",
     setup(__props) {
       const serviceDetail = vue.ref({});
-      const options = vue.ref([{ icon: "headphones", text: "客服" }]);
+      const serviceStore = useServiceStore();
+      const options = vue.ref([]);
       const buttonGroup = vue.ref([
         {
           text: "立即上门",
@@ -18345,17 +18401,34 @@ ${i3}
         const result = await getServiceDetailAPI(service_id);
         if (result.code === 2e3) {
           serviceDetail.value = result.data;
-          formatAppLog("log", "at pages/home/DetailService.vue:111", serviceDetail.value);
+          formatAppLog("log", "at pages/home/DetailService.vue:115", serviceDetail.value);
         }
       };
       const showEvaluate = vue.ref(true);
       const buttonClick = ({ index, content }) => {
-        formatAppLog("log", "at pages/home/DetailService.vue:120", index, content);
+        serviceStore.updateService({
+          service_name: serviceDetail.value.service_name,
+          service_price: serviceDetail.value.service_price,
+          service_detail_id: serviceDetail.value.service_detail_id,
+          service_id: serviceDetail.value.service_id,
+          service_image,
+          service_detail_describe: serviceDetail.value.service_detail_describe
+        });
         const url = reqParams("/pages/home/OrderService", {
           isReserve: index === 1
+          // service_id:service
         });
         uni.navigateTo({ url });
       };
+      const service_image = vue.computed(() => {
+        let temp = "";
+        serviceDetail.value.service_images.forEach((item) => {
+          if (item.service_image_type === 1 && item.service_image_order === 1) {
+            temp = item.service_image_name;
+          }
+        });
+        return temp;
+      });
       onLoad((query) => {
         if (Object.keys(query).length !== 0) {
           let obj = {};
@@ -18513,8 +18586,8 @@ ${i3}
       };
     }
   };
-  const PagesHomeDetailService = /* @__PURE__ */ _export_sfc(_sfc_main$u, [["__scopeId", "data-v-76f1c5f4"], ["__file", "D:/graduationProject/pet-front-end/pages/home/DetailService.vue"]]);
-  const _sfc_main$t = {
+  const PagesHomeDetailService = /* @__PURE__ */ _export_sfc(_sfc_main$w, [["__scopeId", "data-v-76f1c5f4"], ["__file", "D:/graduationProject/pet-front-end/pages/home/DetailService.vue"]]);
+  const _sfc_main$v = {
     props: {
       // 线条宽度 单位px
       lineW: {
@@ -18611,7 +18684,7 @@ ${i3}
       }
     }
   };
-  function _sfc_render$f(_ctx, _cache, $props, $setup, $data, $options) {
+  function _sfc_render$e(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock(
       "view",
       {
@@ -18672,83 +18745,277 @@ ${i3}
       /* STYLE */
     );
   }
-  const __easycom_0$2 = /* @__PURE__ */ _export_sfc(_sfc_main$t, [["render", _sfc_render$f], ["__scopeId", "data-v-2fa0d557"], ["__file", "D:/graduationProject/pet-front-end/components/tab-nav/tab-nav.vue"]]);
-  const _sfc_main$s = {};
-  function _sfc_render$e(_ctx, _cache) {
-    return vue.openBlock(), vue.createElementBlock("view", { class: "content" }, [
-      vue.createElementVNode("view", { class: "timer-state" }, [
-        vue.createElementVNode("view", { class: "timer" }, "自己营Apple产品专营店"),
-        vue.createElementVNode("view", { class: "state" }, " 已取消 ")
-      ]),
-      vue.createElementVNode("view", { class: "image-text" }, [
-        vue.createElementVNode("view", { class: "main" }, [
-          vue.createCommentVNode(" 图片 "),
-          vue.createElementVNode("img", {
-            src: `./static/image/cat1.jpg`,
-            alt: ""
-          }, null, 8, ["src"]),
-          vue.createCommentVNode(" 文字 "),
-          vue.createElementVNode("text", null, "Apple苹果iPhone8Plus4G手机深空灰asdasdasdasdasdasdasd移动联通版64G裸机Apple苹果iPhone8Plus4G手机深空灰移动联通版64G裸机")
-        ])
-      ]),
-      vue.createCommentVNode(" 商品数量,价钱 "),
-      vue.createElementVNode("view", { class: "number-price" }, [
-        vue.createElementVNode("view", { class: "num" }, " 共1件商品 "),
-        vue.createElementVNode("view", { class: "price" }, " 实际付款$ 3900.00 ")
-      ]),
-      vue.createCommentVNode(" 操作按钮 "),
-      vue.createElementVNode("view", { class: "operation" }, [
-        vue.createElementVNode("button", {
-          plain: true,
-          class: "btn",
-          style: {}
-        }, "查看物流"),
-        vue.createElementVNode("button", {
-          plain: true,
-          class: "btn"
-        }, "再次购买")
-      ])
-    ]);
-  }
-  const Order = /* @__PURE__ */ _export_sfc(_sfc_main$s, [["render", _sfc_render$e], ["__scopeId", "data-v-dc300319"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/Order.vue"]]);
-  const _sfc_main$r = {
+  const __easycom_0$2 = /* @__PURE__ */ _export_sfc(_sfc_main$v, [["render", _sfc_render$e], ["__scopeId", "data-v-2fa0d557"], ["__file", "D:/graduationProject/pet-front-end/components/tab-nav/tab-nav.vue"]]);
+  const payAPI = async (data) => {
+    return await request("/pay", data, {
+      method: "post"
+    });
+  };
+  const paySuccessAPI = async (data) => {
+    return await request("/paySuccess", data, {
+      method: "post"
+    });
+  };
+  const confirmOrder = async (data) => {
+    return await request("/confirmOrder", data, {
+      method: "post"
+    });
+  };
+  const getOrder = async (data) => {
+    return await request("/getOrder", data);
+  };
+  const cancelOrderAPI = async (data) => {
+    return await request("/cancelOrder", data, {
+      method: "post"
+    });
+  };
+  const successOrderAPI = async (data) => {
+    return await request("/successOrder", data, {
+      method: "post"
+    });
+  };
+  const _sfc_main$u = {
+    __name: "Order",
+    props: ["orderData"],
+    setup(__props) {
+      const props = __props;
+      const userStore = useUserStore();
+      const total = vue.computed(() => {
+        let temp = 0;
+        props.orderData.orders_goods.forEach((item) => {
+          temp += item.good_number;
+        });
+        return temp;
+      });
+      const payHandler = async () => {
+        let obj = {
+          out_trade_no: props.orderData.order_id,
+          subject: props.orderData.order_number,
+          total_amount: parseFloat(props.orderData.order_price)
+        };
+        const result = await payAPI(obj);
+        if (result.code === 2e3) {
+          uni.requestPayment({
+            provider: "alipay",
+            orderInfo: result.data,
+            // 从后端获取的支付参数
+            async success(res) {
+              const result1 = await paySuccessAPI({ order_id: props.orderData.order_id });
+              if (result1.code === 2e3) {
+                uni.showToast({
+                  title: "支付成功",
+                  icon: "success"
+                });
+                uni.$emit("renderOrder", props.orderData.order_status);
+              }
+            },
+            fail(err) {
+              uni.showToast({
+                title: "支付失败，请联系管理员",
+                icon: "none"
+              });
+              formatAppLog("error", "at pages/my/components/Order.vue:94", "支付失败", err);
+            }
+          });
+        }
+      };
+      const cancelHandler = async (order_id) => {
+        const confirm = await uni.showModal({ title: "提示", content: "确定要取消吗?" });
+        if (confirm.confirm) {
+          const result = await cancelOrderAPI({
+            order_id,
+            user_id: userStore.user.user_id
+          });
+          if (result.code === 2e3) {
+            uni.showToast({ title: "取消成功", icon: "none" });
+            uni.$emit("renderOrder", props.orderData.order_status);
+          }
+        }
+      };
+      const successHanlder = async (order_id) => {
+        const confirm = await uni.showModal({ title: "提示", content: "确定服务已经完成了吗?" });
+        if (confirm.confirm) {
+          const result = await successOrderAPI({
+            order_id,
+            user_id: userStore.user.user_id
+          });
+          if (result.code === 2e3) {
+            uni.showToast({ title: "订单已完成", icon: "none" });
+            formatAppLog("log", "at pages/my/components/Order.vue:123", { order_status: props.orderData.order_status });
+            uni.$emit("renderOrder", props.orderData.order_status);
+          }
+        }
+      };
+      const orderStatus = (status) => {
+        switch (status) {
+          case 1:
+            return "待付款";
+          case 2:
+            return "待收货";
+          case 4:
+            return "已取消";
+          case 5:
+            return "已完成";
+        }
+      };
+      onLoad(() => {
+        var EnvUtils = plus.android.importClass("com.alipay.sdk.app.EnvUtils");
+        EnvUtils.setEnv(EnvUtils.EnvEnum.SANDBOX);
+      });
+      return (_ctx, _cache) => {
+        return vue.openBlock(), vue.createElementBlock("view", { class: "content" }, [
+          vue.createElementVNode("view", { class: "timer-state" }, [
+            vue.createElementVNode(
+              "view",
+              { class: "timer" },
+              "订单编号:" + vue.toDisplayString(__props.orderData.order_number),
+              1
+              /* TEXT */
+            ),
+            vue.createElementVNode(
+              "view",
+              { class: "state" },
+              vue.toDisplayString(orderStatus(__props.orderData.order_status)),
+              1
+              /* TEXT */
+            )
+          ]),
+          (vue.openBlock(true), vue.createElementBlock(
+            vue.Fragment,
+            null,
+            vue.renderList(__props.orderData.orders_goods, (item, index) => {
+              return vue.openBlock(), vue.createElementBlock("view", { class: "image-text" }, [
+                vue.createElementVNode("view", { class: "main" }, [
+                  vue.createCommentVNode(" 文字 "),
+                  vue.createElementVNode("img", {
+                    src: `${vue.unref(devUrl)}/good_uploads/${item.good_image}`,
+                    alt: ""
+                  }, null, 8, ["src"]),
+                  vue.createElementVNode(
+                    "text",
+                    null,
+                    vue.toDisplayString(item.good_name),
+                    1
+                    /* TEXT */
+                  )
+                ])
+              ]);
+            }),
+            256
+            /* UNKEYED_FRAGMENT */
+          )),
+          vue.createCommentVNode(" 商品数量,价钱 "),
+          vue.createElementVNode("view", { class: "number-price" }, [
+            vue.createElementVNode(
+              "view",
+              { class: "num" },
+              " 共" + vue.toDisplayString(vue.unref(total)) + "件商品 ",
+              1
+              /* TEXT */
+            ),
+            vue.createElementVNode(
+              "view",
+              { class: "price" },
+              " 实际付款$ " + vue.toDisplayString(__props.orderData.order_price.toFixed(2)),
+              1
+              /* TEXT */
+            )
+          ]),
+          vue.createCommentVNode(" 操作按钮 "),
+          vue.createElementVNode("view", { class: "operation" }, [
+            vue.createCommentVNode(' <button :plain="true" class="btn" >查看物流</button>'),
+            __props.orderData.order_status === 2 ? (vue.openBlock(), vue.createElementBlock("button", {
+              key: 0,
+              plain: true,
+              class: "btn",
+              onClick: _cache[0] || (_cache[0] = ($event) => successHanlder(__props.orderData.order_id))
+            }, " 确认完成 ")) : vue.createCommentVNode("v-if", true),
+            __props.orderData.order_status === 1 ? (vue.openBlock(), vue.createElementBlock("button", {
+              key: 1,
+              plain: true,
+              class: "btn",
+              onClick: _cache[1] || (_cache[1] = ($event) => cancelHandler(__props.orderData.order_id))
+            }, " 取消订单 ")) : vue.createCommentVNode("v-if", true),
+            __props.orderData.order_status === 1 ? (vue.openBlock(), vue.createElementBlock("button", {
+              key: 2,
+              plain: true,
+              class: "btn",
+              onClick: payHandler
+            }, " 立即付款 ")) : vue.createCommentVNode("v-if", true)
+          ])
+        ]);
+      };
+    }
+  };
+  const Order = /* @__PURE__ */ _export_sfc(_sfc_main$u, [["__scopeId", "data-v-dc300319"], ["__file", "D:/graduationProject/pet-front-end/pages/my/components/Order.vue"]]);
+  const _sfc_main$t = {
     __name: "OrderDetail",
     setup(__props) {
+      const userStore = useUserStore();
       const tabnav = vue.ref();
-      const orderList = vue.ref([{
-        type: "0",
-        //状态值
-        name: "全部",
-        list: []
-        //数据
-      }, {
-        type: "1",
-        //状态值
-        name: "待付款",
-        list: []
-        //数据
-      }, {
-        type: "2",
-        //状态值
-        name: "待收货",
-        list: []
-        //数据
-      }, {
-        type: "3",
-        //状态值
-        name: "已完成",
-        list: []
-        //数据
-      }, {
-        type: "4",
-        //状态值
-        name: "售后",
-        list: []
-        //数据
-      }]);
-      const ontype = (e2) => {
-        formatAppLog("log", "at pages/my/OrderDetail.vue:39", e2);
+      const lists = vue.ref([]);
+      const defaulKey = vue.ref("");
+      const orderList = vue.ref([
+        {
+          type: "0",
+          //状态值
+          name: "全部",
+          list: []
+          //数据
+        },
+        {
+          type: "1",
+          //状态值
+          name: "待付款",
+          list: []
+          //数据
+        },
+        {
+          type: "2",
+          //状态值
+          name: "待收货",
+          list: []
+          //数据
+        },
+        {
+          type: "4",
+          //状态值
+          name: "已取消",
+          list: []
+          //数据
+        },
+        {
+          type: "5",
+          //状态值
+          name: "已完成",
+          list: []
+          //数据
+        }
+      ]);
+      const selectOrder = async (order_state) => {
+        const result = await getOrder({ order_state, user_id: userStore.user.user_id });
+        if (result.code === 2e3) {
+          lists.value = result.data;
+          formatAppLog("log", "at pages/my/OrderDetail.vue:59", lists.value);
+        }
       };
+      const ontype = (e2) => {
+        selectOrder(e2.type);
+      };
+      onLoad((query) => {
+        if (Object.keys(query).length !== 0) {
+          let obj = {};
+          for (let i2 in query) {
+            obj[decodeURIComponent(i2)] = decodeURIComponent(query[i2]);
+          }
+          defaulKey.value = obj.order_status;
+          selectOrder(obj.order_status);
+          uni.$on("renderOrder", selectOrder);
+        }
+      });
+      onUnload(() => {
+        uni.$off("renderOrder", selectOrder);
+      });
       return (_ctx, _cache) => {
         const _component_tab_nav = resolveEasycom(vue.resolveDynamicComponent("tab-nav"), __easycom_0$2);
         return vue.openBlock(), vue.createElementBlock("view", null, [
@@ -18757,15 +19024,24 @@ ${i3}
             ref: tabnav,
             tabnav: orderList.value,
             onOntype_: ontype,
-            fixed: false
-          }, null, 8, ["tabnav"]),
-          vue.createVNode(Order)
+            fixed: false,
+            "default-key": defaulKey.value
+          }, null, 8, ["tabnav", "default-key"]),
+          (vue.openBlock(true), vue.createElementBlock(
+            vue.Fragment,
+            null,
+            vue.renderList(lists.value, (item, index) => {
+              return vue.openBlock(), vue.createBlock(Order, { orderData: item }, null, 8, ["orderData"]);
+            }),
+            256
+            /* UNKEYED_FRAGMENT */
+          ))
         ]);
       };
     }
   };
-  const PagesMyOrderDetail = /* @__PURE__ */ _export_sfc(_sfc_main$r, [["__scopeId", "data-v-838e9a54"], ["__file", "D:/graduationProject/pet-front-end/pages/my/OrderDetail.vue"]]);
-  const _sfc_main$q = {};
+  const PagesMyOrderDetail = /* @__PURE__ */ _export_sfc(_sfc_main$t, [["__scopeId", "data-v-838e9a54"], ["__file", "D:/graduationProject/pet-front-end/pages/my/OrderDetail.vue"]]);
+  const _sfc_main$s = {};
   function _sfc_render$d(_ctx, _cache) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "total" }, [
       vue.createElementVNode("view", { class: "left" }, [
@@ -18783,8 +19059,8 @@ ${i3}
       ])
     ]);
   }
-  const ImageText = /* @__PURE__ */ _export_sfc(_sfc_main$q, [["render", _sfc_render$d], ["__scopeId", "data-v-e9c1a8ef"], ["__file", "D:/graduationProject/pet-front-end/pages/community/components/ImageText.vue"]]);
-  const _sfc_main$p = {
+  const ImageText = /* @__PURE__ */ _export_sfc(_sfc_main$s, [["render", _sfc_render$d], ["__scopeId", "data-v-e9c1a8ef"], ["__file", "D:/graduationProject/pet-front-end/pages/community/components/ImageText.vue"]]);
+  const _sfc_main$r = {
     __name: "index",
     setup(__props) {
       vue.ref([]);
@@ -18889,8 +19165,8 @@ ${i3}
       };
     }
   };
-  const PagesCommunityIndex = /* @__PURE__ */ _export_sfc(_sfc_main$p, [["__file", "D:/graduationProject/pet-front-end/pages/community/index.vue"]]);
-  const _sfc_main$o = {};
+  const PagesCommunityIndex = /* @__PURE__ */ _export_sfc(_sfc_main$r, [["__file", "D:/graduationProject/pet-front-end/pages/community/index.vue"]]);
+  const _sfc_main$q = {};
   function _sfc_render$c(_ctx, _cache) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "content" }, [
       vue.createCommentVNode("这里的高度应该由图片的高度决定 "),
@@ -18931,7 +19207,7 @@ ${i3}
       ])
     ]);
   }
-  const PagesCommunityDetailArticle = /* @__PURE__ */ _export_sfc(_sfc_main$o, [["render", _sfc_render$c], ["__scopeId", "data-v-eded9e05"], ["__file", "D:/graduationProject/pet-front-end/pages/community/DetailArticle.vue"]]);
+  const PagesCommunityDetailArticle = /* @__PURE__ */ _export_sfc(_sfc_main$q, [["render", _sfc_render$c], ["__scopeId", "data-v-eded9e05"], ["__file", "D:/graduationProject/pet-front-end/pages/community/DetailArticle.vue"]]);
   class WebSocket {
     constructor(url) {
       this.url = url;
@@ -18980,79 +19256,14 @@ ${i3}
       });
     }
   }
-  const useSocketStore = defineStore("socket", () => {
-    const userStore = useUserStore();
-    const socket = vue.ref(null);
-    const list = vue.ref([]);
-    const initSocket = () => {
-      socket.value = new WebSocket(WEBSOCKETURL);
-      socket.value.connect();
-      authentication();
-      getHistoryMessage();
-    };
-    const sendMessage = (data) => {
-      let obj = {
-        data,
-        id: userStore.user.user_id,
-        type: 3
-      };
-      socket.value.send(JSON.stringify(obj));
-    };
-    const getHistoryMessage = () => {
-      socket.value.onOpen(() => {
-        let obj = {
-          id: userStore.user.user_id,
-          type: 2
-          //获取历史记录
-        };
-        socket.value.send(JSON.stringify(obj));
-      });
-    };
-    const onMes = () => {
-      socket.value.onMessage((res) => {
-        let {
-          type,
-          data
-        } = JSON.parse(res.data);
-        formatAppLog("log", "at stores/socket.js:60", data);
-        switch (type) {
-          case 1:
-            break;
-          case 2:
-            list.value = data;
-            break;
-          case 3:
-            list.value.push(data);
-            break;
-        }
-      });
-    };
-    const authentication = () => {
-      let obj = {
-        id: userStore.user.user_id,
-        type: 1
-        //获取历史记录
-      };
-      socket.value.onOpen(() => {
-        socket.value.send(JSON.stringify(obj));
-      });
-    };
-    return {
-      socket,
-      initSocket,
-      list,
-      sendMessage,
-      onMes,
-      getHistoryMessage
-    };
-  });
-  const _sfc_main$n = {
+  const _sfc_main$p = {
     __name: "Chat",
     setup(__props) {
-      useUserStore();
-      const socketStore = useSocketStore();
+      const userStore = useUserStore();
+      const socket = vue.ref(null);
+      const scrollview = vue.ref();
       const inputValue = vue.ref("");
-      vue.ref([]);
+      const list = vue.ref([]);
       vue.ref("");
       const scrollHeight = vue.ref(0);
       const windowObj = vue.computed(() => {
@@ -19064,13 +19275,83 @@ ${i3}
         });
         return obj;
       });
+      const setScrollTop = () => {
+        vue.nextTick(() => {
+          let scrollView = uni.createSelectorQuery().select(".scroll-view");
+          scrollView.fields({ size: true }, (data) => {
+            let height = data.height;
+            scrollHeight.value = height;
+          }).exec();
+        });
+      };
+      const onMessage = () => {
+        socket.value.onMessage((res) => {
+          let { type, data } = JSON.parse(res.data);
+          switch (type) {
+            case 1:
+              break;
+            case 2:
+              list.value = data;
+              setScrollTop();
+              break;
+          }
+        });
+      };
+      const initSocket = () => {
+        socket.value = new WebSocket(WEBSOCKETURL);
+        socket.value.connect();
+        socket.value.onOpen(() => {
+          authentication();
+          getHistoryMessage();
+        });
+      };
       const sendMessage = () => {
-        socketStore.sendMessage(inputValue.value);
+        if (inputValue.value === "")
+          return uni.showToast({
+            title: "输入的消息不能为空",
+            icon: "none"
+          });
+        socket.value.send(
+          JSON.stringify({
+            data: inputValue.value,
+            id: userStore.user.user_id,
+            type: 3
+          })
+        );
         inputValue.value = "";
+        setScrollTop();
+      };
+      const getHistoryMessage = () => {
+        socket.value.send(
+          JSON.stringify({
+            id: userStore.user.user_id,
+            type: 2
+            //获取历史记录
+          })
+        );
+      };
+      const authentication = () => {
+        socket.value.send(
+          JSON.stringify({
+            id: userStore.user.user_id,
+            type: 1
+            //获取历史记录
+          })
+        );
       };
       onLoad(() => {
-        socketStore.initSocket();
-        socketStore.onMes();
+        initSocket();
+        onMessage();
+      });
+      onUnload(() => {
+        socket.value.send(
+          JSON.stringify({
+            id: userStore.user.user_id,
+            type: 8
+            //获取历史记录
+          })
+        );
+        socket.value.close();
       });
       return (_ctx, _cache) => {
         return vue.openBlock(), vue.createElementBlock("view", { class: "" }, [
@@ -19079,13 +19360,15 @@ ${i3}
             class: "scroll-box",
             style: vue.normalizeStyle({ height: vue.unref(windowObj).windowHeight - vue.unref(windowObj).statusBarHeight - 94 + "px" }),
             "scroll-top": scrollHeight.value,
-            onScrolltoupper: _cache[0] || (_cache[0] = (...args) => _ctx.loadMores && _ctx.loadMores(...args))
+            onScrolltoupper: _cache[0] || (_cache[0] = (...args) => _ctx.loadMores && _ctx.loadMores(...args)),
+            ref_key: "scrollview",
+            ref: scrollview
           }, [
             vue.createElementVNode("view", { class: "scroll-view" }, [
               (vue.openBlock(true), vue.createElementBlock(
                 vue.Fragment,
                 null,
-                vue.renderList(vue.unref(socketStore).list, (item, index) => {
+                vue.renderList(list.value, (item, index) => {
                   return vue.openBlock(), vue.createElementBlock("view", {
                     class: "news-box",
                     key: index
@@ -19143,7 +19426,12 @@ ${i3}
                 544
                 /* HYDRATE_EVENTS, NEED_PATCH */
               ), [
-                [vue.vModelText, inputValue.value]
+                [
+                  vue.vModelText,
+                  inputValue.value,
+                  void 0,
+                  { trim: true }
+                ]
               ]),
               vue.createElementVNode("view", {
                 class: "send-input",
@@ -19155,7 +19443,7 @@ ${i3}
       };
     }
   };
-  const PagesMessagesChat = /* @__PURE__ */ _export_sfc(_sfc_main$n, [["__scopeId", "data-v-d3b50b6a"], ["__file", "D:/graduationProject/pet-front-end/pages/messages/Chat.vue"]]);
+  const PagesMessagesChat = /* @__PURE__ */ _export_sfc(_sfc_main$p, [["__scopeId", "data-v-d3b50b6a"], ["__file", "D:/graduationProject/pet-front-end/pages/messages/Chat.vue"]]);
   const ERR_MSG_OK = "chooseAndUploadFile:ok";
   const ERR_MSG_FAIL = "chooseAndUploadFile:fail";
   function chooseImage(opts) {
@@ -19437,7 +19725,7 @@ ${i3}
     }
     return filedata;
   };
-  const _sfc_main$m = {
+  const _sfc_main$o = {
     name: "uploadImage",
     emits: ["uploadFiles", "choose", "delFile"],
     props: {
@@ -19677,8 +19965,8 @@ ${i3}
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const uploadImage = /* @__PURE__ */ _export_sfc(_sfc_main$m, [["render", _sfc_render$b], ["__scopeId", "data-v-bdfc07e0"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/upload-image.vue"]]);
-  const _sfc_main$l = {
+  const uploadImage = /* @__PURE__ */ _export_sfc(_sfc_main$o, [["render", _sfc_render$b], ["__scopeId", "data-v-bdfc07e0"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/upload-image.vue"]]);
+  const _sfc_main$n = {
     name: "uploadFile",
     emits: ["uploadFiles", "choose", "delFile"],
     props: {
@@ -19896,8 +20184,8 @@ ${i3}
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const uploadFile = /* @__PURE__ */ _export_sfc(_sfc_main$l, [["render", _sfc_render$a], ["__scopeId", "data-v-a54939c6"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/upload-file.vue"]]);
-  const _sfc_main$k = {
+  const uploadFile = /* @__PURE__ */ _export_sfc(_sfc_main$n, [["render", _sfc_render$a], ["__scopeId", "data-v-a54939c6"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/upload-file.vue"]]);
+  const _sfc_main$m = {
     name: "uniFilePicker",
     components: {
       uploadImage,
@@ -20449,7 +20737,7 @@ ${i3}
       }, 8, ["readonly", "list-styles", "files-list", "showType", "delIcon", "onUploadFiles", "onChoose", "onDelFile"])) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$k, [["render", _sfc_render$9], ["__scopeId", "data-v-6223573f"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue"]]);
+  const __easycom_0$1 = /* @__PURE__ */ _export_sfc(_sfc_main$m, [["render", _sfc_render$9], ["__scopeId", "data-v-6223573f"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue"]]);
   function obj2strClass(obj) {
     let classess = "";
     for (let key in obj) {
@@ -20468,7 +20756,7 @@ ${i3}
     }
     return style;
   }
-  const _sfc_main$j = {
+  const _sfc_main$l = {
     name: "uni-easyinput",
     emits: ["click", "iconClick", "update:modelValue", "input", "focus", "blur", "confirm", "clear", "eyes", "change", "keyboardheightchange"],
     model: {
@@ -20922,8 +21210,8 @@ ${i3}
       /* CLASS, STYLE */
     );
   }
-  const __easycom_2 = /* @__PURE__ */ _export_sfc(_sfc_main$j, [["render", _sfc_render$8], ["__scopeId", "data-v-09fd5285"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue"]]);
-  const _sfc_main$i = {
+  const __easycom_2 = /* @__PURE__ */ _export_sfc(_sfc_main$l, [["render", _sfc_render$8], ["__scopeId", "data-v-09fd5285"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue"]]);
+  const _sfc_main$k = {
     name: "uni-data-select",
     mixins: [Ws.mixinDatacom || {}],
     props: {
@@ -21281,8 +21569,8 @@ ${i3}
       )
     ]);
   }
-  const __easycom_3 = /* @__PURE__ */ _export_sfc(_sfc_main$i, [["render", _sfc_render$7], ["__scopeId", "data-v-ddf9e0a2"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-data-select/components/uni-data-select/uni-data-select.vue"]]);
-  const _sfc_main$h = {
+  const __easycom_3 = /* @__PURE__ */ _export_sfc(_sfc_main$k, [["render", _sfc_render$7], ["__scopeId", "data-v-ddf9e0a2"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-data-select/components/uni-data-select/uni-data-select.vue"]]);
+  const _sfc_main$j = {
     __name: "PublishContent",
     setup(__props) {
       vue.ref({
@@ -21335,8 +21623,8 @@ ${i3}
       };
     }
   };
-  const PagesCommunityPublishContent = /* @__PURE__ */ _export_sfc(_sfc_main$h, [["__scopeId", "data-v-99d57647"], ["__file", "D:/graduationProject/pet-front-end/pages/community/PublishContent.vue"]]);
-  const _sfc_main$g = {
+  const PagesCommunityPublishContent = /* @__PURE__ */ _export_sfc(_sfc_main$j, [["__scopeId", "data-v-99d57647"], ["__file", "D:/graduationProject/pet-front-end/pages/community/PublishContent.vue"]]);
+  const _sfc_main$i = {
     __name: "ConfirmAddress",
     setup(__props) {
       const useStore = useUserStore();
@@ -21413,7 +21701,7 @@ ${i3}
       };
     }
   };
-  const PagesCarConfirmAddress = /* @__PURE__ */ _export_sfc(_sfc_main$g, [["__scopeId", "data-v-777a2470"], ["__file", "D:/graduationProject/pet-front-end/pages/car/ConfirmAddress.vue"]]);
+  const PagesCarConfirmAddress = /* @__PURE__ */ _export_sfc(_sfc_main$i, [["__scopeId", "data-v-777a2470"], ["__file", "D:/graduationProject/pet-front-end/pages/car/ConfirmAddress.vue"]]);
   const en$1 = {
     "uni-load-more.contentdown": "Pull up to show more",
     "uni-load-more.contentrefresh": "loading...",
@@ -21441,7 +21729,7 @@ ${i3}
   const {
     t: t$2
   } = initVueI18n(messages);
-  const _sfc_main$f = {
+  const _sfc_main$h = {
     name: "UniLoadMore",
     emits: ["clickLoadMore"],
     props: {
@@ -21598,8 +21886,8 @@ ${i3}
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_0 = /* @__PURE__ */ _export_sfc(_sfc_main$f, [["render", _sfc_render$6], ["__scopeId", "data-v-9245e42c"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-load-more/components/uni-load-more/uni-load-more.vue"]]);
-  const _sfc_main$e = {
+  const __easycom_0 = /* @__PURE__ */ _export_sfc(_sfc_main$h, [["render", _sfc_render$6], ["__scopeId", "data-v-9245e42c"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-load-more/components/uni-load-more/uni-load-more.vue"]]);
+  const _sfc_main$g = {
     name: "uniDataChecklist",
     mixins: [Ws.mixinDatacom || {}],
     emits: ["input", "update:modelValue", "change"],
@@ -22156,7 +22444,7 @@ ${i3}
       /* STYLE */
     );
   }
-  const __easycom_4 = /* @__PURE__ */ _export_sfc(_sfc_main$e, [["render", _sfc_render$5], ["__scopeId", "data-v-2f788efd"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.vue"]]);
+  const __easycom_4 = /* @__PURE__ */ _export_sfc(_sfc_main$g, [["render", _sfc_render$5], ["__scopeId", "data-v-2f788efd"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.vue"]]);
   let Calendar$1 = class Calendar {
     constructor({
       selected,
@@ -22506,7 +22794,7 @@ ${i3}
     }
     return value;
   }
-  const _sfc_main$d = {
+  const _sfc_main$f = {
     props: {
       weeks: {
         type: Object,
@@ -22596,7 +22884,7 @@ ${i3}
       /* CLASS, HYDRATE_EVENTS */
     );
   }
-  const calendarItem = /* @__PURE__ */ _export_sfc(_sfc_main$d, [["render", _sfc_render$4], ["__scopeId", "data-v-3c762a01"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/calendar-item.vue"]]);
+  const calendarItem = /* @__PURE__ */ _export_sfc(_sfc_main$f, [["render", _sfc_render$4], ["__scopeId", "data-v-3c762a01"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/calendar-item.vue"]]);
   const en = {
     "uni-datetime-picker.selectDate": "select date",
     "uni-datetime-picker.selectTime": "select time",
@@ -22669,7 +22957,7 @@ ${i3}
     "zh-Hant": zhHant
   };
   const { t: t$1 } = initVueI18n(i18nMessages);
-  const _sfc_main$c = {
+  const _sfc_main$e = {
     name: "UniDatetimePicker",
     data() {
       return {
@@ -23554,9 +23842,9 @@ ${i3}
       )) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const TimePicker = /* @__PURE__ */ _export_sfc(_sfc_main$c, [["render", _sfc_render$3], ["__scopeId", "data-v-1d532b70"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/time-picker.vue"]]);
+  const TimePicker = /* @__PURE__ */ _export_sfc(_sfc_main$e, [["render", _sfc_render$3], ["__scopeId", "data-v-1d532b70"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/time-picker.vue"]]);
   const { t } = initVueI18n(i18nMessages);
-  const _sfc_main$b = {
+  const _sfc_main$d = {
     components: {
       calendarItem,
       timePicker: TimePicker
@@ -24325,8 +24613,8 @@ ${i3}
       /* HYDRATE_EVENTS */
     );
   }
-  const Calendar = /* @__PURE__ */ _export_sfc(_sfc_main$b, [["render", _sfc_render$2], ["__scopeId", "data-v-1d379219"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/calendar.vue"]]);
-  const _sfc_main$a = {
+  const Calendar = /* @__PURE__ */ _export_sfc(_sfc_main$d, [["render", _sfc_render$2], ["__scopeId", "data-v-1d379219"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/calendar.vue"]]);
+  const _sfc_main$c = {
     name: "UniDatetimePicker",
     options: {
       virtualHost: true
@@ -25305,8 +25593,8 @@ ${i3}
       }, null, 8, ["date", "defTime", "start-date", "end-date", "selectableTimes", "startPlaceholder", "endPlaceholder", "default-value", "pleStatus", "range", "hasTime", "hideSecond", "onConfirm", "onMaskClose"])) : vue.createCommentVNode("v-if", true)
     ]);
   }
-  const __easycom_1 = /* @__PURE__ */ _export_sfc(_sfc_main$a, [["render", _sfc_render$1], ["__scopeId", "data-v-9802168a"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.vue"]]);
-  const _sfc_main$9 = {
+  const __easycom_1 = /* @__PURE__ */ _export_sfc(_sfc_main$c, [["render", _sfc_render$1], ["__scopeId", "data-v-9802168a"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.vue"]]);
+  const _sfc_main$b = {
     name: "UniCard",
     emits: ["click"],
     props: {
@@ -25470,7 +25758,7 @@ ${i3}
       /* CLASS, STYLE */
     );
   }
-  const __easycom_7 = /* @__PURE__ */ _export_sfc(_sfc_main$9, [["render", _sfc_render], ["__scopeId", "data-v-ae4bee67"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-card/components/uni-card/uni-card.vue"]]);
+  const __easycom_7 = /* @__PURE__ */ _export_sfc(_sfc_main$b, [["render", _sfc_render], ["__scopeId", "data-v-ae4bee67"], ["__file", "D:/graduationProject/pet-front-end/uni_modules/uni-card/components/uni-card/uni-card.vue"]]);
   const petRules = {
     pet_name: {
       rules: [{
@@ -25517,7 +25805,7 @@ ${i3}
       }]
     }
   };
-  const _sfc_main$8 = {
+  const _sfc_main$a = {
     __name: "EditPet",
     setup(__props) {
       const store = useUserStore();
@@ -25820,7 +26108,7 @@ ${i3}
       };
     }
   };
-  const PagesMyEditPet = /* @__PURE__ */ _export_sfc(_sfc_main$8, [["__scopeId", "data-v-a65bf837"], ["__file", "D:/graduationProject/pet-front-end/pages/my/EditPet.vue"]]);
+  const PagesMyEditPet = /* @__PURE__ */ _export_sfc(_sfc_main$a, [["__scopeId", "data-v-a65bf837"], ["__file", "D:/graduationProject/pet-front-end/pages/my/EditPet.vue"]]);
   const getCurrentTimeFormatted = () => {
     const now2 = /* @__PURE__ */ new Date();
     const year = now2.getFullYear();
@@ -25831,48 +26119,11 @@ ${i3}
     const seconds = String(now2.getSeconds()).padStart(2, "0");
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
-  const confirmOrder = async (data) => {
-    return await request("/confirmOrder", data, {
-      method: "post"
-    });
-  };
-  const useOrderStore = defineStore("order", () => {
-    const orderList = vue.ref({});
-    const updateOrder = (data) => {
-      orderList.value = data;
-    };
-    const goodList = vue.computed(() => {
-      formatAppLog("log", "at stores/order.js:18", orderList.value.goodList);
-      return orderList.value.goodList;
-    });
-    const goodTotalNumber = vue.computed(() => {
-      let total = 0;
-      orderList.value.goodList.forEach((item) => {
-        total += item.addNum;
-      });
-      return total;
-    });
-    const goodSumPrice = vue.computed(() => {
-      let price = 0;
-      orderList.value.goodList.forEach((item) => {
-        price += item.addNum * item.good_price;
-      });
-      return parseFloat(price.toFixed(2));
-    });
-    return {
-      orderList,
-      updateOrder,
-      goodTotalNumber,
-      goodSumPrice,
-      goodList
-    };
-  }, {
-    unistorage: true
-  });
-  const _sfc_main$7 = {
+  const _sfc_main$9 = {
     __name: "OrderService",
     setup(__props) {
       const datetimesingle = vue.ref();
+      const serviceStore = useServiceStore();
       const isReserve = vue.ref(false);
       const start = vue.computed(() => {
         const now2 = /* @__PURE__ */ new Date();
@@ -25882,11 +26133,9 @@ ${i3}
         return `${year}-${month}-${date}`;
       });
       const changeLog = (e2) => {
-        formatAppLog("log", "at pages/home/OrderService.vue:140", "change事件:", e2);
+        formatAppLog("log", "at pages/home/OrderService.vue:138", "change事件:", e2);
       };
-      const carStore = useCarStore();
       const userStore = useUserStore();
-      const orderStore = useOrderStore();
       const address = vue.ref({});
       const showAddress = vue.ref(true);
       const orderTime = vue.ref("");
@@ -25915,40 +26164,44 @@ ${i3}
         });
       };
       const payHandler = async () => {
-        if (!address.value) {
+        if (!address.value)
           return uni.showToast({ title: "请检查您的地址", icon: "none" });
-        }
-        if (!carStore.checkOutCar) {
-          return uni.showToast({ title: "请检查您的商品", icon: "none" });
-        }
-        let obj = {
-          shipping_address: address.value.address_area + address.value.address_details,
-          //地址
-          address_name: address.value.address_name,
-          address_number: address.value.address_phone,
-          goodList: carStore.checkOutCar,
-          //商品数据
-          user_id: userStore.user.user_id,
-          //用户id
-          create_date: orderTime.value,
-          order_number: orderNumber.value
-        };
-        const result = await confirmOrder(obj);
-        if (result.code === 2e3) {
-          orderStore.updateOrder(result.data);
-          const good_id_arr = orderStore.orderList.goodList.map((item) => item.good_id);
-          if (good_id_arr.length > 0) {
-            good_id_arr.forEach((item) => {
-              carStore.deleteGoods(item);
-            });
+        if (Object.keys(serviceStore.service).length <= 0)
+          return uni.showToast({ title: "请检查您选择的服务", icon: "none" });
+        if (!datetimesingle.value)
+          return uni.showToast({ title: "请检查您预约服务时间", icon: "none" });
+        uni.showModal({
+          title: "提示",
+          content: "确认要下单吗？",
+          async success(res) {
+            if (res.confirm) {
+              let obj = {
+                service_id: serviceStore.service.service_id,
+                service_name: serviceStore.service.service_name,
+                service_price: serviceStore.service.service_price,
+                service_time: datetimesingle.value,
+                //商品数据
+                service_number: orderNumber.value,
+                //用户id
+                service_date: orderTime.value,
+                service_address_name: address.value.address_name,
+                service_address_phone: address.value.address_phone,
+                service_address: address.value.address_area + address.value.address_details,
+                //地址
+                service_status: isReserve ? 2 : 1,
+                user_id: userStore.user.user_id,
+                service_image: serviceStore.service.service_image
+              };
+              const result = await confirmServiceAPI(obj);
+              if (result.code === 2e3) {
+                uni.showToast({
+                  title: "下单成功"
+                });
+                uni.switchTab({ url: "/pages/home/index" });
+              }
+            }
           }
-          uni.showToast({ title: "订单确认成功", icon: "none" });
-          uni.navigateTo({
-            url: "/pages/car/pay"
-          });
-        } else {
-          return uni.showToast({ title: "确认订单失败,请联系客服", icon: "none" });
-        }
+        });
       };
       vue.onMounted(() => {
         orderTime.value = getCurrentTimeFormatted();
@@ -26045,57 +26298,40 @@ ${i3}
               vue.createElementVNode("view", { class: "lable-title" }, "已选择的服务")
             ]),
             vue.createElementVNode("view", { class: "shopping-list" }, [
-              vue.createCommentVNode(" 选中的商品  "),
-              (vue.openBlock(true), vue.createElementBlock(
-                vue.Fragment,
-                null,
-                vue.renderList(vue.unref(carStore).checkOutCar, (c2, index) => {
-                  return vue.openBlock(), vue.createElementBlock("view", {
-                    class: "shopping-item",
-                    key: c2.good_id
-                  }, [
-                    vue.createElementVNode("view", { class: "shopping-img" }, [
-                      vue.createElementVNode("image", {
-                        src: `${vue.unref(devUrl)}/good_uploads/${c2.good_image}`
-                      }, null, 8, ["src"])
-                    ]),
-                    vue.createElementVNode("view", { class: "shopping-info" }, [
-                      vue.createElementVNode("view", { class: "shopping-hd" }, [
-                        vue.createElementVNode(
-                          "view",
-                          { class: "shopping-title" },
-                          vue.toDisplayString(c2.good_category.good_category_name),
-                          1
-                          /* TEXT */
-                        ),
-                        vue.createElementVNode(
-                          "view",
-                          { class: "shopping-price" },
-                          "￥" + vue.toDisplayString((c2.good_price * c2.addNum).toFixed(2)),
-                          1
-                          /* TEXT */
-                        ),
-                        vue.createElementVNode(
-                          "view",
-                          { class: "shopping-price" },
-                          "x" + vue.toDisplayString(c2.addNum),
-                          1
-                          /* TEXT */
-                        )
-                      ]),
-                      vue.createElementVNode(
-                        "view",
-                        { class: "shopping-text" },
-                        vue.toDisplayString(c2.good_name),
-                        1
-                        /* TEXT */
-                      )
-                    ])
-                  ]);
-                }),
-                128
-                /* KEYED_FRAGMENT */
-              ))
+              vue.createCommentVNode(" 对应的服务  "),
+              vue.createElementVNode("view", { class: "shopping-item" }, [
+                vue.createElementVNode("view", { class: "shopping-img" }, [
+                  vue.createElementVNode("image", {
+                    src: `${vue.unref(devUrl)}/service_uploads/${vue.unref(serviceStore).service.service_image}`
+                  }, null, 8, ["src"])
+                ]),
+                vue.createElementVNode("view", { class: "shopping-info" }, [
+                  vue.createElementVNode("view", { class: "shopping-hd" }, [
+                    vue.createElementVNode(
+                      "view",
+                      { class: "shopping-title" },
+                      vue.toDisplayString(vue.unref(serviceStore).service.service_name),
+                      1
+                      /* TEXT */
+                    ),
+                    vue.createCommentVNode(" .toFixed(2) "),
+                    vue.createElementVNode(
+                      "view",
+                      { class: "shopping-price" },
+                      "￥" + vue.toDisplayString(vue.unref(serviceStore).service.service_price),
+                      1
+                      /* TEXT */
+                    )
+                  ]),
+                  vue.createElementVNode(
+                    "view",
+                    { class: "shopping-text" },
+                    vue.toDisplayString(vue.unref(serviceStore).service.service_detail_describe),
+                    1
+                    /* TEXT */
+                  )
+                ])
+              ])
             ])
           ]),
           vue.createCommentVNode(" 服务时间 "),
@@ -26157,7 +26393,7 @@ ${i3}
                     size: "32rpx"
                   }),
                   vue.createTextVNode(
-                    vue.toDisplayString(vue.unref(carStore).sumPrice),
+                    vue.toDisplayString(vue.unref(serviceStore).service.service_price),
                     1
                     /* TEXT */
                   )
@@ -26172,7 +26408,7 @@ ${i3}
                   style: { "padding": "24rpx 60rpx", "border-radius": "14rpx" },
                   onClick: payHandler
                 }, [
-                  vue.createElementVNode("view", { class: "selecet-text" }, "确认订单")
+                  vue.createElementVNode("view", { class: "selecet-text" }, "下单")
                 ])
               ])
             ])
@@ -26181,8 +26417,40 @@ ${i3}
       };
     }
   };
-  const PagesHomeOrderService = /* @__PURE__ */ _export_sfc(_sfc_main$7, [["__scopeId", "data-v-03b8f559"], ["__file", "D:/graduationProject/pet-front-end/pages/home/OrderService.vue"]]);
-  const _sfc_main$6 = {
+  const PagesHomeOrderService = /* @__PURE__ */ _export_sfc(_sfc_main$9, [["__scopeId", "data-v-03b8f559"], ["__file", "D:/graduationProject/pet-front-end/pages/home/OrderService.vue"]]);
+  const useOrderStore = defineStore("order", () => {
+    const orderList = vue.ref({});
+    const updateOrder = (data) => {
+      orderList.value = data;
+    };
+    const goodList = vue.computed(() => {
+      return orderList.value.goodList;
+    });
+    const goodTotalNumber = vue.computed(() => {
+      let total = 0;
+      orderList.value.goodList.forEach((item) => {
+        total += item.addNum;
+      });
+      return total;
+    });
+    const goodSumPrice = vue.computed(() => {
+      let price = 0;
+      orderList.value.goodList.forEach((item) => {
+        price += item.addNum * item.good_price;
+      });
+      return parseFloat(price.toFixed(2));
+    });
+    return {
+      orderList,
+      updateOrder,
+      goodTotalNumber,
+      goodSumPrice,
+      goodList
+    };
+  }, {
+    unistorage: true
+  });
+  const _sfc_main$8 = {
     __name: "ConfirmOrder",
     setup(__props) {
       const carStore = useCarStore();
@@ -26235,8 +26503,10 @@ ${i3}
           user_id: userStore.user.user_id,
           //用户id
           create_date: orderTime.value,
-          order_number: orderNumber.value
+          order_number: orderNumber.value,
+          order_price: carStore.sumPrice
         };
+        formatAppLog("log", "at pages/car/ConfirmOrder.vue:174", obj.goodList);
         const result = await confirmOrder(obj);
         if (result.code === 2e3) {
           orderStore.updateOrder(result.data);
@@ -26247,7 +26517,7 @@ ${i3}
             });
           }
           uni.showToast({ title: "订单确认成功", icon: "none" });
-          uni.navigateTo({
+          uni.redirectTo({
             url: "/pages/car/pay"
           });
         } else {
@@ -26479,7 +26749,7 @@ ${i3}
       };
     }
   };
-  const PagesCarConfirmOrder = /* @__PURE__ */ _export_sfc(_sfc_main$6, [["__scopeId", "data-v-7bed0b62"], ["__file", "D:/graduationProject/pet-front-end/pages/car/ConfirmOrder.vue"]]);
+  const PagesCarConfirmOrder = /* @__PURE__ */ _export_sfc(_sfc_main$8, [["__scopeId", "data-v-7bed0b62"], ["__file", "D:/graduationProject/pet-front-end/pages/car/ConfirmOrder.vue"]]);
   const rules = {
     phone: {
       rules: [
@@ -26521,7 +26791,7 @@ ${i3}
       ]
     }
   };
-  const _sfc_main$5 = {
+  const _sfc_main$7 = {
     __name: "login",
     setup(__props) {
       const store = useUserStore();
@@ -26651,8 +26921,8 @@ ${i3}
       };
     }
   };
-  const PagesLoginLogin = /* @__PURE__ */ _export_sfc(_sfc_main$5, [["__file", "D:/graduationProject/pet-front-end/pages/login/login.vue"]]);
-  const _sfc_main$4 = {
+  const PagesLoginLogin = /* @__PURE__ */ _export_sfc(_sfc_main$7, [["__file", "D:/graduationProject/pet-front-end/pages/login/login.vue"]]);
+  const _sfc_main$6 = {
     __name: "register",
     setup(__props) {
       const formData = vue.ref({
@@ -26774,13 +27044,47 @@ ${i3}
       };
     }
   };
-  const PagesLoginRegister = /* @__PURE__ */ _export_sfc(_sfc_main$4, [["__file", "D:/graduationProject/pet-front-end/pages/login/register.vue"]]);
-  const _sfc_main$3 = {
+  const PagesLoginRegister = /* @__PURE__ */ _export_sfc(_sfc_main$6, [["__file", "D:/graduationProject/pet-front-end/pages/login/register.vue"]]);
+  const _sfc_main$5 = {
     __name: "pay",
     setup(__props) {
       const orderStore = useOrderStore();
-      const payHandler = () => {
+      const payHandler = async () => {
+        let obj = {
+          out_trade_no: orderStore.orderList.order_id,
+          subject: orderStore.orderList.order_number,
+          total_amount: parseFloat(orderStore.orderList.order_price)
+        };
+        const result = await payAPI(obj);
+        if (result.code === 2e3) {
+          uni.requestPayment({
+            provider: "alipay",
+            orderInfo: result.data,
+            // 从后端获取的支付参数
+            async success(res) {
+              const result1 = await paySuccessAPI({ order_id: orderStore.orderList.order_id });
+              if (result1.code === 2e3) {
+                uni.showToast({
+                  title: "支付成功",
+                  icon: "success"
+                });
+                uni.navigateBack();
+              }
+            },
+            fail(err) {
+              uni.showToast({
+                title: "支付失败，请联系管理员",
+                icon: "none"
+              });
+              formatAppLog("error", "at pages/car/pay.vue:140", "支付失败", err);
+            }
+          });
+        }
       };
+      onLoad(() => {
+        var EnvUtils = plus.android.importClass("com.alipay.sdk.app.EnvUtils");
+        EnvUtils.setEnv(EnvUtils.EnvEnum.SANDBOX);
+      });
       return (_ctx, _cache) => {
         const _component_icon_base = resolveEasycom(vue.resolveDynamicComponent("icon-base"), __easycom_0$b);
         const _component_u_icon = vue.resolveComponent("u-icon");
@@ -26974,8 +27278,8 @@ ${i3}
       };
     }
   };
-  const PagesCarPay = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-f5acff60"], ["__file", "D:/graduationProject/pet-front-end/pages/car/pay.vue"]]);
-  const _sfc_main$2 = {
+  const PagesCarPay = /* @__PURE__ */ _export_sfc(_sfc_main$5, [["__scopeId", "data-v-f5acff60"], ["__file", "D:/graduationProject/pet-front-end/pages/car/pay.vue"]]);
+  const _sfc_main$4 = {
     __name: "ComfirmAddress",
     setup(__props) {
       const useStore = useUserStore();
@@ -27052,8 +27356,8 @@ ${i3}
       };
     }
   };
-  const PagesHomeComfirmAddress = /* @__PURE__ */ _export_sfc(_sfc_main$2, [["__scopeId", "data-v-cddc6d94"], ["__file", "D:/graduationProject/pet-front-end/pages/home/ComfirmAddress.vue"]]);
-  const _sfc_main$1 = {
+  const PagesHomeComfirmAddress = /* @__PURE__ */ _export_sfc(_sfc_main$4, [["__scopeId", "data-v-cddc6d94"], ["__file", "D:/graduationProject/pet-front-end/pages/home/ComfirmAddress.vue"]]);
+  const _sfc_main$3 = {
     __name: "index",
     setup(__props) {
       const options = vue.ref([
@@ -27152,7 +27456,323 @@ ${i3}
       };
     }
   };
-  const PagesAdoptIndex = /* @__PURE__ */ _export_sfc(_sfc_main$1, [["__scopeId", "data-v-65579be7"], ["__file", "D:/graduationProject/pet-front-end/pages/adopt/index.vue"]]);
+  const PagesAdoptIndex = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-65579be7"], ["__file", "D:/graduationProject/pet-front-end/pages/adopt/index.vue"]]);
+  const _sfc_main$2 = {
+    __name: "index",
+    setup(__props) {
+      const address = vue.ref();
+      const hospitals = vue.ref([]);
+      const test = vue.ref("");
+      const gaodeParamePOI2 = vue.ref({
+        sortrule: "weight",
+        show_fields: `photos,business`,
+        location: "",
+        keywords: "宠物医院",
+        radius: 5e3,
+        output: "json",
+        key: "f0a1569e5f07b655319d5429462b03a2"
+      });
+      const getAddress = async () => {
+        try {
+          const location2 = await uni.getLocation({
+            type: "gcj02",
+            geocode: true
+          });
+          if (!location2)
+            return;
+          const { latitude, longitude } = location2;
+          test.value = `${latitude},${longitude}`;
+          address.value = location2.address.province + location2.address.city + location2.address.district + location2.address.street;
+          gaodeParamePOI2.value.location = `${latitude},${longitude}`;
+          formatAppLog("log", "at pages/medical/index.vue:84", gaodeParamePOI2.value.location);
+          const url = `https://restapi.amap.com/v5/place/around`;
+          const response = await uni.request({
+            url,
+            method: "GET",
+            data: gaodeParamePOI2.value
+          });
+          if (response.data && response.data.status === "1" && response.data.count > 0) {
+            hospitals.value = response.data.pois;
+          } else {
+            uni.showToast({ title: "未找到附近宠物医院", icon: "none" });
+          }
+        } catch (e2) {
+          formatAppLog("error", "at pages/medical/index.vue:97", "查询宠物医院出错", error);
+          uni.showToast({ title: "查询出错", icon: "none" });
+        }
+      };
+      const handlerChange = (id) => {
+        if (id === 1) {
+          parame.value.sortrule = "weight";
+        } else {
+          parame.value.sortrule = "distance";
+        }
+        getAddress();
+      };
+      vue.onMounted(() => {
+        getAddress();
+      });
+      return (_ctx, _cache) => {
+        const _component_uni_icons = resolveEasycom(vue.resolveDynamicComponent("uni-icons"), __easycom_0$d);
+        return vue.openBlock(), vue.createElementBlock(
+          vue.Fragment,
+          null,
+          [
+            vue.createCommentVNode(" 定位 "),
+            vue.createCommentVNode("搜索框"),
+            vue.createElementVNode("view", { class: "top" }, [
+              vue.createElementVNode("view", { class: "location" }, [
+                vue.createCommentVNode(" 图标 "),
+                vue.createVNode(_component_uni_icons, {
+                  type: "location-filled",
+                  size: "22",
+                  color: "#2979FF"
+                }),
+                vue.createElementVNode(
+                  "view",
+                  { class: "" },
+                  vue.toDisplayString(address.value),
+                  1
+                  /* TEXT */
+                )
+              ]),
+              vue.createElementVNode("view", { class: "search" })
+            ]),
+            vue.createElementVNode("view", { class: "set-search" }, [
+              vue.createCommentVNode(` :class="{ active: parame.sortrule === 'weight'?true:false }" `),
+              vue.createElementVNode("view", {
+                class: "commend",
+                onClick: _cache[0] || (_cache[0] = ($event) => handlerChange(1))
+              }, [
+                vue.createTextVNode(" 综合推荐 "),
+                vue.createVNode(_component_uni_icons, {
+                  type: "arrow-down",
+                  size: "16",
+                  color: "#919191"
+                })
+              ]),
+              vue.createCommentVNode(`  :class="{ active: parame.sortrule === 'distance' }" `),
+              vue.createElementVNode("view", {
+                class: "distance",
+                onClick: _cache[1] || (_cache[1] = ($event) => handlerChange(2))
+              }, [
+                vue.createTextVNode(" 距离优先 "),
+                vue.createVNode(_component_uni_icons, {
+                  type: "arrow-down",
+                  size: "16",
+                  color: "#919191"
+                })
+              ])
+            ]),
+            vue.createElementVNode("view", { class: "info" }, [
+              (vue.openBlock(true), vue.createElementBlock(
+                vue.Fragment,
+                null,
+                vue.renderList(hospitals.value, (item, index) => {
+                  return vue.openBlock(), vue.createElementBlock("view", { class: "hospital" }, [
+                    vue.createElementVNode("view", { class: "left" }, [
+                      vue.createCommentVNode(" 医院图片 "),
+                      vue.createElementVNode("img", {
+                        src: item.photos[0].url,
+                        alt: "",
+                        class: "hospital-image"
+                      }, null, 8, ["src"])
+                    ]),
+                    vue.createCommentVNode(" 医院信息 "),
+                    vue.createElementVNode("view", { class: "right" }, [
+                      vue.createElementVNode("view", { class: "" }, [
+                        vue.createCommentVNode(" 医院名字 "),
+                        vue.createElementVNode(
+                          "view",
+                          { class: "name" },
+                          vue.toDisplayString(item.name),
+                          1
+                          /* TEXT */
+                        ),
+                        vue.createCommentVNode(" 公里距离 "),
+                        vue.createElementVNode(
+                          "view",
+                          { class: "type" },
+                          vue.toDisplayString(item.type),
+                          1
+                          /* TEXT */
+                        ),
+                        vue.createCommentVNode(" detail_address "),
+                        vue.createElementVNode(
+                          "view",
+                          { class: "address" },
+                          vue.toDisplayString(item.address),
+                          1
+                          /* TEXT */
+                        ),
+                        vue.createCommentVNode(" 在那一块商圈 "),
+                        vue.createElementVNode(
+                          "view",
+                          { class: "km-distance" },
+                          vue.toDisplayString(item.distance / 1e3) + "公里 评分:" + vue.toDisplayString(item.business.rating),
+                          1
+                          /* TEXT */
+                        ),
+                        item.business.opentime_week ? (vue.openBlock(), vue.createElementBlock(
+                          "view",
+                          {
+                            key: 0,
+                            class: "time"
+                          },
+                          " 营业时间:" + vue.toDisplayString(item.business.opentime_week),
+                          1
+                          /* TEXT */
+                        )) : vue.createCommentVNode("v-if", true)
+                      ])
+                    ])
+                  ]);
+                }),
+                256
+                /* UNKEYED_FRAGMENT */
+              ))
+            ])
+          ],
+          64
+          /* STABLE_FRAGMENT */
+        );
+      };
+    }
+  };
+  const PagesMedicalIndex = /* @__PURE__ */ _export_sfc(_sfc_main$2, [["__scopeId", "data-v-8e81297f"], ["__file", "D:/graduationProject/pet-front-end/pages/medical/index.vue"]]);
+  const _sfc_main$1 = {
+    __name: "ServiceOrder",
+    setup(__props) {
+      const serviceOrderList = vue.ref([]);
+      const userStore = useUserStore();
+      const getData = async () => {
+        const result = await getServiceOrder({ user_id: userStore.user.user_id });
+        if (result.code === 2e3) {
+          serviceOrderList.value = result.data;
+        }
+      };
+      const cancelHandler = async (service_order_id) => {
+        const confirm = await uni.showModal({ title: "提示", content: "确定要取消吗?" });
+        if (confirm.confirm) {
+          const result = await cancelServiceOrderAPI({
+            service_order_id,
+            user_id: userStore.user.user_id
+          });
+          if (result.code === 2e3) {
+            uni.showToast({ title: "取消成功", icon: "none" });
+          }
+          getData();
+        }
+      };
+      const successHanlder = async (service_order_id) => {
+        const confirm = await uni.showModal({ title: "提示", content: "确定服务已经完成了吗?" });
+        if (confirm.confirm) {
+          const result = await successServiceOrderAPI({
+            service_order_id,
+            user_id: userStore.user.user_id
+          });
+          if (result.code === 2e3) {
+            uni.showToast({ title: "订单已完成", icon: "none" });
+          }
+          getData();
+        }
+      };
+      const serviceStatus = (status) => {
+        switch (status) {
+          case 1:
+            return "立即上门";
+          case 2:
+            return "预约上门";
+          case 3:
+            return "已取消";
+          default:
+            return "已完成";
+        }
+      };
+      onLoad(() => {
+        getData();
+      });
+      return (_ctx, _cache) => {
+        return vue.openBlock(true), vue.createElementBlock(
+          vue.Fragment,
+          null,
+          vue.renderList(serviceOrderList.value, (item, index) => {
+            return vue.openBlock(), vue.createElementBlock("view", {
+              class: "content",
+              key: item.service_order_id
+            }, [
+              vue.createElementVNode("view", { class: "timer-state" }, [
+                vue.createElementVNode(
+                  "view",
+                  { class: "timer" },
+                  "订单编号:" + vue.toDisplayString(item.service_number),
+                  1
+                  /* TEXT */
+                ),
+                vue.createElementVNode(
+                  "view",
+                  { class: "state" },
+                  vue.toDisplayString(serviceStatus(item.service_status)),
+                  1
+                  /* TEXT */
+                )
+              ]),
+              vue.createElementVNode("view", { class: "image-text" }, [
+                vue.createElementVNode("view", { class: "main" }, [
+                  vue.createCommentVNode(" 文字 "),
+                  vue.createElementVNode("img", {
+                    src: `${vue.unref(devUrl)}/service_uploads/${item.service_image}`,
+                    alt: ""
+                  }, null, 8, ["src"]),
+                  vue.createElementVNode(
+                    "text",
+                    null,
+                    vue.toDisplayString(item.service_name),
+                    1
+                    /* TEXT */
+                  )
+                ])
+              ]),
+              vue.createCommentVNode(" 商品数量,价钱 "),
+              vue.createElementVNode("view", { class: "number-price" }, [
+                vue.createElementVNode(
+                  "view",
+                  { class: "num" },
+                  " 上门时间:" + vue.toDisplayString(item.service_time),
+                  1
+                  /* TEXT */
+                ),
+                vue.createElementVNode(
+                  "view",
+                  { class: "price" },
+                  " 实际付款$ " + vue.toDisplayString(item.service_price),
+                  1
+                  /* TEXT */
+                )
+              ]),
+              vue.createCommentVNode(" 操作按钮 "),
+              vue.createElementVNode("view", { class: "operation" }, [
+                item.service_status !== 3 && item.service_status !== 4 ? (vue.openBlock(), vue.createElementBlock("button", {
+                  key: 0,
+                  plain: true,
+                  class: "btn",
+                  onClick: ($event) => cancelHandler(item.service_order_id)
+                }, " 取消订单 ", 8, ["onClick"])) : vue.createCommentVNode("v-if", true),
+                item.service_status !== 4 && item.service_status !== 3 ? (vue.openBlock(), vue.createElementBlock("button", {
+                  key: 1,
+                  plain: true,
+                  class: "btn",
+                  onClick: ($event) => successHanlder(item.service_order_id)
+                }, " 确认完成 ", 8, ["onClick"])) : vue.createCommentVNode("v-if", true)
+              ])
+            ]);
+          }),
+          128
+          /* KEYED_FRAGMENT */
+        );
+      };
+    }
+  };
+  const PagesMyServiceOrder = /* @__PURE__ */ _export_sfc(_sfc_main$1, [["__scopeId", "data-v-7e038925"], ["__file", "D:/graduationProject/pet-front-end/pages/my/ServiceOrder.vue"]]);
   __definePage("pages/my/index", PagesMyIndex);
   __definePage("pages/home/index", PagesHomeIndex);
   __definePage("pages/messages/index", PagesMessagesIndex);
@@ -27179,6 +27799,8 @@ ${i3}
   __definePage("pages/car/pay", PagesCarPay);
   __definePage("pages/home/ComfirmAddress", PagesHomeComfirmAddress);
   __definePage("pages/adopt/index", PagesAdoptIndex);
+  __definePage("pages/medical/index", PagesMedicalIndex);
+  __definePage("pages/my/ServiceOrder", PagesMyServiceOrder);
   const whiteList = [
     "/pages/login/login",
     "/pages/login/register",

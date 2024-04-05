@@ -1,29 +1,38 @@
 <template>
-  <el-tabs v-model="tabIndex" type="card" class="demo-tabs" closable @tab-remove="removeTab">
-    <el-tab-pane v-for="item in editableTabs" :key="item.name" :name="item.name">
+  <el-empty :image-size="200" v-if="users.length <= 0" description="暂无用户咨询问题" />
+  <el-tabs
+    v-model="tabIndex"
+    type="card"
+    class="demo-tabs"
+    closable
+    @tab-remove="removeTab"
+    @tab-change="tabChange"
+    v-else
+  >
+    <el-tab-pane v-for="item in users" :key="item.user_id" :name="item.user_id">
       <template v-slot:label>
         <!-- header 插槽的内容放这里 -->
-        <img src="../../assets/default.png" class="avatar" />
+        <img :src="`${DEVURL}/uploads/${item.user_avatar}`" class="avatar" />
         <!-- 用户名 -->
-        <div>123</div>
+        <div>{{ item.user_name }}</div>
       </template>
       <template v-slot>
         <div class="chat-main">
-          <div class="chat">
+          <div class="chat" ref="scrollContain">
             <div class="scroll-view">
-              <div class="news-box" v-for="(item, index) in socketStore.list" :key="index">
+              <div class="news-box" v-for="(item, index) in list" :key="index">
                 <!-- 头像 -->
 
                 <img
                   class="avatar"
-                  :class="[item.message_type === 1 ? 'is-me' : 'avatar-right']"
+                  :class="[item.message_type !== 1 ? 'is-me' : 'avatar-right']"
                   :src="`${DEVURL}/uploads/${
-                    item.message_type === 1 ? item.user.user_avatar : item.admin.admin_avatar
+                    item.message_type !== 1 ? item.admin.admin_avatar : item.user.user_avatar
                   }`"
                 />
 
                 <!-- 消息 -->
-                <div class="message-box" :class="{ 'is-me': item.message_type === 1 }">
+                <div class="message-box" :class="{ 'is-me': item.message_type !== 1 }">
                   <text class="message">{{ item.message || '' }}</text>
                 </div>
               </div>
@@ -50,33 +59,123 @@
   </el-tabs>
 </template>
 <script setup>
-import { useSocketStore } from '@/stores/socket'
+import Socket from '@/request/websocket'
 const DEVURL = import.meta.env.VITE_API_URL
-const socketStore = useSocketStore()
+import { useAdminStore } from '@/stores/admin'
+const adminStore = useAdminStore()
+const socket = ref(null)
+const users = ref([])
+const list = ref([])
+const tabIndex = ref('')
+const scrollContain = ref()
 //聊天消息数组
 const textarea = ref('')
 
-//发送按钮的回调事件
-const sendMessage = () => {
-  socketStore.sendMessage(textarea.value)
+//选项卡变化事件，点击不同选项卡，获得不同的用户所对应的历史数据
+const tabChange = () => {
+  getHistory()
 }
 
-const tabIndex = ref('1')
-const editableTabs = ref([
-  {
-    title: 'Tab 1',
-    name: 'zekaiyang',
-    content: ['123123']
-  },
-  {
-    title: 'Tab 2',
-    name: 'test',
-    content: ['2222']
-  }
-])
+//初始化websocket
+const initWebSocket = () => {
+  socket.value = new Socket(import.meta.env.VITE_API_WEBSOCKET_URL)
+  socket.value.connect() //连接
+  socket.value.onOpen(() => {
+    authentication() //认证身份
+    getUser() //获取用户
+  })
+}
+
+//认证身份
+const authentication = () => {
+  socket.value.send(JSON.stringify({ id: adminStore.admin.admin_id, type: 4 }))
+}
+
+//获取用户
+const getUser = () => {
+  socket.value.send(
+    JSON.stringify({
+      id: adminStore.admin.admin_id,
+      type: 6
+    })
+  )
+}
+
+//获取历史数据
+const getHistory = () => {
+  socket.value.send(
+    JSON.stringify({
+      id: tabIndex.value,
+      type: 5
+    })
+  )
+}
+
+const sendMessage = () => {
+  socket.value.send(
+    JSON.stringify({
+      id: tabIndex.value,
+      type: 7,
+      data: textarea.value
+    })
+  )
+  setScroll()
+  textarea.value = ''
+}
+//监听消息
+const onMessage = () => {
+  socket.value.onMessage((res) => {
+    const { type, data } = JSON.parse(res.data)
+    switch (type) {
+      case 4: //连接类型
+        break
+      case 5: //获取历史数据
+        list.value = data
+        setScroll()
+        break
+      case 6: //获取所有用户
+        ElNotification({
+          title: 'Success',
+          message: '已帮您获取当前有哪些客户想要咨询',
+          type: 'success'
+        })
+        users.value = data
+        break
+      case 8:
+        ElNotification({
+          title: 'Info',
+          message: data,
+          type: 'info'
+        })
+        break
+    }
+  })
+}
+
+//设置滚动到底部
+const setScroll = () => {
+  nextTick(() => {
+    scrollContain.value[0].scrollTop = scrollContain.value[0].scrollHeight
+  })
+}
+//关闭websocket
+const closeSocket = () => {
+  socket.value.send(
+    JSON.stringify({
+      id: adminStore.admin_id,
+      type: 9
+    })
+  )
+  socket.value.close()
+}
 
 onMounted(() => {
-  // socketStore.onMsg()
+  initWebSocket()
+  onMessage()
+})
+
+onBeforeUnmount(() => {
+  closeSocket()
 })
 </script>
 <style lang="scss" scoped>
@@ -95,6 +194,58 @@ onMounted(() => {
     height: 500px;
     border: 1px solid #cccccc;
     overflow: auto;
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      float: left;
+      margin-top: 20px;
+    }
+    .avatar-right {
+      margin-right: 10px;
+    }
+
+    .message-box {
+      max-width: 76%;
+      display: inline-block;
+      word-wrap: break-word; /* 控制消息框换行 */
+    }
+
+    .message {
+      font-size: 24rpx;
+      // background-color: #c9c8c8;
+      padding: 15px;
+      float: left;
+      border-radius: 8px;
+      overflow: hidden;
+      word-break: break-all;
+      white-space: pre-wrap;
+      margin-top: 20px;
+    }
+
+    .message-image {
+      width: 80px;
+      height: 130px;
+      padding: 15px 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .news-box::after {
+      content: '';
+      display: block;
+      clear: both;
+    }
+
+    .news-box:last-child .message {
+      margin-bottom: 20px;
+    }
+
+    .is-me {
+      float: right;
+      margin-left: 10px;
+    }
   }
 
   .message-textarea {
@@ -132,57 +283,5 @@ onMounted(() => {
 
 .scroll-view {
   height: 100%;
-}
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  float: left;
-  margin-top: 20px;
-}
-
-.avatar-right {
-  margin-right: 10px;
-}
-
-.message-box {
-  max-width: 76%;
-  display: inline-block;
-  word-wrap: break-word; /* 控制消息框换行 */
-}
-
-.message {
-  font-size: 24rpx;
-  background-color: #e6e6e6;
-  padding: 15px;
-  float: left;
-  border-radius: 8px;
-  overflow: hidden;
-  word-break: break-all;
-  white-space: pre-wrap;
-  margin-top: 20px;
-}
-
-.message-image {
-  width: 80px;
-  height: 130px;
-  padding: 15px 0;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.news-box::after {
-  content: '';
-  display: block;
-  clear: both;
-}
-
-.news-box:last-child .message {
-  margin-bottom: 20px;
-}
-
-.is-me {
-  float: right;
-  margin-left: 10px;
 }
 </style>

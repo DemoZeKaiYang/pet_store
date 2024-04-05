@@ -70,7 +70,7 @@ import ServiceSelect from './components/ServiceSelect.vue'
 import SelectItem from './components/SelectItem.vue'
 import SelectType from './components/SelectType.vue'
 import { getServiceTypeApi, getServiceAPI } from '@/apis/service.js'
-import { reqParams } from '../../utils/reqParams'
+import { reqParams } from '@/utils/reqParams'
 
 const serviceTypeList = ref([])
 const serviceList = ref([])

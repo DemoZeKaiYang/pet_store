@@ -185,7 +185,7 @@ const checkedAll = () => {
   })
 }
 
-//支付      
+//确认订单      
 const toConfirmation = () => {
   if (store.checkOutCar.length < 1) {
     uni.showToast({
@@ -196,17 +196,6 @@ const toConfirmation = () => {
   }
   uni.navigateTo({
     url:'/pages/car/ConfirmOrder'
-  })
-  uni.showModal({
-    title: '温馨提示',
-    content: '支付后续更新调用微信支付',
-    showCancel: false,
-    confirmText: '确定',
-    confirmColor: '#458bd0',                                                                 
-    success: (res) => {
-      if (res.confirm) {
-      }
-    },
   })
 }
 </script>

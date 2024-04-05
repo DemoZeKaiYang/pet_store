@@ -22,6 +22,7 @@
   </view>
   <!-- 商品 -->
   <view class="goods">
+
     <!-- 商品简介 -->
     <view class="meta">
       <view class="price">
@@ -84,11 +85,14 @@ import { onLoad } from '@dcloudio/uni-app'
 import { getServiceDetailAPI } from '@/apis/service.js'
 import { devUrl } from '@/config.js'
 import { reqParams } from '@/utils/reqParams.js'
+import { useServiceStore } from '@/stores/service.js'
 //详细服务的数据
 const serviceDetail = ref({})
 
+const serviceStore = useServiceStore()
+
 //配置项
-const options = ref([{ icon: 'headphones', text: '客服' }])
+const options = ref([])
 
 //购物车按钮组
 const buttonGroup = ref([
@@ -117,18 +121,30 @@ const showEvaluate = ref(true)
 
 //左侧按钮组事件
 const buttonClick = ({ index, content }) => {
-  console.log(index, content)
-
-  //立即上门
-  const url=reqParams('/pages/home/OrderService', {
-    isReserve: index === 1,
+  serviceStore.updateService({
+    service_name: serviceDetail.value.service_name,
+    service_price: serviceDetail.value.service_price,
+    service_detail_id: serviceDetail.value.service_detail_id,
+    service_id: serviceDetail.value.service_id,
+    service_image: service_image,
+    service_detail_describe: serviceDetail.value.service_detail_describe,
   })
-
-  uni.navigateTo({url})
+  const url = reqParams('/pages/home/OrderService', {
+    isReserve: index === 1,
+    // service_id:service
+  })
+  uni.navigateTo({ url })
 }
-
+const service_image = computed(() => {
+  let temp = ''
+  serviceDetail.value.service_images.forEach((item) => {
+    if (item.service_image_type === 1 && item.service_image_order === 1) {
+      temp = item.service_image_name
+    }
+  })
+  return temp
+})
 onLoad((query) => {
-  
   if (Object.keys(query).length !== 0) {
     let obj = {}
     for (let i in query) {

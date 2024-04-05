@@ -14,11 +14,6 @@
 import { useSocketStore } from '@/stores/socket'
 import Menu from './components/Menu.vue'
 import LayoutHeader from './components/LayoutHeader.vue'
-
-const socketStore = useSocketStore()
-onMounted(() => {
-  socketStore.initWebSocket()
-})
 </script>
 
 <style scoped lang="scss">

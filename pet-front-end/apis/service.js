@@ -20,3 +20,30 @@ export const getServiceDetailAPI = async (service_id) => {
     service_id
   })
 }
+
+//确认服务
+export const confirmServiceAPI = async (data) => {
+  return await request('/confirmService', data, {
+    method: 'post'
+  })
+}
+
+
+//获取订单服务
+export const getServiceOrder = async (data) => {
+  return await request('/getServiceOrder', data)
+}
+
+//取消订单
+export const cancelServiceOrderAPI = async (data) => {
+  return await request('/cancelServiceOrder', data, {
+    method: 'post'
+  })
+}
+
+//确认订单
+export const successServiceOrderAPI = async (data) => {
+  return await request('/successServiceOrder', data, {
+    method: 'post'
+  })
+}

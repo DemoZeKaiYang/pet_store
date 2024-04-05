@@ -11,11 +11,10 @@ export const useOrderStore = defineStore('order', () => {
 
   const updateOrder = (data) => {
     orderList.value = data
-
   }
 
   const goodList = computed(() => {
-    console.log(orderList.value.goodList);
+    
     return orderList.value.goodList
   })
   //商品总数

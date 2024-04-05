@@ -62,7 +62,7 @@
   height: 2.5rem;
 }
 .content .image-text[data-v-dc300319] {
-  background-color: #F7F7F7;
+  background-color: #f7f7f7;
   padding: 0.78125rem;
 }
 .content .image-text .main[data-v-dc300319] {
@@ -78,7 +78,7 @@
   width: 15.625rem;
   height: 4.6875rem;
   margin-left: 1.5625rem;
-  color: #4A4447;
+  color: #4a4447;
   font-size: 0.8125rem;
   overflow: hidden;
 }
@@ -86,7 +86,7 @@
   display: flex;
   height: 2.5rem;
   box-sizing: border-box;
-  border-bottom: 1px solid #F4F4F4;
+  border-bottom: 1px solid #f4f4f4;
   font-size: 0.78125rem;
 }
 .content .number-price .num[data-v-dc300319] {
@@ -119,5 +119,5 @@
 /* 水平间距 */
 /* 水平间距 */
 body[data-v-838e9a54] {
-  background-color: #F0F2F5;
+  background-color: #f0f2f5;
 }

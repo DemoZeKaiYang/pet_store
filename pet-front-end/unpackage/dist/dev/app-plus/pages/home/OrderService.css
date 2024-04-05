@@ -1197,9 +1197,16 @@
   font-weight: 600;
 }
 .pay-page .shopping-text[data-v-03b8f559] {
+  width: 15.625rem;
   margin-top: 0.3125rem;
   font-size: 0.75rem;
   color: #999;
+  white-space: nowrap;
+  /* 防止文本换行 */
+  overflow: hidden;
+  /* 隐藏超出容器的文本 */
+  text-overflow: ellipsis;
+  /* 显示省略号 */
 }
 .end-price[data-v-03b8f559] {
   padding: 0.75rem;

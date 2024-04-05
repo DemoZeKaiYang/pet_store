@@ -37,18 +37,18 @@
         <view class="lable-title">已选择的服务</view>
       </view>
       <view class="shopping-list">
-        <!-- 选中的商品  -->
-        <view class="shopping-item" v-for="(c, index) in carStore.checkOutCar" :key="c.good_id">
+        <!-- 对应的服务  -->
+        <view class="shopping-item">
           <view class="shopping-img">
-            <image :src="`${devUrl}/good_uploads/${c.good_image}`"></image>
+            <image :src="`${devUrl}/service_uploads/${serviceStore.service.service_image}`"></image>
           </view>
           <view class="shopping-info">
             <view class="shopping-hd">
-              <view class="shopping-title">{{ c.good_category.good_category_name }}</view>
-              <view class="shopping-price">￥{{ (c.good_price * c.addNum).toFixed(2) }}</view>
-              <view class="shopping-price">x{{ c.addNum }}</view>
+              <view class="shopping-title">{{ serviceStore.service.service_name }}</view>
+              <!-- .toFixed(2) -->
+              <view class="shopping-price">￥{{ serviceStore.service.service_price }}</view>
             </view>
-            <view class="shopping-text">{{ c.good_name }}</view>
+            <view class="shopping-text">{{ serviceStore.service.service_detail_describe }}</view>
           </view>
         </view>
       </view>
@@ -61,7 +61,6 @@
       </view>
       <!-- 如果是点击立即上门，展示为立即上门，如果点击预约，展示时间选择器 -->
       <view>
-        
         <uni-datetime-picker
           type="datetime"
           v-model="datetimesingle"
@@ -95,7 +94,7 @@
         <view class="price-box">
           合计:<view class="price-text">
             <u-icon name="rmb" :bold="true" color="rgb(245, 54, 22)" size="32rpx"></u-icon
-            >{{ carStore.sumPrice }}
+            >{{ serviceStore.service.service_price }}
           </view>
         </view>
         <view class="print-item-entry" style="flex: 2">
@@ -104,7 +103,7 @@
             style="padding: 24rpx 60rpx; border-radius: 14rpx"
             @tap="payHandler"
           >
-            <view class="selecet-text">确认订单</view>
+            <view class="selecet-text">下单</view>
           </view>
         </view>
       </view>
@@ -114,18 +113,17 @@
 
 <script setup>
 import { onMounted, ref, computed } from 'vue'
-import { useCarStore } from '@/stores/car.js'
 import { devUrl } from '@/config.js'
 import { getDefaultAddressAPI } from '@/apis/address.js'
 import { useUserStore } from '@/stores/user'
 import { getCurrentTimeFormatted } from '@/utils/getNowTime.js'
 import { onLoad } from '@dcloudio/uni-app'
-import { confirmOrder } from '@/apis/order'
-import { useOrderStore } from '@/stores/order.js'
+import { confirmServiceAPI } from '@/apis/service.js'
+import { useServiceStore } from '@/stores/service.js'
 
 //日期时间
 const datetimesingle = ref()
-
+const serviceStore = useServiceStore()
 const isReserve = ref(false)
 //时间不能少于
 const start = computed(() => {
@@ -140,9 +138,8 @@ const changeLog = (e) => {
   console.log('change事件:', e)
 }
 
-const carStore = useCarStore()
 const userStore = useUserStore()
-const orderStore = useOrderStore()
+
 const address = ref({})
 const showAddress = ref(true)
 const orderTime = ref('')
@@ -181,43 +178,44 @@ const updateAddress = (obj) => {
 //确认订单
 const payHandler = async () => {
   // 校验地址
-  if (!address.value) {
-    return uni.showToast({ title: '请检查您的地址', icon: 'none' })
-  }
-  // 校验订单,校验不能为空
-  if (!carStore.checkOutCar) {
-    return uni.showToast({ title: '请检查您的商品', icon: 'none' })
-  }
-  // 封装数据，用户id
-  let obj = {
-    shipping_address: address.value.address_area + address.value.address_details, //地址
-    address_name: address.value.address_name,
-    address_number: address.value.address_phone,
-    goodList: carStore.checkOutCar, //商品数据
-    user_id: userStore.user.user_id, //用户id
-    create_date: orderTime.value,
-    order_number: orderNumber.value,
-  }
-  const result = await confirmOrder(obj)
-  if (result.code === 2000) {
-    //对后端返回的订单存储到orderStore中
-    orderStore.updateOrder(result.data)
+  if (!address.value) return uni.showToast({ title: '请检查您的地址', icon: 'none' })
 
-    //清除购物车
-    const good_id_arr = orderStore.orderList.goodList.map((item) => item.good_id)
-    if (good_id_arr.length > 0) {
-      good_id_arr.forEach((item) => {
-        carStore.deleteGoods(item)
-      })
-    }
-    uni.showToast({ title: '订单确认成功', icon: 'none' })
-    //跳转支付页面
-    uni.navigateTo({
-      url: '/pages/car/pay',
-    })
-  } else {
-    return uni.showToast({ title: '确认订单失败,请联系客服', icon: 'none' })
-  }
+  // 校验订单,校验不能为空
+  if (Object.keys(serviceStore.service).length <= 0)
+    return uni.showToast({ title: '请检查您选择的服务', icon: 'none' })
+
+  if (!datetimesingle.value) return uni.showToast({ title: '请检查您预约服务时间', icon: 'none' })
+
+  uni.showModal({
+    title: '提示',
+    content: '确认要下单吗？',
+    async success(res) {
+      if (res.confirm) {
+        // 封装数据，用户id
+        let obj = {
+          service_id: serviceStore.service.service_id,
+          service_name: serviceStore.service.service_name,
+          service_price: serviceStore.service.service_price,
+          service_time: datetimesingle.value, //商品数据
+          service_number: orderNumber.value, //用户id
+          service_date: orderTime.value,
+          service_address_name: address.value.address_name,
+          service_address_phone: address.value.address_phone,
+          service_address: address.value.address_area + address.value.address_details, //地址
+          service_status: isReserve ? 2 : 1,
+          user_id: userStore.user.user_id,
+          service_image:serviceStore.service.service_image
+        }
+        const result = await confirmServiceAPI(obj)
+        if (result.code === 2000) {
+          uni.showToast({
+            title: '下单成功',
+          })
+          uni.switchTab({ url: '/pages/home/index' })
+        }
+      }
+    },
+  })
 }
 
 //支付处理
@@ -266,6 +264,7 @@ onLoad((query) => {
     margin-top: 20rpx;
     border-radius: 14rpx;
     display: flex;
+
     flex-direction: column;
     background: #fff;
     padding: 20rpx 0;
@@ -341,9 +340,13 @@ onLoad((query) => {
   }
 
   .shopping-text {
+    width: 500rpx;
     margin-top: 10rpx;
     font-size: 24rpx;
     color: #999;
+    white-space: nowrap; /* 防止文本换行 */
+    overflow: hidden; /* 隐藏超出容器的文本 */
+    text-overflow: ellipsis; /* 显示省略号 */
   }
 }
 

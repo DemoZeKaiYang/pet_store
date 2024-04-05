@@ -64,7 +64,7 @@
   </view>
 </template>
 <script setup>
-import { onNavigationBarButtonTap, onLoad,onShow,onBackPress } from '@dcloudio/uni-app'
+import { onNavigationBarButtonTap, onLoad, onShow, onBackPress } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import request from '@/utils/request'
 import { devUrl } from '@/config.js'
@@ -77,17 +77,12 @@ const options = ref([
   {
     icon: 'cart',
     text: '购物车',
-    info:store.carNum
+    info: store.carNum,
   },
 ])
 const buttonGroup = ref([
   {
     text: '加入购物车',
-    backgroundColor: '#ff0000',
-    color: '#fff',
-  },
-  {
-    text: '立即购买',
     backgroundColor: '#ffa200',
     color: '#fff',
   },
@@ -131,29 +126,22 @@ onLoad((query) => {
 //左侧按钮
 const onClick = (e) => {
   uni.navigateTo({
-    url:'/pages/car/car'
+    url: '/pages/car/car',
   })
-  
 }
 //右侧按钮
 const buttonClick = (e) => {
   //跳转到购物车
   if (e.index === 0) {
     store.addGoodInCar(good.value)
-    options.value[0].info=store.carNum
-
+    options.value[0].info = store.carNum
   }
   if (e.index === 1) {
-
   }
-  
 }
-onShow(()=>{
-  
-   options.value[0].info=store.carNum
+onShow(() => {
+  options.value[0].info = store.carNum
 })
-
-
 </script>
 <style lang="scss" scoped>
 .swiper {

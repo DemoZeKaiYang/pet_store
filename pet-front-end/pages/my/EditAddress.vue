@@ -66,7 +66,7 @@
               <view class="nominal" style="color: #2979ff; margin-top: 10rpx">设为默认地址</view>
               <view class="input switch">
                 <switch
-                  :color="colors"
+
                   style="transform: scale(0.8)"
                   @change="switchChange"
                   :checked="formData.address_default == 1"
@@ -77,7 +77,7 @@
         </uni-forms>
       </view>
       <view class="save">
-        <view class="btn" :style="'background:' + colors" @click="saveAddress">保存地址</view>
+        <view class="btn"  @tap="saveAddress">保存地址</view>
       </view>
       <!-- 省市区选择 province city area初始省市区设置 show:是否显示  @sureSelectArea：确认事件 @hideShow：隐藏事件-->
       <SelectCit
@@ -115,6 +115,7 @@ const isShow = ref(true)
 //保存地址
 const saveAddress = async () => {
   try {
+    console.log(formData.value);
     await form.value.validate()
     const result = await updateAddressApi(formData.value)
     if (result.code === 200) {

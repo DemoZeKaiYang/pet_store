@@ -17,6 +17,11 @@
     "url": ""
   },
   "permissions": {
+    "Maps": {
+      "coordType": "gcj02"
+    },
+    "Geolocation": {},
+    "Payment": {},
     "UniNView": {
       "description": "UniNView原生渲染"
     }
@@ -97,8 +102,43 @@
           "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
         ]
       },
-      "apple": {},
+      "apple": {
+        "dSYMs": false
+      },
       "plugins": {
+        "maps": {
+          "amap": {
+            "name": "amap5m7r6gw5",
+            "appkey_ios": "8ea2cedfafd0bfd1f82339384be8ac4b",
+            "appkey_android": "8ea2cedfafd0bfd1f82339384be8ac4b"
+          }
+        },
+        "geolocation": {
+          "amap": {
+            "name": "amap5m7r6gw5",
+            "__platform__": [
+              "ios",
+              "android"
+            ],
+            "appkey_ios": "8ea2cedfafd0bfd1f82339384be8ac4b",
+            "appkey_android": "8ea2cedfafd0bfd1f82339384be8ac4b"
+          },
+          "system": {
+            "__platform__": [
+              "ios",
+              "android"
+            ]
+          }
+        },
+        "ad": {},
+        "payment": {
+          "alipay": {
+            "__platform__": [
+              "ios",
+              "android"
+            ]
+          }
+        },
         "audio": {
           "mp3": {
             "description": "Android平台录音支持MP3格式文件"
@@ -154,14 +194,14 @@
         {
           "iconPath": "/static/image/faxian.png",
           "selectedIconPath": "/static/image/faxian-selected.png",
-          "pagePath": "pages/community/index",
-          "text": "发现"
+          "pagePath": "pages/medical/index",
+          "text": "医疗"
         },
         {
           "iconPath": "/static/image/xiaoxi.png",
           "selectedIconPath": "/static/image/xiaoxi-selected.png",
-          "pagePath": "pages/messages/index",
-          "text": "消息"
+          "pagePath": "pages/adopt/index",
+          "text": "领养"
         },
         {
           "iconPath": "/static/image/icon7.png",

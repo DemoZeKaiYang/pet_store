@@ -4,13 +4,14 @@ const orderGoodModel = require('../model/orderGoodModel')
 const { confirmOrderValidate } = require('../schema/OrderSchema')
 const { v4: uuidv4 } = require('uuid')
 
+orderModel.hasMany(orderGoodModel, { foreignKey: 'order_id' })
 //确认订单
 const confirmOrder = async (req, res) => {
   //校验前端传递过来的数据
   if (!confirmOrderValidate(req.body)) {
     return res.json({ code: 1001, message: '确认订单的信息有误' })
   }
-  const { user_id, create_date, shipping_address, goodList, order_number, address_name, address_number } = req.body
+  const { user_id, create_date, shipping_address, goodList, order_number, address_name, address_number, order_price } = req.body
   try {
     //创建订单
     const result = await orderModel.create({
@@ -22,7 +23,8 @@ const confirmOrder = async (req, res) => {
       shipping_address,
       order_number,
       address_name,
-      address_number
+      address_number,
+      order_price: order_price
     })
     //获取订单id
     const { order_id } = result.dataValues
@@ -33,7 +35,10 @@ const confirmOrder = async (req, res) => {
         order_good_id: uuidv4(),
         good_id: item.good_id,
         order_id,
-        quantity: item.addNum,
+        good_name: item.good_name,
+        good_image: item.good_image,
+        good_number: item.addNum,
+        good_price: item.good_price,
         total_price: parseFloat((item.addNum * item.good_price).toFixed(2))
       }
     })
@@ -50,6 +55,7 @@ const confirmOrder = async (req, res) => {
       ...order,
       goodList
     }
+
     //返回订单
     return res.json({
       code: 2000,
@@ -61,6 +67,77 @@ const confirmOrder = async (req, res) => {
     return res.json({ code: 2003, message: '数据库创建失败' })
   }
 }
+
+const getOrder = async (req, res) => {
+  const { order_state, user_id } = req.query
+
+  try {
+    //查询全部
+    if (order_state === '0') {
+      //获取所有订单
+      const result = await orderModel.findAll({ where: { user_id }, include: [{ model: orderGoodModel }] })
+      if (result.length <= 0) return res.json({ type: 2000, message: '获取订单成功,您还没有有订单', data: [] })
+
+      const dataArr = result.map((item) => item.dataValues)
+
+      return res.json({ code: 2000, message: '获取订单成功', data: dataArr })
+    } else {
+      const result = await orderModel.findAll({ where: { order_status: Number(order_state), user_id }, include: [{ model: orderGoodModel }] })
+      console.log(result)
+      if (result.length <= 0) return res.json({ code: 2000, message: '获取订单成功,您还没有有订单', data: [] })
+
+      const dataArr = result.map((item) => item.dataValues)
+
+      return res.json({ code: 2000, message: '获取订单成功', data: dataArr })
+    }
+  } catch (error) {
+    console.log(error)
+  }
+  return res.json({ code: 2000, message: '获取订单成功', data: [] })
+}
+
+//
+const cancelOrder = async (req, res) => {
+  if (!req.body.order_id) return res.json({ code: 2001, message: '取消订单失败,没有传递服务订单id' })
+  const { order_id, user_id } = req.body
+  try {
+    await orderModel.update(
+      { order_status: 4 },
+      {
+        where: {
+          order_id,
+          user_id
+        }
+      }
+    )
+    return res.json({ code: 2000, message: '取消订单成功' })
+  } catch (error) {
+    return res.json({ code: 2002, message: '取消订单失败,数据库问题' })
+  }
+}
+
+const successOrder = async (req, res) => {
+  if (!req.body.order_id) return res.json({ code: 2001, message: '取消订单失败,没有传递服务订单id' })
+  const { order_id, user_id } = req.body
+  try {
+    await orderModel.update(
+      { order_status: 5 },
+      {
+        where: {
+          order_id,
+          user_id
+        }
+      }
+    )
+    return res.json({ code: 2000, message: '取消订单成功' })
+  } catch (error) {
+    return res.json({ code: 2002, message: '取消订单失败,数据库问题' })
+  }
+}
+
 module.exports = {
-  confirmOrder
+  confirmOrder,
+  getOrder,
+  cancelOrder,
+  successOrder
 }

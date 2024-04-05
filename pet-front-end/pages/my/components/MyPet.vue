@@ -14,7 +14,7 @@
             请添加一只宠物
           </view>
           <!-- 图标 -->
-          <img src="@/static/image/addCat.png" alt=""  class="add-pet-img"/>
+          <img :src="`./static/image/addCat.png`" alt=""  class="add-pet-img"/>
           </view>
         </swiper-item>
         <swiper-item v-for="(p, index) in petData" class="pet-swiper-item" v-else>

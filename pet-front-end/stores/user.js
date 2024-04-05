@@ -44,9 +44,10 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function saveInfo() {
-    const result = updateUserApi(user.value)
+    const result = await updateUserApi(user.value)
     if (result.code === 200) {
       user.value = result.data
+      uni.removeStorageSync("user")
       uni.setStorageSync("user", user.value)
       return true
     }

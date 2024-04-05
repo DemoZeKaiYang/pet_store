@@ -6,20 +6,22 @@
       :style="{ height: windowObj.windowHeight - windowObj.statusBarHeight - 94 + 'px' }"
       :scroll-top="scrollHeight"
       @scrolltoupper="loadMores"
+      ref="scrollview"
     >
       <view class="scroll-view">
-        <view class="news-box" v-for="(item, index) in socketStore.list" :key="index">
+        <view class="news-box" v-for="(item, index) in list" :key="index">
           <!-- 头像 -->
           <image
             class="avatar"
-            :class="[item.message_type===1 ? 'is-me' : 'avatar-right']"
-            
-            :src="`${devUrl}/uploads/${(item.message_type===1?item.user.user_avatar:item.admin.admin_avatar)}`"
+            :class="[item.message_type === 1 ? 'is-me' : 'avatar-right']"
+            :src="`${devUrl}/uploads/${
+              item.message_type === 1 ? item.user.user_avatar : item.admin.admin_avatar
+            }`"
             mode="aspectFill"
           ></image>
 
           <!-- 消息 -->
-          <view class="message-box" :class="{ 'is-me': item.message_type===1 }">
+          <view class="message-box" :class="{ 'is-me': item.message_type === 1 }">
             <text class="message">{{ item.message || '' }}</text>
           </view>
         </view>
@@ -34,7 +36,7 @@
         <input
           class="input-text"
           type="text"
-          v-model="inputValue"
+          v-model.trim="inputValue"
           placeholder="说些什么吧"
           @input="getInput"
           @confirm="tapTo(2)"
@@ -46,16 +48,17 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, nextTick } from 'vue'
-import { onShow ,onLoad} from '@dcloudio/uni-app'
+import { computed, onMounted, ref, nextTick, onBeforeUnmount } from 'vue'
+import { onShow, onLoad, onHide, onUnload } from '@dcloudio/uni-app'
 import { devUrl } from '@/config'
 import { useUserStore } from '@/stores/user.js'
-import {useSocketStore} from '@/stores/socket.js'
+import WebSocket from '@/utils/websocket.js'
+import { WEBSOCKETURL } from '@/config.js'
 //使用用户仓库
 const userStore = useUserStore()
+const socket = ref(null)
+const scrollview = ref()
 
-//使用socket仓库
-const socketStore=useSocketStore()
 //输入框数据
 const inputValue = ref('')
 //消息列表
@@ -66,10 +69,6 @@ const image = ref('')
 //滚动条的位置
 const scrollHeight = ref(0)
 
-
-
-
-
 //获取系统的信息
 const windowObj = computed(() => {
   let obj
@@ -78,22 +77,99 @@ const windowObj = computed(() => {
       obj = res
     },
   })
+
   return obj
 })
-//发送消息
-const sendMessage=()=>{
-  socketStore.sendMessage(inputValue.value)
-  inputValue.value=""
+//重新设置滚动条高度
+const setScrollTop = () => {
+  nextTick(() => {
+    let scrollView = uni.createSelectorQuery().select('.scroll-view')
+    scrollView
+      .fields({ size: true }, (data) => {
+        let height = data.height
+        scrollHeight.value = height
+      })
+      .exec()
+  })
 }
 
-  
-onLoad(()=>{
-   socketStore.initSocket()
-   socketStore.onMes()
+const onMessage = () => {
+  socket.value.onMessage((res) => {
+    let { type, data } = JSON.parse(res.data)
+    switch (type) {
+      case 1: //连接类型
+        break
+      case 2: //获取历史数据
+        list.value = data
+        setScrollTop()
+        break
+    }
+  })
+}
+const initSocket = () => {
+  socket.value = new WebSocket(WEBSOCKETURL)
+  socket.value.connect()
+  socket.value.onOpen(() => {
+    //认证身份
+    authentication()
+    //获取历史聊天记录
+    getHistoryMessage()
+  })
+}
+
+//发送消息
+const sendMessage = () => {
+  if (inputValue.value === '')
+    return uni.showToast({
+      title: '输入的消息不能为空',
+      icon: 'none',
+    })
+
+  socket.value.send(
+    JSON.stringify({
+      data: inputValue.value,
+      id: userStore.user.user_id,
+      type: 3,
+    })
+  )
+  inputValue.value = ''
+  setScrollTop()
+}
+
+//获取历史数据
+const getHistoryMessage = () => {
+  socket.value.send(
+    JSON.stringify({
+      id: userStore.user.user_id,
+      type: 2, //获取历史记录
+    })
+  )
+}
+
+//认证身份
+const authentication = () => {
+  socket.value.send(
+    JSON.stringify({
+      id: userStore.user.user_id,
+      type: 1, //获取历史记录
+    })
+  )
+}
+onLoad(() => {
+  initSocket()
+  onMessage()
 })
 
-
-
+onUnload(() => {
+  //告知管理员该用户退出
+  socket.value.send(
+    JSON.stringify({
+      id: userStore.user.user_id,
+      type: 8, //获取历史记录
+    })
+  )
+  socket.value.close()
+})
 </script>
 
 <style lang="scss" scoped>

@@ -14,7 +14,7 @@ const multer = require('multer')
 const storage = multer.diskStorage({
   //保存路径
   destination: function (req, file, cb) {
-    cb(null, path.resolve(__dirname, '../good_uploads'))
+    cb(null, path.resolve(__dirname, '../uploads'))
     //注意这里的文件路径,不是相对路径，直接填写从项目根路径开始写就行了
   },
   //保存在 destination 中的文件名

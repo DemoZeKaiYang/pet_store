@@ -42,7 +42,6 @@ function request(path, params = {}, options = {}) {
         resolve(res.data);
       },
       fail: (err) => {
-
         // 请求失败处理
         reject(err);
       },

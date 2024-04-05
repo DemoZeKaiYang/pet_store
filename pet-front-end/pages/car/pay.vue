@@ -13,9 +13,7 @@
               <text class="text1">{{ orderStore.orderList.address_name }}</text>
               <text class="phones">{{ orderStore.orderList.address_phone }}</text>
             </view>
-            <view class="address_name"
-              >{{ orderStore.orderList.shipping_address }}</view
-            >
+            <view class="address_name">{{ orderStore.orderList.shipping_address }}</view>
           </view>
         </view>
       </view>
@@ -25,11 +23,15 @@
     <view class="shopping-box">
       <view class="shopping-top">
         <view class="lable-title">商品信息</view>
-        <view class="lable-number">共{{ orderStore.goodTotalNumber}}个</view>
+        <view class="lable-number">共{{ orderStore.goodTotalNumber }}个</view>
       </view>
       <view class="shopping-list">
         <!-- 选中的商品  -->
-        <view class="shopping-item" v-for="(good, index) in orderStore.goodList" :key="good.good_id">
+        <view
+          class="shopping-item"
+          v-for="(good, index) in orderStore.goodList"
+          :key="good.good_id"
+        >
           <view class="shopping-img">
             <image :src="`${devUrl}/good_uploads/${good.good_image}`"></image>
           </view>
@@ -39,7 +41,7 @@
               <view class="shopping-price">￥{{ (good.good_price * good.addNum).toFixed(2) }}</view>
               <view class="shopping-price">x{{ good.addNum }}</view>
             </view>
-            <view class="shopping-text">{{good.good_name }}</view>
+            <view class="shopping-text">{{ good.good_name }}</view>
           </view>
         </view>
       </view>
@@ -67,7 +69,7 @@
       </view>
       <view class="shopping-top cell-list">
         <view class="cell-left">下单时间</view>
-        <view class="cell-right">{{orderStore.orderList.create_date }}</view>
+        <view class="cell-right">{{ orderStore.orderList.create_date }}</view>
       </view>
     </view>
     <view class="footer-box">
@@ -99,12 +101,51 @@ import request from '@/utils/request'
 import { getCurrentTimeFormatted } from '@/utils/getNowTime.js'
 import { onLoad } from '@dcloudio/uni-app'
 import { useOrderStore } from '@/stores/order.js'
-const orderStore=useOrderStore()
+import { payAPI ,paySuccessAPI} from '@/apis/pay.js'
+
+const orderStore = useOrderStore()
 
 //支付事件
-const payHandler=()=>{
-  
+const payHandler = async () => {
+ 
+  //获取订单号
+  //金额
+  let obj = {
+    out_trade_no: orderStore.orderList.order_id,
+    subject: orderStore.orderList.order_number,
+    total_amount: parseFloat(orderStore.orderList.order_price),
+  }
+  const result = await payAPI(obj)
+
+  if (result.code === 2000) {
+    uni.requestPayment({
+      provider: 'alipay',
+      orderInfo: result.data, // 从后端获取的支付参数
+      async success(res) {
+        const result1 = await paySuccessAPI({ order_id: orderStore.orderList.order_id })
+        if (result1.code === 2000) {
+          uni.showToast({
+            title: '支付成功',
+            icon: 'success',
+          })
+          uni.navigateBack()
+        }
+        //去修改订单的状态
+      },
+      fail(err) {
+        uni.showToast({
+          title: '支付失败，请联系管理员',
+          icon: 'none',
+        })
+        console.error('支付失败', err)
+      },
+    })
+  }
 }
+onLoad(() => {
+  var EnvUtils = plus.android.importClass('com.alipay.sdk.app.EnvUtils')
+  EnvUtils.setEnv(EnvUtils.EnvEnum.SANDBOX)
+})
 </script>
 
 <style lang="scss" scoped>

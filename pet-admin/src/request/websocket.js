@@ -7,26 +7,18 @@ class Socket {
   connect() {
     this.instance = new WebSocket(this.url)
 
-    this.instance.onopen = (event) => {
-      console.log('WebSocket连接已打开')
-      // 这里可以调用onOpen的回调，如果有的话
-    }
+    this.instance.onopen = (event) => {}
 
     this.instance.onmessage = (event) => {
       const data = event.data
-      // 这里可以调用onMessage的回调，并将数据传递给它
-      // 假设你在某个地方存储了这些回调
-      // this.onMessageCallbacks.forEach(callback => callback(data));
     }
 
     this.instance.onerror = (event) => {
       console.error('WebSocket发生错误:', event)
-      // 这里可以调用onError的回调，如果有的话
     }
 
     this.instance.onclose = (event) => {
       console.log('WebSocket连接已关闭', event)
-      // 这里可以调用onClose的回调，如果有的话
     }
   }
 
