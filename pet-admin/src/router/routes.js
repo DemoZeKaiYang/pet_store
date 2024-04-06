@@ -31,6 +31,13 @@ const routes = [
         ]
       },
       {
+        path: 'message',
+        component: () => import('@/views/message/index.vue'),
+        meta: {
+          title: '客户处理'
+        }
+      },
+      {
         path: 'address',
         name: 'address',
         meta: {
@@ -60,15 +67,16 @@ const routes = [
             meta: {
               title: '商品分类'
             }
+          },
+          {
+            path: 'good',
+            name: 'good',
+            component: () => import('@/views/shop/good/index.vue'),
+            meta: {
+              title: '商品'
+            }
           }
         ]
-      },
-      {
-        path: 'message',
-        component: () => import('@/views/message/index.vue'),
-        meta: {
-          title: '客户处理'
-        }
       }
     ]
   },

@@ -1,11 +1,11 @@
 <template>
   <el-card class="top-edit">
-    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind">添加种类</el-button>
+    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind">添加商品</el-button>
     <el-button type="danger" size="large" style="font-size: 20px" @click="delSelectKind">删除选中</el-button>
     <!-- 搜索框 -->
     <el-input
       v-model.trim="search"
-      placeholder="请输入要搜素的种类名称"
+      placeholder="请输入要搜素的商品名称"
       size="large"
       class="pet-search"
       prefix-icon="Search"
@@ -26,20 +26,18 @@
       height="600"
     >
       <el-table-column type="selection" width="100" label="序号" fixed />
-      <el-table-column label="分类名称" width="200" prop="good_category_name" />
-      <el-table-column label="等级" width="150" prop="level" />
-      <el-table-column label="种类名称" width="200" prop="good_kind_name" />
-      <el-table-column label="分类排序" width="150" prop="good_category_order" sortable />
-      <el-table-column label="分类图片" prop="good_category_image" width="200">
+      <el-table-column label="商品名称" width="300" prop="good_name" />
+      <el-table-column label="商品价格" width="150" prop="good_price" />
+      <el-table-column label="商品原价" width="150" prop="good_origin_price" />
+      <el-table-column label="评论数量" width="150" prop="good_comment_num" />
+      <el-table-column label="封面图片" prop="good_image" width="150">
         <template #default="scope">
-          <el-image
-            style="width: 100px; height: 100px"
-            :src="imagePrefix + scope.row.good_category_image"
-            :fit="fill"
-          />
+          <el-image style="width: 100px; height: 100px" :src="imagePrefix + scope.row.good_image" :fit="fill" />
         </template>
       </el-table-column>
-      <el-table-column label="分类显示" prop="good_category_display" width="200" />
+      <el-table-column label="销售数量" prop="good_sold_num" width="150" />
+      <el-table-column label="商品种类" prop="good_category.good_category_name" width="120" />
+
       <el-table-column label="编辑" width="200">
         <template #default="scope">
           <el-button size="large" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
@@ -59,10 +57,10 @@
 </template>
 
 <script setup>
-import { getShopCategoryAPI, searchShopCategoryAPI, delShopCategoryAPI } from '@/apis/shop/good_category/index.js'
 import { delMessageBox } from '@/utils/messageBox.js'
-import EditCategory from './components/EditCategory.vue'
+import EditGood from './components/EditGood.vue'
 import { successMessage, failMessage } from '@/utils/message'
+import { getGoodAPI, searchGoodAPI } from '@/apis/shop/good/index.js'
 //实例
 const multipleTableRef = ref()
 
@@ -70,14 +68,6 @@ const multipleTableRef = ref()
 const search = ref()
 
 const imagePrefix = ref(import.meta.env.VITE_API_URL + '/good_uploads/')
-//获取种类
-const getData = async () => {
-  const result = await getShopCategoryAPI()
-
-  if (result.code === 2000) {
-    tableData.value = result.data
-  }
-}
 
 //选中的数据
 const selectData = ref()
@@ -91,10 +81,17 @@ const dialogFormVisible = ref(false)
 //编辑传递的数据
 const editData = ref({})
 
+//获取种类
+const getData = async () => {
+  const result = await getGoodAPI()
+  if (result.code === 2000) {
+    tableData.value = result.data
+  }
+}
+
 //删除选中得数据
 const delSelectKind = async () => {
   const confirmDel = await delMessageBox()
-
   if (confirmDel) {
     const good_category_id_arr = selectData.value.map((item) => item.good_category_id)
     const result = await delShopCategoryAPI(good_category_id_arr)
@@ -109,7 +106,6 @@ const delSelectKind = async () => {
 
 //删除单个种类
 const delKind = async (row) => {
-  console.log(row)
   const confirmDel = await delMessageBox()
   if (confirmDel) {
     const result = await delShopCategoryAPI(row.good_category_id)
@@ -128,7 +124,7 @@ const searchBtn = async () => {
     getData()
     return
   }
-  const result = await searchShopCategoryAPI(search.value)
+  const result = await searchGoodAPI(search.value)
   if (result.code === 2000) {
     tableData.value = result.data
     successMessage('查询成功')

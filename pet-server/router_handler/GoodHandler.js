@@ -65,7 +65,6 @@ const getGoods = async (req, res) => {
   return res.json({ code: 200, message: '成功', data: arr, count: number })
 }
 const getGoodsDetail = async (req, res) => {
-  console.log(req.body.good_id)
   try {
     const result = await goodModel.findAll({
       where: { good_id: req.body.good_id },
@@ -81,7 +80,55 @@ const getGoodsDetail = async (req, res) => {
   }
 }
 
+//管理员
+
+const adminGetGood = async (req, res) => {
+  try {
+    const result = await goodModel.findAll({
+      include: [{ model: goodCategoriesModel }, { model: goodImageModel }]
+    })
+    console.log(result)
+    const data = result.map((item) => {
+      return item.dataValues
+    })
+
+    return res.json({ code: 2000, message: '获取商品成功', data })
+  } catch (error) {
+    return res.json({ code: 2001, message: '失败', data: error })
+  }
+}
+const adminAddGood = async (req, res) => {}
+const adminUpdateGood = async (req, res) => {}
+const adminDelGood = async (req, res) => {}
+
+//搜索功能
+const adminSearchGood = async (req, res) => {
+  if (!req.body.search) {
+    return res.json({ code: 2003, message: '不能查询为空' })
+  }
+  try {
+    const result = await goodModel.findAll({
+      where: {
+        good_name: {
+          [Op.like]: `%${req.body.search}%`
+        }
+      },
+      include: [{ model: goodCategoriesModel }, { model: goodImageModel }]
+    })
+    const arr = result.map((item) => item.dataValues)
+    return res.json({ code: 2000, message: '搜索成功', data: arr })
+  } catch (error) {
+    return res.json({ code: 2001, message: '搜索失败' })
+  }
+}
+const adminUploadGood = async (req, res) => {}
 module.exports = {
   getGoods,
-  getGoodsDetail
+  getGoodsDetail,
+  adminGetGood,
+  adminAddGood,
+  adminUpdateGood,
+  adminDelGood,
+  adminSearchGood,
+  adminUploadGood
 }

@@ -12,8 +12,8 @@ export const updateShopCategoryAPI = async (data) => {
   return await request.post('/admin/shop/updateCategory', data)
 }
 
-export const delShopCategoryAPI = async (good_kind_id) => {
-  return await request.post('/admin/shop/delCategory', { good_kind_id })
+export const delShopCategoryAPI = async (good_category_id) => {
+  return await request.post('/admin/shop/delCategory', { good_category_id })
 }
 
 export const searchShopCategoryAPI = async (search) => {

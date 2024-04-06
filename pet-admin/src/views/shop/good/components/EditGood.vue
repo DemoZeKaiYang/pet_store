@@ -1,7 +1,7 @@
 <template>
-  <el-dialog :model-value="dialogFormVisible" title="编辑种类" width="600" @close="cancelHandler">
+  <el-dialog :model-value="dialogFormVisible" title="编辑商品" width="600" @close="cancelHandler">
     <el-form :model="formData" class="kind-form" :rules="rules" ref="formRef" show-message>
-      <el-form-item label="分类图片 :" size="large" prop="good_category_image">
+      <el-form-item label="封面图片 :" size="large" prop="good_image">
         <el-upload
           class="avatar-uploader"
           :show-file-list="false"
@@ -10,29 +10,29 @@
           :on-change="getFile"
           :auto-upload="false"
         >
-          <img v-if="formData.good_category_image" :src="imagePrefix + formData.good_category_image" class="avatar" />
+          <img v-if="formData.good_category_image" :src="imagePrefix + formData.good_image" class="avatar" />
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
         </el-upload>
       </el-form-item>
-      <el-form-item label="分类名称 :" size="large" class="item" prop="good_category_name">
+      <el-form-item label="商品名称 :" size="large" class="item" prop="good_name">
         <el-input v-model="formData.good_category_name" autocomplete="off" />
       </el-form-item>
 
-      <el-form-item label="等 级 :" size="large" label-width="105" prop="level">
+      <el-form-item label="商品价格 :" size="large" label-width="105" prop="good_price">
         <el-input :value="formData.level" autocomplete="off" disabled />
       </el-form-item>
 
-      <el-form-item label="种类名称 :" size="large" class="item" prop="good_kind_name">
-        <el-select v-model="formData.good_kind_name" placeholder="请选择种类" size="large" @change="optionsChange">
+      <el-form-item label="商品原价 :" size="large" class="item" prop="good_origin_price">
+        <!-- <el-select v-model="formData.good_kind_name" placeholder="请选择种类" size="large" @change="optionsChange">
           <el-option
             v-for="item in options"
             :key="item.good_kind_id"
             :label="item.good_kind_name"
             :value="item.good_kind_name"
           />
-        </el-select>
+        </el-select> -->
       </el-form-item>
-      <el-form-item label="分类排序 :" size="large" prop="good_category_order">
+      <el-form-item label="评论数量 :" size="large" prop="good_comment_num">
         <el-input v-model.number="formData.good_category_order" autocomplete="off" />
       </el-form-item>
 
