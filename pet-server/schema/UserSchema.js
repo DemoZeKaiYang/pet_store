@@ -65,7 +65,35 @@ const updateUserValidate = (value) => {
   }
 }
 
+const updatePasswordValidate = (value) => {
+  const result = Joi.object({
+    user_id: Joi.string()
+      .guid({ version: ['uuidv4'] })
+      .required()
+      .error(new Error('id错误')),
+    old_password: Joi.string()
+      .regex(/^[a-zA-Z]\w{5,17}$/)
+      .required()
+      .error(new Error('用户旧密码错误')),
+    new_password: Joi.string()
+      .regex(/^[a-zA-Z]\w{5,17}$/)
+      .required()
+      .error(new Error('新密码不符合规范'))
+  }).validate(value, {
+    // false：表示对所有字段进行校验错误；如果不定义，只要发现不合法的字段就会停止校验
+    abortEarly: false,
+    // 允许验证被对象包含没有定义校验规则的未知字段，否则会认为被校验数据不通过
+    allowUnknown: true
+  })
+  if (result.error) {
+    console.log(result.error)
+    return false
+  } else {
+    return true
+  }
+}
 module.exports = {
   addUserValidate,
-  updateUserValidate
+  updateUserValidate,
+  updatePasswordValidate
 }

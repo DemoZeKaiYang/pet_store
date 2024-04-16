@@ -1,6 +1,6 @@
 <template>
   <el-card class="top-edit">
-    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind">添加种类</el-button>
+    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind" disabled>添加种类</el-button>
     <el-button type="danger" size="large" style="font-size: 20px" @click="delSelectKind">删除选中</el-button>
     <!-- 搜索框 -->
     <el-input
@@ -26,20 +26,17 @@
       height="600"
     >
       <el-table-column type="selection" width="100" label="序号" fixed />
-      <el-table-column label="分类名称" width="200" prop="good_category_name" />
-      <el-table-column label="等级" width="150" prop="level" />
-      <el-table-column label="种类名称" width="200" prop="good_kind_name" />
-      <el-table-column label="分类排序" width="150" prop="good_category_order" sortable />
-      <el-table-column label="分类图片" prop="good_category_image" width="200">
+      <el-table-column label="宠物名称" width="200" prop="pet_name" />
+      <el-table-column label="宠物种类" width="120" prop="pet_kind.pet_kind" />
+      <el-table-column label="宠物绝育" width="120" prop="pet_sterilize" />
+      <el-table-column label="宠物生辰" width="200" prop="pet_birthday" />
+      <el-table-column label="宠物性别" width="120" prop="pet_sex" />
+      <el-table-column label="宠物主人" width="200" prop="user.user_name" />
+      <el-table-column label="宠物头像" prop="pet_avatar" width="200">
         <template #default="scope">
-          <el-image
-            style="width: 100px; height: 100px"
-            :src="imagePrefix + scope.row.good_category_image"
-            :fit="fill"
-          />
+          <el-image style="width: 100px; height: 100px" :src="imagePrefix + scope.row.pet_avatar" :fit="fill" />
         </template>
       </el-table-column>
-      <el-table-column label="分类显示" prop="good_category_display" width="200" />
       <el-table-column label="编辑" width="200">
         <template #default="scope">
           <el-button size="large" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
@@ -63,17 +60,17 @@ import { getShopCategoryAPI } from '@/apis/shop/good_category/index.js'
 import { delMessageBox } from '@/utils/messageBox.js'
 import EditPet from './components/EditPet.vue'
 import { successMessage, failMessage } from '@/utils/message'
+import { delPetAPI, getPetAPI, searchPetAPI } from '@/apis/pet/index.js'
 //实例
 const multipleTableRef = ref()
 
 //搜索框的数据
 const search = ref()
 
-const imagePrefix = ref(import.meta.env.VITE_API_URL + '/good_uploads/')
+const imagePrefix = ref(import.meta.env.VITE_API_URL + '/pet_uploads/')
 //获取种类
 const getData = async () => {
-  const result = await getShopCategoryAPI()
-
+  const result = await getPetAPI()
   if (result.code === 2000) {
     tableData.value = result.data
   }
@@ -94,10 +91,9 @@ const editData = ref({})
 //删除选中得数据
 const delSelectKind = async () => {
   const confirmDel = await delMessageBox()
-
   if (confirmDel) {
-    const good_kind_id_arr = selectData.value.map((item) => item.good_kind_id)
-    const result = await delShopKindAPI(good_kind_id_arr)
+    const pet_id_arr = selectData.value.map((item) => item.pet_id)
+    const result = await delPetAPI(pet_id_arr)
     if (result.code === 2000) {
       successMessage('删除成功')
       getData()
@@ -111,7 +107,7 @@ const delSelectKind = async () => {
 const delKind = async (row) => {
   const confirmDel = await delMessageBox()
   if (confirmDel) {
-    const result = await delShopKindAPI(row.good_kind_id)
+    const result = await delPetAPI(row.pet_id)
     if (result.code === 2000) {
       successMessage('删除成功')
       getData()
@@ -127,7 +123,7 @@ const searchBtn = async () => {
     getData()
     return
   }
-  const result = await searchShopKindAPI(search.value)
+  const result = await searchPetAPI(search.value)
   if (result.code === 2000) {
     tableData.value = result.data
     successMessage('查询成功')
@@ -138,7 +134,16 @@ const searchBtn = async () => {
 
 //编辑事件
 const handleEdit = (index, row) => {
-  let obj = { ...row }
+  let obj = {
+    ...row,
+    user_id: row.user.user_id,
+    user_name: row.user.user_name,
+    pet_kind_id: row.pet_kind.pet_kind_id,
+  }
+  delete obj.user
+  delete obj.pet_kind
+  obj.pet_kind=row.pet_kind.pet_kind
+  console.log(obj)
   editData.value = obj
   dialogFormVisible.value = true
 }

@@ -1,39 +1,45 @@
 <template>
   <el-dialog :model-value="dialogFormVisible" title="编辑种类" width="600" @close="cancelHandler">
     <el-form :model="formData" class="kind-form" :rules="rules" ref="formRef" show-message>
-      <el-form-item label="分类图片 :" size="large" prop="good_kind_order">
+      <el-form-item label="宠物头像 :" size="large" prop="pet_avatar">
         <el-upload
           class="avatar-uploader"
           :show-file-list="false"
-          method="post"
-          :limit="1"
-          auto-upload="false"
           accept="image/png, image/gif, image/jpg, image/jpeg"
           :on-change="getFile"
-          :on-success="handleAvatarSuccess"
-          :before-upload="beforeImageUpload"
           :auto-upload="false"
         >
-          <img v-if="formData.good_category_image" :src="imagePrefix + formData.good_category_image" class="avatar" />
+          <img v-if="formData.pet_avatar" :src="imagePrefix + formData.pet_avatar" class="avatar" />
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
         </el-upload>
       </el-form-item>
-      <el-form-item label="分类名称 :" size="large" class="item" prop="good_kind_name">
-        <el-input v-model="formData.good_category_name" autocomplete="off" />
+      <el-form-item label="宠物名称 :" size="large" class="item" prop="pet_name">
+        <el-input v-model="formData.pet_name" autocomplete="off" />
       </el-form-item>
 
-      <el-form-item label="等 级 :" size="large" label-width="105" prop="level">
-        <el-input :value="formData.level" autocomplete="off" disabled />
+      <el-form-item label="宠物种类 :" size="large" prop="pet_kind">
+        <el-select v-model="formData.pet_kind" placeholder="请选择种类" size="large" @change="optionsChange">
+          <el-option v-for="item in options" :key="item.pet_kind_id" :label="item.pet_kind" :value="item.pet_kind" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="种类名称 :" size="large" class="item" prop="good_kind_name">
-        <el-input v-model="formData.good_kind_name" autocomplete="off" />
+      <el-form-item label="宠物绝育 :" size="large" class="item" prop="pet_sterilize">
+        <el-radio-group v-model="formData.pet_sterilize">
+          <el-radio value="1" size="large">绝育</el-radio>
+          <el-radio value="0" size="large">未绝育</el-radio>
+        </el-radio-group>
       </el-form-item>
-      <el-form-item label="分类排序 :" size="large" prop="good_kind_order">
-        <el-input v-model.number="formData.good_category_order" autocomplete="off" />
+      <el-form-item label="宠物生辰 :" size="large" prop="pet_birthday">
+        <el-date-picker :disabled-date='disabledDate' v-model="formData.pet_birthday" type="date" placeholder="请选择宠物的生日" :size="size" />
       </el-form-item>
 
-      <el-form-item label="分类显示 :" size="large" prop="good_display">
-        <el-input v-model.number="formData.good_category_display" autocomplete="off" />
+      <el-form-item label="宠物性别 :" size="large" prop="pet_sex">
+        <el-radio-group v-model="formData.pet_sex">
+          <el-radio value="1" size="large">靓仔</el-radio>
+          <el-radio value="0" size="large">靓女</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="宠物主人 :" size="large" prop="user_name">
+        <el-input v-model="formData.user_name" autocomplete="off" disabled />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -50,50 +56,57 @@
 <script setup>
 import { successMessage, failMessage } from '@/utils/message'
 import { uploadShopCategoryAPI } from '@/apis/shop/good_category/index.js'
-import uploadImgToBase64 from '@/utils/uploadImgToBase64.js'
+import { getPetKindAPI, addPetAPI, updatePetAPI, uploadPetAPI } from '@/apis/pet/index.js'
 const props = defineProps(['dialogFormVisible', 'editData'])
 const emit = defineEmits(['cancelDialog', 'renderData'])
 const formData = ref({
-  good_category_name: '',
-  level: 2,
-  parent_category_id: '',
-  good_kind_name: '',
-  good_category_order: '',
-  good_category_image: '',
-  good_category_display: ''
+  pet_avatar: '',
+  pet_birthday: '',
+  pet_id: '',
+  pet_kind_id: '',
+  pet_kind: '',
+  pet_name: '',
+  user_id: '',
+  user_name: ''
 })
 
 //是添加还是删除
 const isAdd = ref(true)
 
 //图片的地址
-const imagePrefix = ref(import.meta.env.VITE_API_URL + '/good_uploads/')
+const imagePrefix = ref(import.meta.env.VITE_API_URL + '/pet_uploads/')
 
 //实例
 const formRef = ref()
+
+//宠物种类
+const options = ref([])
 //校验规则
 const rules = reactive({
-  good_kind_name: [
-    { required: true, message: '请输入种类名称', trigger: 'blur' },
-    { min: 4, max: 4, message: '长度必须为4位', trigger: 'blur' }
-  ],
-  level: [{ required: true, message: '请输入等级', trigger: 'blur' }],
-  good_kind_order: [{ required: true, message: '请输入排序', trigger: 'blur' }],
-  good_display: [{ required: true, message: '请输入是否显示', trigger: 'blur' }]
+  pet_name: [{ required: true, message: '请输入宠物名称', trigger: 'blur' }],
+  pet_kind: [{ required: true, message: '请选择宠物种类', trigger: 'change' }],
+  pet_sterilize: [{ required: true, message: '请选择宠物绝育状态', trigger: 'change' }],
+  pet_birthday: [{ required: true, message: '请选择宠物生日', trigger: 'change' }],
+  pet_sex: [{ required: true, message: '请选择宠物性别', trigger: 'change' }]
 })
 
 //取消
 const cancelHandler = () => {
-  formData.value = {
-    good_category_name: '',
-    level: 2,
-    parent_category_id: '',
-    good_kind_name: '',
-    good_category_order: '',
-    good_category_image: ''
-  }
+  resetFormData()
   formRef.value.resetFields()
   emit('cancelDialog')
+}
+const resetFormData = () => {
+  formData.value = {
+    pet_avatar: '',
+    pet_birthday: '',
+    pet_id: '',
+    pet_kind_id: '',
+    pet_kind: '',
+    pet_name: '',
+    user_id: '',
+    user_name: ''
+  }
 }
 
 //确认
@@ -102,16 +115,10 @@ const confirm = async (formEl) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       if (isAdd.value) {
-        const result = await addShopKindAPI(formData.value)
+        const result = await addPetAPI(formData.value)
         if (result.code === 2000) {
           successMessage('添加成功')
-          formData.value = {
-            good_kind_name: '',
-            level: 1,
-            good_kind_order: '',
-            good_display: ''
-          }
-          formRef.value.resetFields()
+          resetFormData()
           emit('cancelDialog')
           emit('renderData')
         } else {
@@ -119,16 +126,10 @@ const confirm = async (formEl) => {
         }
       } else {
         //修改
-        const result = await updateShopKindAPI(formData.value)
+        const result = await updatePetAPI(formData.value)
         if (result.code === 2000) {
           successMessage('修改成功')
-          formData.value = {
-            good_kind_name: '',
-            level: 1,
-            good_kind_order: '',
-            good_display: ''
-          }
-          formRef.value.resetFields()
+          resetFormData()
           emit('cancelDialog')
           emit('renderData')
         } else {
@@ -141,36 +142,29 @@ const confirm = async (formEl) => {
   })
 }
 
-//上传图片成功的事件
-const handleAvatarSuccess = (response, uploadFile, uploadFiles) => {
-  console.log(response)
-  console.log(uploadFile)
-  console.log(uploadFiles)
-}
-//上传失败图片的事件
-const beforeAvatarUpload = (error, uploadFile, uploadFiles) => {
-  console.log(response)
-  console.log(uploadFile)
-  console.log(uploadFiles)
-}
-
-//上传图片前的事件
-// const beforeImageUpload = async (UploadRawFile) => {
-//   // console.log(UploadRawFile)
-//   const fd = new FormData()
-//   fd.append('good_category_image', UploadRawFile)
-//   console.log(fd)
-//   const result = await uploadShopCategoryAPI()
-// }
-
 //图片改变事件
 const getFile = async (uploadFile, uploadFiles) => {
-  // console.log(uploadFile)
   const fd = new FormData()
-  fd.append('good_category_image', uploadFile.raw)
+  fd.append('pet_avatar', uploadFile.raw)
+  const result = await uploadPetAPI(fd)
+  if (result.code === 2000) {
+    formData.value.pet_avatar = result.data.pet_avatar
+  }
+}
 
-  const result = await uploadShopCategoryAPI(fd)
-  console.log(result)
+//获取所有的种类
+const getPetKind = async () => {
+  const result = await getPetKindAPI()
+  if (result.code === 2000) {
+    options.value = result.data
+  }
+}
+
+//optionsChange:选择种类时自动填充id
+const optionsChange = (value) => {
+  formData.value.pet_kind_id = options.value.find((element) => {
+    return element.pet_kind === value
+  }).pet_kind_id
 }
 
 watch(
@@ -178,12 +172,20 @@ watch(
   (newVal, oldVal) => {
     if (newVal && JSON.stringify(props.editData) !== '{}') {
       formData.value = props.editData
+      console.log(formData.value)
       isAdd.value = false
     } else {
       isAdd.value = true
     }
   }
 )
+//判断是否会超出日期
+const disabledDate = (time) => {
+  return time.getTime() > Date.now()
+}
+onMounted(() => {
+  getPetKind()
+})
 </script>
 
 <style scoped lang="scss">

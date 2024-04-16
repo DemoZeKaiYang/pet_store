@@ -3167,8 +3167,8 @@ This will fail in production if not fixed.`);
     skipHydrate,
     storeToRefs
   }, Symbol.toStringTag, { value: "Module" }));
-  const devUrl = "http://192.168.6.4:9000";
-  const WEBSOCKETURL = "ws://192.168.6.4:9000/chat";
+  const devUrl = "http://192.168.10.126:9000";
+  const WEBSOCKETURL = "ws://192.168.10.126:9000/chat";
   function request(path, params = {}, options = {}) {
     let token = null;
     token = uni.getStorageSync("token");
@@ -17613,7 +17613,6 @@ ${i3}
       vue.ref(true);
       const saveAddress = async () => {
         try {
-          formatAppLog("log", "at pages/my/EditAddress.vue:118", formData.value);
           await form.value.validate();
           const result = await updateAddressApi(formData.value);
           if (result.code === 200) {
@@ -25856,7 +25855,8 @@ ${i3}
       });
       const getKind = async () => {
         const result = await getKindPetApi();
-        if (result.code === 200) {
+        if (result.code === 2e3) {
+          formatAppLog("log", "at pages/my/EditPet.vue:112", result);
           kinds.value = result.data.map((item) => {
             return {
               value: item.pet_kind_id,
@@ -25917,9 +25917,9 @@ ${i3}
               title: "添加失败"
             });
           }
-          formatAppLog("log", "at pages/my/EditPet.vue:176", result);
+          formatAppLog("log", "at pages/my/EditPet.vue:177", result);
         } catch (e2) {
-          formatAppLog("log", "at pages/my/EditPet.vue:178", e2);
+          formatAppLog("log", "at pages/my/EditPet.vue:179", e2);
         }
       };
       const delPet = async (item) => {
@@ -27462,7 +27462,8 @@ ${i3}
     setup(__props) {
       const address = vue.ref();
       const hospitals = vue.ref([]);
-      const test = vue.ref("");
+      const baidulocation = vue.ref("");
+      const gaodelocation = vue.ref("");
       const gaodeParamePOI2 = vue.ref({
         sortrule: "weight",
         show_fields: `photos,business`,
@@ -27481,10 +27482,10 @@ ${i3}
           if (!location2)
             return;
           const { latitude, longitude } = location2;
-          test.value = `${latitude},${longitude}`;
+          baidulocation.value = `${latitude},${longitude}`;
+          gaodelocation.value = `${longitude},${latitude}`;
           address.value = location2.address.province + location2.address.city + location2.address.district + location2.address.street;
           gaodeParamePOI2.value.location = `${latitude},${longitude}`;
-          formatAppLog("log", "at pages/medical/index.vue:84", gaodeParamePOI2.value.location);
           const url = `https://restapi.amap.com/v5/place/around`;
           const response = await uni.request({
             url,
@@ -27497,17 +27498,60 @@ ${i3}
             uni.showToast({ title: "未找到附近宠物医院", icon: "none" });
           }
         } catch (e2) {
-          formatAppLog("error", "at pages/medical/index.vue:97", "查询宠物医院出错", error);
+          formatAppLog("error", "at pages/medical/index.vue:99", "查询宠物医院出错", error);
           uni.showToast({ title: "查询出错", icon: "none" });
         }
       };
       const handlerChange = (id) => {
         if (id === 1) {
-          parame.value.sortrule = "weight";
+          gaodeParamePOI2.value.sortrule = "weight";
         } else {
-          parame.value.sortrule = "distance";
+          gaodeParamePOI2.value.sortrule = "distance";
         }
         getAddress();
+      };
+      const handlerGotoGaode = (item) => {
+        const updateLocation = item.location.split(",");
+        const location2 = updateLocation[1] + "," + updateLocation[0];
+        const origin = baidulocation.value;
+        const coord_type = "gcj02";
+        const title = address.value;
+        const content = item.name;
+        const slat = baidulocation.value.split(",")[0];
+        const slon = baidulocation.value.split(",")[1];
+        let hasBaiduMap = plus.runtime.isApplicationExist({
+          pname: "com.baidu.BaiduMap",
+          action: "baidumap://"
+        });
+        let hasAmap = plus.runtime.isApplicationExist({
+          pname: "com.autonavi.minimap",
+          action: "androidamap://"
+        });
+        let urlBaiduMap = `baidumap://map/direction?origin=name:${title}|latlng:${origin}&destination=name:${content}|latlng:${location2}&coord_type=${coord_type}&src=chongwujiayuan`;
+        let urlAmap = `androidamap://route/plan/?slat=${slat}&slon=${slon}sname=${title}&dlat=${updateLocation[1]}&dlon=${updateLocation[0]}&dname=${content}sourceApplication=chongwujiayuan&dev=0`;
+        if (hasAmap && hasBaiduMap) {
+          plus.nativeUI.actionSheet(
+            {
+              title: "选择地图应用",
+              cancel: "取消",
+              buttons: [{ title: "百度地图" }, { title: "高德地图" }]
+            },
+            function(e2) {
+              switch (e2.index) {
+                case 1:
+                  plus.runtime.openURL(urlBaiduMap);
+                  break;
+                case 2:
+                  plus.runtime.openURL(urlAmap);
+                  break;
+              }
+            }
+          );
+        } else if (hasAmap) {
+          plus.runtime.openURL(urlAmap);
+        } else if (hasBaiduMap) {
+          plus.runtime.openURL(urlBaiduMap);
+        }
       };
       vue.onMounted(() => {
         getAddress();
@@ -27569,7 +27613,10 @@ ${i3}
                 vue.Fragment,
                 null,
                 vue.renderList(hospitals.value, (item, index) => {
-                  return vue.openBlock(), vue.createElementBlock("view", { class: "hospital" }, [
+                  return vue.openBlock(), vue.createElementBlock("view", {
+                    class: "hospital",
+                    onClick: ($event) => handlerGotoGaode(item)
+                  }, [
                     vue.createElementVNode("view", { class: "left" }, [
                       vue.createCommentVNode(" 医院图片 "),
                       vue.createElementVNode("img", {
@@ -27625,7 +27672,7 @@ ${i3}
                         )) : vue.createCommentVNode("v-if", true)
                       ])
                     ])
-                  ]);
+                  ], 8, ["onClick"]);
                 }),
                 256
                 /* UNKEYED_FRAGMENT */

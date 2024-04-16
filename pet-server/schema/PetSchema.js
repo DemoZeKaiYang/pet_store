@@ -5,6 +5,7 @@ const petsValidate = (value) => {
   const result = Joi.object({
     pet_id: Joi.string()
       .guid({ version: ['uuidv4'] })
+      .empty()
       .error(new Error('pet_id不规范')),
     pet_avatar: Joi.string().required().error(new Error('头像地址不规范')),
     pet_name: Joi.string().required().error(new Error('宠物名字不规范')),
@@ -13,9 +14,7 @@ const petsValidate = (value) => {
       .guid({ version: ['uuidv4'] })
       .error(new Error('pet_kind_id不规范')),
     pet_sex: Joi.number().required().error(new Error('宠物性别数据不规范')),
-    pet_sterilize: Joi.number()
-      .required()
-      .error(new Error('宠物绝育数据不规范')),
+    pet_sterilize: Joi.number().required().error(new Error('宠物绝育数据不规范')),
     user_id: Joi.string()
       .guid({ version: ['uuidv4'] })
       .required()

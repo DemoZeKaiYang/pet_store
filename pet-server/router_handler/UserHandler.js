@@ -1,11 +1,11 @@
-const { addUserValidate, updateUserValidate } = require('../schema/UserSchema')
+const { addUserValidate, updateUserValidate, updatePasswordValidate } = require('../schema/UserSchema')
 const userModel = require('../model/UserModel')
 const { v4: uuidv4 } = require('uuid')
 // bcryptjs 对用户密码进行加密
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const secret = require('../secret')
-
+const { Op } = require('sequelize')
 // 添加用户处理
 const addUser = async (req, res) => {
   //验证请求体携带的phone和password的格式是否正确
@@ -16,8 +16,7 @@ const addUser = async (req, res) => {
       where: { user_phone: req.body.phone }
     })
     //返回用户注册过
-    if (isPhone.length > 0)
-      return res.json({ code: 201, message: '该用户已经注册过了', data: {} })
+    if (isPhone.length > 0) return res.json({ code: 201, message: '该用户已经注册过了', data: {} })
 
     //注册新用户
     const isCreate = await userModel.create({
@@ -25,7 +24,7 @@ const addUser = async (req, res) => {
       user_phone: req.body.phone,
       user_password: bcryptjs.hashSync(req.body.password, 10)
     })
-    console.log(isCreate)
+
     res.json({
       code: 200,
       message: '注册新用户成功',
@@ -89,10 +88,7 @@ const uploadAvatar = async (req, res) => {
 //修改用户
 const updateUser = async (req, res) => {
   //校验用户提交的数据
-  if (!updateUserValidate(req.body))
-    return res
-      .status(401)
-      .json({ code: 401, message: '修改用户失败,请检查数据格式', data: {} })
+  if (!updateUserValidate(req.body)) return res.status(401).json({ code: 401, message: '修改用户失败,请检查数据格式', data: {} })
 
   try {
     //test
@@ -120,9 +116,90 @@ const updateUser = async (req, res) => {
   }
 }
 
+//管理员
+//获取所有用户
+const adminGetUser = async (req, res) => {
+  try {
+    const result = await userModel.findAll({ attributes: { exclude: ['user_password'] } })
+    const data = result.map((item) => {
+      return item.dataValues
+    })
+    return res.json({ code: 2000, message: '获取所有用户成功', data })
+  } catch (error) {
+    return res.json({ code: 2001, message: '失败', data: error })
+  }
+}
+
+//修改
+const adminUpdateUser = async (req, res) => {
+  if (!updateUserValidate(req.body)) return res.json({ code: 2002, message: '传递的数据有误' })
+  try {
+    const result = await userModel.update(req.body, { where: { user_id: req.body.user_id } })
+    return result.length >= 0 ? res.json({ code: 2000, message: '修改成功' }) : res.json({ code: 2004, message: '修改失败' })
+  } catch (error) {
+    return res.json({ code: 2001, message: '修改失败' })
+  }
+}
+
+//搜索功能
+const adminSearchUser = async (req, res) => {
+  if (!req.body.search) {
+    return res.json({ code: 2003, message: '不能查询为空' })
+  }
+  try {
+    const result = await userModel.findAll({
+      where: { user_name: { [Op.like]: `%${req.body.search}%` } },
+      attributes: { exclude: ['user_password'] }
+    })
+    const arr = result.map((item) => item.dataValues)
+    return res.json({ code: 2000, message: '搜索成功', data: arr })
+  } catch (error) {
+    console.log(error)
+    return res.json({ code: 2001, message: '搜索失败' })
+  }
+}
+
+//图片上传
+const adminUploadUser = async (req, res) => {
+  if (!req.file.filename) {
+    return res.json({ code: 2001, message: '上传图片失败' })
+  }
+  return res.json({
+    code: 2000,
+    data: { user_avatar: req.file.filename },
+    message: '上传图片成功'
+  })
+}
+
+//修改密码
+const updatePassword = async (req, res) => {
+  if (!updatePasswordValidate(req.body)) return res.json({ code: 2001, message: '修改密码失败,传递的数据有误' })
+
+  const { old_password, new_password, user_id } = req.body
+  try {
+    const user = await userModel.findAll({ where: { user_id: user_id } })
+
+    //判断数据库密码和用户传过来的密码是否一致 bcryptjs.hashSync(req.body.password, 10)
+    if (bcryptjs.compareSync(old_password, user[0].dataValues.user_password)) {
+      const pwd = bcryptjs.hashSync(req.body.new_password, 10)
+      const updatepasswordresult = await userModel.update({ user_password: pwd }, { where: { user_id } })
+      return res.json({ code: 2000, message: '修改成功' })
+    } else {
+      return res.json({ code: 2002, message: '原密码错误' })
+    }
+  } catch (error) {
+    console.log(error)
+    return res.json({ code: 2003, message: '修改失败' })
+  }
+}
 module.exports = {
   addUser,
   loginUser,
   uploadAvatar,
-  updateUser
+  updateUser,
+  adminGetUser,
+  adminUpdateUser,
+  updatePassword,
+  adminSearchUser,
+  adminUploadUser
 }

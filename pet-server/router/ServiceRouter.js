@@ -6,7 +6,15 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 const { getServiceTypeHandler } = require('../router_handler/ServiceTypeHandler')
 const { getService, confirmService, getServiceOrder, cancelServiceOrder, successServiceOrder } = require('../router_handler/ServiceHandler')
-const { getServiceDetail } = require('../router_handler/ServiceDetailHandler.js')
+const {
+  getServiceDetail,
+  adminGetService,
+  adminAddService,
+  adminUpdateService,
+  adminDelService,
+  adminSearchService,
+  adminUploadService
+} = require('../router_handler/ServiceDetailHandler.js')
 
 //获取服务类型
 router.get('/getServiceType', getServiceTypeHandler)
@@ -28,4 +36,12 @@ router.post('/cancelServiceOrder', cancelServiceOrder)
 
 //确认完成订单
 router.post('/successServiceOrder', successServiceOrder)
+
+//admin
+router.get('/admin/getService', jwtMiddleware, adminGetService)
+router.post('/admin/addService', jwtMiddleware, adminAddService)
+router.post('/admin/updateService', jwtMiddleware, adminUpdateService)
+router.post('/admin/delService', jwtMiddleware, adminDelService)
+router.post('/admin/searchService', jwtMiddleware, adminSearchService)
+router.post('/admin/uploadService', jwtMiddleware, adminUploadService)
 module.exports = router

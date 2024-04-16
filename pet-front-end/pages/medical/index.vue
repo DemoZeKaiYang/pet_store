@@ -21,7 +21,7 @@
   </view>
 
   <view class="info">
-    <view class="hospital" v-for="(item, index) in hospitals">
+    <view class="hospital" v-for="(item, index) in hospitals" @tap="handlerGotoGaode(item)">
       <view class="left">
         <!-- 医院图片 -->
         <img :src="item.photos[0].url" alt="" class="hospital-image" />
@@ -53,7 +53,8 @@ import { onMounted, ref } from 'vue'
 
 const address = ref()
 const hospitals = ref([])
-const test = ref('')
+const baidulocation = ref('')
+const gaodelocation=ref('')
 const gaodeParamePOI2 = ref({
   sortrule: 'weight',
   show_fields: `photos,business`,
@@ -74,14 +75,15 @@ const getAddress = async () => {
 
     if (!location) return
     const { latitude, longitude } = location
-    test.value = `${latitude},${longitude}`
+    baidulocation.value = `${latitude},${longitude}`
+    gaodelocation.value=`${longitude},${latitude}`
     address.value =
       location.address.province +
       location.address.city +
       location.address.district +
       location.address.street
     gaodeParamePOI2.value.location = `${latitude},${longitude}`
-    console.log(gaodeParamePOI2.value.location)
+
     const url = `https://restapi.amap.com/v5/place/around`
     const response = await uni.request({
       url,
@@ -102,13 +104,68 @@ const getAddress = async () => {
 //综合推荐or距离优先
 const handlerChange = (id) => {
   if (id === 1) {
-    parame.value.sortrule = 'weight'
+    gaodeParamePOI2.value.sortrule = 'weight'
   } else {
-    parame.value.sortrule = 'distance'
+    gaodeParamePOI2.value.sortrule = 'distance'
   }
   getAddress()
 }
 
+/**
+ * item每一个位置的信息
+ */
+const handlerGotoGaode = (item) => {
+  //终点
+  const updateLocation=item.location.split(',')
+  const location=updateLocation[1]+','+updateLocation[0]
+  // 起点
+  const origin = baidulocation.value
+  //坐标类型
+  const coord_type = 'gcj02'
+  //起点名称
+  const title=address.value
+  // 终点名称
+  const content=item.name
+  const slat=baidulocation.value.split(',')[0]
+  const slon=baidulocation.value.split(',')[1]
+  let hasBaiduMap = plus.runtime.isApplicationExist({
+    pname: 'com.baidu.BaiduMap',
+    action: 'baidumap://',
+  })
+  let hasAmap = plus.runtime.isApplicationExist({
+    pname: 'com.autonavi.minimap',
+    action: 'androidamap://',
+  })
+  let urlBaiduMap = `baidumap://map/direction?origin=name:${title}|latlng:${origin}&destination=name:${content}|latlng:${location}&coord_type=${coord_type}&src=chongwujiayuan`
+
+  let urlAmap =
+    `androidamap://route/plan/?slat=${slat}&slon=${slon}sname=${title}&dlat=${updateLocation[1]}&dlon=${updateLocation[0]}&dname=${content}sourceApplication=chongwujiayuan&dev=0`
+  
+
+  if (hasAmap && hasBaiduMap) {
+    plus.nativeUI.actionSheet(
+      {
+        title: '选择地图应用',
+        cancel: '取消',
+        buttons: [{ title: '百度地图' }, { title: '高德地图' }],
+      },
+      function (e) {
+        switch (e.index) {
+          case 1:
+            plus.runtime.openURL(urlBaiduMap)
+            break
+          case 2:
+            plus.runtime.openURL(urlAmap)
+            break
+        }
+      }
+    )
+  } else if (hasAmap) {
+    plus.runtime.openURL(urlAmap)
+  } else if (hasBaiduMap) {
+    plus.runtime.openURL(urlBaiduMap)
+  }
+}
 onMounted(() => {
   getAddress()
 })
@@ -125,7 +182,6 @@ onMounted(() => {
     // justify-content: ;
     align-items: center;
   }
-  
 }
 
 .set-search {

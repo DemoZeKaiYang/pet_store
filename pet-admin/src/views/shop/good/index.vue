@@ -48,19 +48,19 @@
   </el-card>
 
   <!-- 编辑对话框 -->
-  <EditCategory
+  <EditGood
     :dialogFormVisible="dialogFormVisible"
     @cancelDialog="cancelDialog"
     :editData="editData"
     @renderData="getData"
-  ></EditCategory>
+  ></EditGood>
 </template>
 
 <script setup>
 import { delMessageBox } from '@/utils/messageBox.js'
 import EditGood from './components/EditGood.vue'
 import { successMessage, failMessage } from '@/utils/message'
-import { getGoodAPI, searchGoodAPI } from '@/apis/shop/good/index.js'
+import { delGoodAPI, getGoodAPI, searchGoodAPI } from '@/apis/shop/good/index.js'
 //实例
 const multipleTableRef = ref()
 
@@ -93,8 +93,8 @@ const getData = async () => {
 const delSelectKind = async () => {
   const confirmDel = await delMessageBox()
   if (confirmDel) {
-    const good_category_id_arr = selectData.value.map((item) => item.good_category_id)
-    const result = await delShopCategoryAPI(good_category_id_arr)
+    const good_id_arr = selectData.value.map((item) => item.good_id)
+    const result = await delGoodAPI(good_id_arr)
     if (result.code === 2000) {
       successMessage('删除成功')
       getData()
@@ -108,7 +108,7 @@ const delSelectKind = async () => {
 const delKind = async (row) => {
   const confirmDel = await delMessageBox()
   if (confirmDel) {
-    const result = await delShopCategoryAPI(row.good_category_id)
+    const result = await delGoodAPI(row.good_id)
     if (result.code === 2000) {
       successMessage('删除成功')
       getData()
@@ -135,7 +135,14 @@ const searchBtn = async () => {
 
 //编辑事件
 const handleEdit = (index, row) => {
-  let obj = { ...row }
+  console.log(row)
+  let obj = {
+    ...row,
+    good_category_id: row.good_category.good_category_id,
+    good_category_name: row.good_category.good_category_name
+  }
+  delete obj.good_category
+
   editData.value = obj
   dialogFormVisible.value = true
 }
@@ -163,9 +170,11 @@ onMounted(() => {
 <style lang="scss" scoped>
 .contain {
   margin-top: 20px;
+
   .kind-table {
     font-size: 20px;
   }
+
   .select-check {
     font-size: 20px;
   }
@@ -175,11 +184,13 @@ onMounted(() => {
     width: 28px; /* 修改选中状态下选择框的宽度 */
     height: 28px; /* 修改选中状态下选择框的高度 */
   }
+
   :deep(.el-checkbox__inner::after) {
     height: 14px;
     width: 6px;
     left: 10px;
   }
+
   :deep(.el-checkbox__inner::before) {
     top: 10px;
   }

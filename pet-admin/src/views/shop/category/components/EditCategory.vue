@@ -5,7 +5,7 @@
         <el-upload
           class="avatar-uploader"
           :show-file-list="false"
-          :limit="1"
+
           accept="image/png, image/gif, image/jpg, image/jpeg"
           :on-change="getFile"
           :auto-upload="false"

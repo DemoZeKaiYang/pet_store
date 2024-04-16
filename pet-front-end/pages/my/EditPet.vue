@@ -108,7 +108,8 @@ const imageValue = computed(() => {
 //获取品种
 const getKind = async () => {
   const result = await getKindPetApi()
-  if (result.code === 200) {
+  if (result.code === 2000) {
+    console.log(result);
     kinds.value = result.data.map((item) => {
       return {
         value: item.pet_kind_id,

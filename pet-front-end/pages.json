@@ -2,12 +2,7 @@
   "easycom": {
     "autoscan": true
   },
-  "pages": [{
-      "path": "pages/my/index",
-      "style": {
-        "navigationBarTitleText": "个人中心"
-      }
-    },
+  "pages": [
     {
       "path": "pages/home/index",
       "style": {
@@ -15,6 +10,13 @@
         "enablePullDownRefresh": false
       }
     },
+    {
+      "path": "pages/my/index",
+      "style": {
+        "navigationBarTitleText": "个人中心"
+      }
+    },
+
     {
       "path": "pages/messages/index",
       "style": {

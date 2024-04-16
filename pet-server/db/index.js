@@ -7,7 +7,7 @@ const sequelize = new Sequelize(database, user, password, {
   dialect: 'mysql',
   host,
   port,
-  logging: false,
+  logging: true,
   timezone: '+08:00',
   pool: {
     // 使用连接池

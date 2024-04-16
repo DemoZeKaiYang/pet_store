@@ -11,9 +11,7 @@ const addressValidate = (value) => {
     address_area: Joi.string().required().error(new Error('收货地区错误')),
     address_details: Joi.string().required().error(new Error('收货详细地址')),
     address_name: Joi.string().required().error(new Error('收货人姓名不规范')),
-    address_default: Joi.number()
-      .required()
-      .error(new Error('收货人姓名不规范')),
+    address_default: Joi.number().required().error(new Error('是否为默认')),
     user_id: Joi.string()
       .guid({ version: ['uuidv4'] })
       .required()

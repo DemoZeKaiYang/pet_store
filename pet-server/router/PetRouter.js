@@ -4,7 +4,13 @@ const {
   getPets,
   uploadsPetImage,
   addOrUpdatePets,
-  delPets
+  delPets,
+  adminGetPet,
+  adminAddPet,
+  adminUpdatePet,
+  adminDelPet,
+  adminSearchPet,
+  adminUploadPet
 } = require('../router_handler/PetHandler')
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
@@ -29,14 +35,16 @@ const upload = multer({ storage })
 
 router.get('/pet', jwtMiddleware, urlencodedParser, getPets)
 //上传宠物图片
-router.post(
-  '/pet/upload',
-  jwtMiddleware,
-  upload.single('pet_avatar'),
-  uploadsPetImage
-)
+router.post('/pet/upload', jwtMiddleware, upload.single('pet_avatar'), uploadsPetImage)
 
 router.post('/pet', jwtMiddleware, addOrUpdatePets)
 router.post('/pet/del', jwtMiddleware, delPets)
+//管理员管理宠物
+router.get('/admin/getPet', jwtMiddleware, adminGetPet)
+router.post('/admin/addPet', jwtMiddleware, adminAddPet)
+router.post('/admin/updatePet', jwtMiddleware, adminUpdatePet)
+router.post('/admin/delPet', jwtMiddleware, adminDelPet)
+router.post('/admin/searchPet', jwtMiddleware, adminSearchPet)
+router.post('/admin/uploadPet', jwtMiddleware, upload.single('pet_avatar'), adminUploadPet)
 //暴漏数据
 module.exports = router

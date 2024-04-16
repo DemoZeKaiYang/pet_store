@@ -3,8 +3,10 @@ const orderModel = require('../model/OrderModel')
 const orderGoodModel = require('../model/orderGoodModel')
 const { confirmOrderValidate } = require('../schema/OrderSchema')
 const { v4: uuidv4 } = require('uuid')
-
+const userModel = require('../model/UserModel')
+const { Op } = require('sequelize')
 orderModel.hasMany(orderGoodModel, { foreignKey: 'order_id' })
+orderModel.belongsTo(userModel, { foreignKey: 'user_id' })
 //确认订单
 const confirmOrder = async (req, res) => {
   //校验前端传递过来的数据
@@ -70,24 +72,18 @@ const confirmOrder = async (req, res) => {
 
 const getOrder = async (req, res) => {
   const { order_state, user_id } = req.query
-
   try {
     //查询全部
     if (order_state === '0') {
       //获取所有订单
       const result = await orderModel.findAll({ where: { user_id }, include: [{ model: orderGoodModel }] })
       if (result.length <= 0) return res.json({ type: 2000, message: '获取订单成功,您还没有有订单', data: [] })
-
       const dataArr = result.map((item) => item.dataValues)
-
       return res.json({ code: 2000, message: '获取订单成功', data: dataArr })
     } else {
       const result = await orderModel.findAll({ where: { order_status: Number(order_state), user_id }, include: [{ model: orderGoodModel }] })
-      console.log(result)
       if (result.length <= 0) return res.json({ code: 2000, message: '获取订单成功,您还没有有订单', data: [] })
-
       const dataArr = result.map((item) => item.dataValues)
-
       return res.json({ code: 2000, message: '获取订单成功', data: dataArr })
     }
   } catch (error) {
@@ -101,15 +97,7 @@ const cancelOrder = async (req, res) => {
   if (!req.body.order_id) return res.json({ code: 2001, message: '取消订单失败,没有传递服务订单id' })
   const { order_id, user_id } = req.body
   try {
-    await orderModel.update(
-      { order_status: 4 },
-      {
-        where: {
-          order_id,
-          user_id
-        }
-      }
-    )
+    await orderModel.update({ order_status: 4 }, { where: { order_id, user_id } })
     return res.json({ code: 2000, message: '取消订单成功' })
   } catch (error) {
     return res.json({ code: 2002, message: '取消订单失败,数据库问题' })
@@ -120,24 +108,58 @@ const successOrder = async (req, res) => {
   if (!req.body.order_id) return res.json({ code: 2001, message: '取消订单失败,没有传递服务订单id' })
   const { order_id, user_id } = req.body
   try {
-    await orderModel.update(
-      { order_status: 5 },
-      {
-        where: {
-          order_id,
-          user_id
-        }
-      }
-    )
+    await orderModel.update({ order_status: 5 }, { where: { order_id, user_id } })
     return res.json({ code: 2000, message: '取消订单成功' })
   } catch (error) {
     return res.json({ code: 2002, message: '取消订单失败,数据库问题' })
   }
 }
 
+//管理员操作,获取所有订单包括对应的订单商品
+const getOrderAndGood = async (req, res) => {
+  try {
+    const result = await orderModel.findAll({ include: [{ model: userModel }] })
+    const orderData = result.map((item) => item.dataValues)
+    return res.json({ code: 2000, message: '订单创建完成', data: orderData })
+  } catch (error) {
+    console.log(error)
+    return res.json({ code: 2001, message: '获取订单失败,数据库', data: error })
+  }
+}
+//通过订单编号搜索
+const searchOrder = async (req, res) => {
+  if (!req.body.search) return res.json({ code: 2003, message: '不能查询为空' })
+  try {
+    const result = await orderModel.findAll({ where: { order_number: { [Op.like]: `%${req.body.search}%` } } })
+    const arr = result.map((item) => item.dataValues)
+    return res.json({ code: 2000, message: '获取成功', data: arr })
+  } catch (error) {
+    console.log(error)
+    return res.json({ code: 2001, message: '获取订单失败' })
+  }
+}
+
+const adminDelOrder = async (req, res) => {
+  try {
+    // 检查id是否为数组
+    const isBatchDelete = Array.isArray(req.body.order_id)
+    // 定义删除操作
+    let deleteOperation
+    deleteOperation = isBatchDelete ? { where: { order_id: { [Op.in]: req.body.order_id } } } : { where: { order_id: req.body.order_id } }
+    // 执行删除操作
+    const result = await orderModel.destroy(deleteOperation)
+    // 根据删除操作的成功与否返回不同的响应
+    return result ? res.json({ code: 2000, message: isBatchDelete ? '批量删除成功' : '单个删除成功' }) : res.json({ code: 2001, message: '删除失败' })
+  } catch (error) {
+    return res.json({ code: 2001, message: '删除失败,需要先删除商品订单所对应的商品,或者数据库查询失败' })
+  }
+}
 module.exports = {
   confirmOrder,
   getOrder,
   cancelOrder,
-  successOrder
+  successOrder,
+  getOrderAndGood,
+  searchOrder,
+  adminDelOrder
 }

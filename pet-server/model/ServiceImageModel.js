@@ -1,6 +1,7 @@
 //地址表的模型
 const { DataTypes } = require('sequelize')
 const { sequelize } = require('../db/index')
+const serviceDetailModel = require('./ServiceDetailModel')
 
 //用户表模型
 const serviceImageModel = sequelize.define(
@@ -15,13 +16,17 @@ const serviceImageModel = sequelize.define(
       type: DataTypes.STRING
     },
     service_image_type: {
-      type: DataTypes.STRING
+      type: DataTypes.INTEGER
     },
     service_image_order: {
-      type: DataTypes.STRING
+      type: DataTypes.INTEGER
     },
     service_detail_id: {
-      type: DataTypes.INTEGER
+      type: DataTypes.UUIDV4,
+      references: {
+        model: serviceDetailModel,
+        key: 'service_detail_id'
+      }
     }
   },
   {

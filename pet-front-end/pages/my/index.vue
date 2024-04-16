@@ -29,7 +29,6 @@ import MoreFunction from './components/MoreFunction.vue'
 import requrest from '@/utils/request.js'
 import { useUserStore } from '@/stores/user.js'
 
-
 const content = ref([
   {
     text: '客服',
@@ -41,7 +40,8 @@ const content = ref([
 const store = useUserStore()
 const loginOut = () => {
   store.resetUser()
-  try {za
+  try {
+    za
     uni.removeStorageSync('token')
     uni.removeStorageSync('user')
   } catch (e) {
@@ -67,6 +67,7 @@ const trigger = (e) => {
 
 onLoad(() => {
   const user = uni.getStorageSync('user')
+ 
 })
 </script>
 

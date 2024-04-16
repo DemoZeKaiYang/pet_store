@@ -38,11 +38,30 @@ const routes = [
         }
       },
       {
-        path: 'address',
-        name: 'address',
+        path: 'usermodel',
+        name: 'usermodel',
         meta: {
-          title: '地址管理'
-        }
+          title: '用户管理'
+        },
+        children: [
+          {
+            path: 'user',
+            name: 'user',
+            component: () => import('@/views/user/index.vue'),
+            meta: {
+              title: '用户管理'
+            }
+          },
+          {
+            path: 'address',
+            name: 'address',
+            component: () => import('@/views/address/index.vue'),
+            meta: {
+              title: '地址管理'
+            }
+          }
+
+        ]
       },
       {
         path: 'shop',
@@ -75,11 +94,40 @@ const routes = [
             meta: {
               title: '商品'
             }
+          },
+          {
+            path: 'order',
+            name: 'order',
+            component: () => import('@/views/shop/order/index.vue'),
+            meta: {
+              title: '商品订单'
+            }
+          }
+        ]
+      },
+      {
+        path: 'service',
+        name: 'service',
+
+        meta: {
+          title: '服务管理'
+        },
+        children: [
+          {
+            path: 'service_detail',
+            name: 'service_detail',
+            component: () => import('@/views/service/detail/index.vue'),
+            meta: {
+              title: '详细服务'
+            }
           }
         ]
       }
+
+
     ]
   },
+
   {
     path: '/login',
     name: 'login',

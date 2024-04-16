@@ -5,15 +5,15 @@ export const getGoodAPI = async () => {
 }
 
 export const addGoodAPI = async (data) => {
-  return await request.post('/admin/shop/addCategory', data)
+  return await request.post('/admin/addGood', data)
 }
 
 export const updateGoodAPI = async (data) => {
-  return await request.post('/admin/shop/updateCategory', data)
+  return await request.post('/admin/updateGood', data)
 }
 
-export const delGoodAPI = async (good_category_id) => {
-  return await request.post('/admin/shop/delCategory', { good_category_id })
+export const delGoodAPI = async (good_id) => {
+  return await request.post('/admin/delGood', { good_id })
 }
 
 export const searchGoodAPI = async (search) => {
@@ -21,5 +21,5 @@ export const searchGoodAPI = async (search) => {
 }
 
 export const uploadGoodAPI = async (data) => {
-  return await requpload.post('/admin/shop/uploadCategory', data)
+  return await requpload.post('/admin/uploadGood', data)
 }
