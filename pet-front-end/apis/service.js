@@ -47,3 +47,10 @@ export const successServiceOrderAPI = async (data) => {
     method: 'post'
   })
 }
+
+  
+export const evalServiceAPI=async(data)=>{
+  return await request('/evalService', data, {
+    method: 'post'
+  })
+}

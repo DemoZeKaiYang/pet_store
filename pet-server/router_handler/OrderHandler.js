@@ -154,6 +154,27 @@ const adminDelOrder = async (req, res) => {
     return res.json({ code: 2001, message: '删除失败,需要先删除商品订单所对应的商品,或者数据库查询失败' })
   }
 }
+
+const adminSuccessOrder = async (req, res) => {
+  try {
+    const { order_id } = req.body
+    const result = await orderModel.update({ order_status: 4 }, { where: { order_id } })
+    return result.length >= 0 ? res.json({ code: 2000, message: '修改成功' }) : res.json({ code: 2004, message: '修改失败' })
+  } catch (error) {
+    console.log(error)
+    return res.json({ code: 2001, message: '获取订单失败' })
+  }
+}
+const adminSearchOrderGood = async (req, res) => {
+  try {
+    const result = await orderGoodModel.findAll({ where: { order_id: { [Op.like]: `%${req.body.order_id}%` } } })
+    const arr = result.map((item) => item.dataValues)
+    return res.json({ code: 2000, message: '获取成功', data: arr })
+  } catch (error) {
+    console.log(error)
+    return res.json({ code: 2001, message: '获取订单失败' })
+  }
+}
 module.exports = {
   confirmOrder,
   getOrder,
@@ -161,5 +182,7 @@ module.exports = {
   successOrder,
   getOrderAndGood,
   searchOrder,
-  adminDelOrder
+  adminDelOrder,
+  adminSuccessOrder,
+  adminSearchOrderGood
 }

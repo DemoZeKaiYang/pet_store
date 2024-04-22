@@ -15,9 +15,9 @@
         </view>
       </uni-grid-item>
       <uni-grid-item>
-        <view class="grid-item-box" style="background-color: #fff" @tap="gotoOrderDetail(2)" >
+        <view class="grid-item-box" style="background-color: #fff" @tap="gotoAdoptApply" >
           <icon-base type="quanchangbaoyou" size="50"></icon-base>
-          <text class="text">待收货</text>
+          <text class="text">领养</text>
         </view>
       </uni-grid-item>
       <uni-grid-item>
@@ -33,7 +33,6 @@
 <script setup>
 import {reqParams} from '@/utils/reqParams.js'
 const gotoOrderDetail=(order_status)=>{
-
   const url=reqParams('/pages/my/OrderDetail',{order_status})
   uni.navigateTo({url})
 }
@@ -41,6 +40,11 @@ const gotoOrderDetail=(order_status)=>{
 const gotoServiceOrder=()=>{
   uni.navigateTo({
     url:'/pages/my/ServiceOrder'
+  })
+}
+const gotoAdoptApply=()=>{
+  uni.navigateTo({
+    url:'/pages/adopt/AdoptApply'
   })
 }
 </script>

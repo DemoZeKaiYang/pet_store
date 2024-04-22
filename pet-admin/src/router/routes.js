@@ -27,6 +27,36 @@ const routes = [
               icon: '',
               disabled: false
             }
+          },
+          {
+            path: 'adopt',
+            name: 'adopt',
+            component: () => import('@/views/adopt/index.vue'),
+            meta: {
+              title: '领养管理',
+              icon: '',
+              disabled: false
+            }
+          },
+          {
+            path: 'apply',
+            name: 'apply',
+            component: () => import('@/views/apply/index.vue'),
+            meta: {
+              title: '申请管理',
+              icon: '',
+              disabled: false
+            }
+          },
+          {
+            path: 'article',
+            name: 'article',
+            component: () => import('@/views/article/index.vue'),
+            meta: {
+              title: '宠物文章',
+              icon: '',
+              disabled: false
+            }
           }
         ]
       },
@@ -100,15 +130,22 @@ const routes = [
             name: 'order',
             component: () => import('@/views/shop/order/index.vue'),
             meta: {
-              title: '商品订单'
+              title: '订单'
             }
-          }
+          },
+          {
+            path: 'image',
+            name: 'image',
+            component: () => import('@/views/shop/image/index.vue'),
+            meta: {
+              title: '商品图片'
+            }
+          },
         ]
       },
       {
         path: 'service',
         name: 'service',
-
         meta: {
           title: '服务管理'
         },
@@ -120,11 +157,19 @@ const routes = [
             meta: {
               title: '详细服务'
             }
+          },
+          {
+            path: 'service_image',
+            name: 'service_image',
+            component: () => import('@/views/service/image/index.vue'),
+            meta: {
+              title: '服务图片'
+            }
+
           }
+
         ]
       }
-
-
     ]
   },
 

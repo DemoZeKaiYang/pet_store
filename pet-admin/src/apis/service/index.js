@@ -4,26 +4,45 @@ export const getServiceAPI = async () => {
   return await request.get('/admin/getService')
 }
 
-export const addPetAPI = async (data) => {
-  return await request.post('/admin/addPet', data)
-}
-
-export const updatePetAPI = async (data) => {
-  return await request.post('/admin/updatePet', data)
-}
-
-export const delPetAPI = async (pet_id) => {
-  return await request.post('/admin/delPet', { pet_id })
-}
-
-export const searchPetAPI = async (search) => {
+//service_detail
+export const searchServiceDetailAPI = async (search) => {
   return await request.post('/admin/searchService', { search })
 }
-
-export const uploadPetAPI = async (data) => {
-  return await requpload.post('/admin/uploadPet', data)
+export const delServiceImageAPI = async (service_detail_id) => {
+  return await request.post('/admin/delServiceImage', { service_detail_id })
+}
+export const addServiceDetailAPI = async (data) => {
+  return await request.post('/admin/addServiceDetail', data)
+}
+export const updateServiceDetailAPI = async (data) => {
+  return await request.post('/admin/updateServiceDetail',  data)
+}
+export const delServiceDetailAPI = async (service_detail_id) => {
+  return await request.post('/admin/adminDelServiceDetail', { service_detail_id })
 }
 
-export const getPetKindAPI = async () => {
-  return await request.get('/admin/getPetKind')
+
+
+//service_image
+
+export const getServiceImageAPI= async () => {
+  return await request.get('/admin/getServiceImage')
+}
+
+export const getAllServiceAPI = async () => {
+  return await request.get('/admin/getAllService')
+}
+
+export const uploadServiceImageAPI = async (data) => {
+  return await request.post('/admin/uploadServiceImage',  data )
+}
+export const addServiceImageAPI = async (data) => {
+  return await request.post('/admin/addServiceImage', data)
+}
+export const updateServiceImageAPI = async (data) => {
+  return await request.post('/admin/updateServiceImage', data)
+}
+
+export const searchServiceImageAPI = async (search) => {
+  return await request.post('/admin/searchServiceImage', { search })
 }

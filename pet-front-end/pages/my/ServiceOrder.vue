@@ -24,7 +24,7 @@
         :plain="true"
         class="btn"
         @tap="cancelHandler(item.service_order_id)"
-        v-if="item.service_status !== 3 && item.service_status !== 4"
+        v-if="item.service_status !== 3 && item.service_status !== 4&&item.service_status !==5"
       >
         取消订单
       </button>
@@ -32,21 +32,57 @@
         :plain="true"
         class="btn"
         @tap="successHanlder(item.service_order_id)"
-        v-if="item.service_status !== 4 && item.service_status !== 3"
+        v-if="item.service_status !== 4 && item.service_status !== 3 &&item.service_status !==5"
       >
         确认完成
       </button>
+      <button
+        :plain="true"
+        class="btn"
+        @tap="evaluateHandler(item.service_id, item.service_order_id)"
+        v-if="item.service_status === 4"
+      >
+        评价服务
+      </button>
     </view>
   </view>
+
+  <uni-popup ref="popup" background-color="#fff" @change="change">
+    <view class="popup-content">
+      <view class="top">
+        <view class="avatar">
+          <img :src="imagePrefix + evaData.service_comment_avatar" alt="" />
+        </view>
+        <view class="eva">
+          <view class="name">用户名:{{ evaData.service_comment_name }}</view>
+          <view class="star"> <uni-rate v-model="evaData.service_comment_star" /> </view>
+        </view>
+      </view>
+      <view class="bottom">
+        <uni-easyinput
+          type="textarea"
+          v-model="evaData.service_comment_content"
+          placeholder="请输入内容"
+        ></uni-easyinput>
+        <button type="primary" plain style="margin-top: 30rpx" @tap="evaService">评价</button>
+      </view>
+    </view>
+  </uni-popup>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { devUrl } from '@/config.js'
 import { onLoad } from '@dcloudio/uni-app'
-import { cancelServiceOrderAPI, getServiceOrder, successServiceOrderAPI } from '@/apis/service.js'
+import {
+  cancelServiceOrderAPI,
+  getServiceOrder,
+  successServiceOrderAPI,
+  evalServiceAPI,
+} from '@/apis/service.js'
 import { useUserStore } from '@/stores/user'
-
+const imagePrefix = ref(devUrl + '/uploads/')
+const popup = ref()
 const serviceOrderList = ref([])
 const userStore = useUserStore()
 const getData = async () => {
@@ -94,6 +130,57 @@ const serviceStatus = (status) => {
     default:
       return '已完成'
   }
+}
+
+const getCurrentTime = () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0') // 月份从0开始，所以要加1，并用'0'填充至两位
+  const day = String(now.getDate()).padStart(2, '0') // 日期用'0'填充至两位
+  return `${year}-${month}-${day}`
+}
+
+const evaData = reactive({
+  service_comment_avatar: userStore.user.user_avatar,
+  service_comment_name: userStore.user.user_name,
+  service_comment_star: 0,
+  service_comment_date: '',
+  service_id: '',
+  service_comment_content: '',
+  service_order: '',
+})
+const evaluateHandler = (service_id, service_order_id) => {
+  popup.value.open('center')
+  evaData.service_id = service_id
+  evaData.service_comment_date = getCurrentTime()
+  evaData.service_order_id = service_order_id
+}
+//发请求评论
+
+//修改服务订单状态，添加评论
+const evaService = async () => {
+  const result = await evalServiceAPI(evaData)
+  console.log(result)
+  if (result.code === 2000) {
+    uni.showToast({
+      title: '评价成功',
+    })
+    getData()
+    popup.value.close()
+    evaData = {
+      service_comment_avatar: userStore.user.user_avatar,
+      service_comment_name: userStore.user.user_name,
+      service_comment_star: 0,
+      service_comment_date: '',
+      service_id: '',
+      service_comment_content: '',
+      service_order: '',
+    }
+    return
+  }
+  uni.showToast({
+    title: '评价失败',
+  })
 }
 onLoad(() => {
   getData()
@@ -185,6 +272,30 @@ onLoad(() => {
       font-size: 28rpx;
       margin-right: 20rpx;
     }
+  }
+}
+
+.popup-content {
+  border-radius: 20rpx;
+  width: 500rpx;
+  height: 500rpx;
+  padding: 25rpx;
+  .top {
+    display: flex;
+  }
+  .avatar {
+    width: 100rpx;
+    height: 100rpx;
+
+    img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+  }
+
+  .bottom {
+    margin-top: 20rpx;
   }
 }
 </style>

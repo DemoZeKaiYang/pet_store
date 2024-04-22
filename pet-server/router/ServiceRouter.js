@@ -9,11 +9,11 @@ const { getService, confirmService, getServiceOrder, cancelServiceOrder, success
 const {
   getServiceDetail,
   adminGetService,
-  adminAddService,
-  adminUpdateService,
-  adminDelService,
   adminSearchService,
-  adminUploadService
+  evalService,
+  adminAddServiceDetail,
+  adminUpdateServiceDetail,
+  adminDelServiceDetail
 } = require('../router_handler/ServiceDetailHandler.js')
 
 //获取服务类型
@@ -37,11 +37,12 @@ router.post('/cancelServiceOrder', cancelServiceOrder)
 //确认完成订单
 router.post('/successServiceOrder', successServiceOrder)
 
+//评价服务
+router.post('/evalService', evalService)
 //admin
 router.get('/admin/getService', jwtMiddleware, adminGetService)
-router.post('/admin/addService', jwtMiddleware, adminAddService)
-router.post('/admin/updateService', jwtMiddleware, adminUpdateService)
-router.post('/admin/delService', jwtMiddleware, adminDelService)
 router.post('/admin/searchService', jwtMiddleware, adminSearchService)
-router.post('/admin/uploadService', jwtMiddleware, adminUploadService)
+router.post('/admin/addServiceDetail', jwtMiddleware, adminAddServiceDetail)
+router.post('/admin/updateServiceDetail', jwtMiddleware, adminUpdateServiceDetail)
+router.post('/admin/adminDelServiceDetail', jwtMiddleware, adminDelServiceDetail)
 module.exports = router

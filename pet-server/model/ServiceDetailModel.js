@@ -21,7 +21,7 @@ const serviceDetailModel = sequelize.define(
       type: DataTypes.STRING
     },
     service_id: {
-      type: DataTypes.INTEGER
+      type: DataTypes.STRING
     }
   },
   {

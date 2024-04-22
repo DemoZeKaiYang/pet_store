@@ -23,6 +23,7 @@ const getGoods = async (req, res) => {
       include: [{ model: goodCategoriesModel }, { model: goodImageModel }]
     })
     arr = rows.map((item) => {
+      console.log(item)
       return {
         ...item.dataValues,
         good_category: item.good_category.dataValues
@@ -42,6 +43,7 @@ const getGoods = async (req, res) => {
     })
 
     arr = rows.map((item) => {
+      console.log(item)
       return {
         ...item.dataValues,
         good_category: item.good_category.dataValues
@@ -70,7 +72,7 @@ const getGoodsDetail = async (req, res) => {
   try {
     const result = await goodModel.findAll({
       where: { good_id: req.body.good_id },
-      include: [{ model: goodCategoriesModel }]
+      include: [{ model: goodCategoriesModel }, { model: goodImageModel }]
     })
     const data = {
       ...result[0].dataValues,

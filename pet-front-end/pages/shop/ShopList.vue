@@ -7,6 +7,7 @@
         :key="index"
         @click="clickItem(item.good_id)"
       >
+      
         <!-- 图片 -->
         <image
           class="t-goods-img"

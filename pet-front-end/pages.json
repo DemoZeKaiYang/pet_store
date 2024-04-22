@@ -2,8 +2,7 @@
   "easycom": {
     "autoscan": true
   },
-  "pages": [
-    {
+  "pages": [{
       "path": "pages/home/index",
       "style": {
         "navigationBarTitleText": "首页",
@@ -16,7 +15,18 @@
         "navigationBarTitleText": "个人中心"
       }
     },
-
+    {
+      "path": "pages/adopt/PublishContent",
+      "style": {
+        "navigationBarTitleText": "发布文章"
+      }
+    },
+    {
+      "path": "pages/adopt/DetailArticle",
+      "style": {
+        "navigationBarTitleText": "详细文章"
+      }
+    },
     {
       "path": "pages/messages/index",
       "style": {
@@ -50,8 +60,6 @@
       "style": {
         "enablePullDownRefresh": false,
         "navigationBarTitleText": "详细商品"
-        // "navigationStyle": "custom"
-        // "titleNView": false //禁用原生导航栏
       }
     },
     {
@@ -97,34 +105,12 @@
       }
     },
     {
-      "path": "pages/community/index",
-      "style": {
-        "navigationBarTitleText": "发现",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/community/DetailArticle",
-      "style": {
-        "navigationBarTitleText": "消息",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
       "path": "pages/messages/Chat",
       "style": {
         "navigationBarTitleText": "客服",
         "enablePullDownRefresh": false
       }
     },
-    {
-      "path": "pages/community/PublishContent",
-      "style": {
-        "navigationBarTitleText": "推送内容",
-        "enablePullDownRefresh": false
-      }
-    },
-
     {
       "path": "pages/car/ConfirmAddress",
       "style": {
@@ -168,42 +154,61 @@
       }
     },
     {
-      "path" : "pages/car/pay",
+      "path": "pages/car/pay",
+      "style": {
+        "navigationBarTitleText": "支付",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/home/ComfirmAddress",
+      "style": {
+        "navigationBarTitleText": "确认地址",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/adopt/index",
+      "style": {
+        "navigationBarTitleText": "领养中心",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/medical/index",
+      "style": {
+        "navigationBarTitleText": "附近医院",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/my/ServiceOrder",
+      "style": {
+        "navigationBarTitleText": "服务订单",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path" : "pages/adopt/DetailAdopt",
       "style" : 
       {
-        "navigationBarTitleText" : "支付",
+        "navigationBarTitleText" : "宠物信息",
         "enablePullDownRefresh" : false
       }
     },
     {
-      "path" : "pages/home/ComfirmAddress",
+      "path" : "pages/adopt/Questionnaire",
       "style" : 
       {
-        "navigationBarTitleText" : "",
+        "navigationBarTitleText" : "领养问卷",
         "enablePullDownRefresh" : false
       }
     },
     {
-      "path" : "pages/adopt/index",
+      "path" : "pages/adopt/AdoptApply",
       "style" : 
       {
-        "navigationBarTitleText" : "领养中心",
-        "enablePullDownRefresh" : false
-      }
-    },
-    {
-      "path" : "pages/medical/index",
-      "style" : 
-      {
-        "navigationBarTitleText" : "附近医院",
-        "enablePullDownRefresh" : false
-      }
-    },
-    {
-      "path" : "pages/my/ServiceOrder",
-      "style" : 
-      {
-        "navigationBarTitleText" : "服务订单",
+        "navigationBarTitleText" : "领养申请",
         "enablePullDownRefresh" : false
       }
     }

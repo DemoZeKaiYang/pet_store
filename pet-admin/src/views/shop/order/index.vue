@@ -1,11 +1,11 @@
 <template>
   <el-card class='top-edit'>
-    <el-button type='primary' size='large' style='font-size: 20px' @click='addKind' disabled>添加种类</el-button>
-    <el-button type='danger' size='large' style='font-size: 20px' @click='delSelectKind'>删除选中</el-button>
+    <el-button type='primary' size='large' style='font-size: 20px' @click='addKind' disabled>禁用禁用</el-button>
+    <el-button type='danger' size='large' style='font-size: 20px' @click='delSelectKind' disabled>禁用禁用</el-button>
     <!-- 搜索框 -->
     <el-input
       v-model.trim='search'
-      placeholder='请输入要搜素的种类名称'
+      placeholder='请输入要搜素的订单编号'
       size='large'
       class='pet-search'
       prefix-icon='Search'
@@ -27,49 +27,65 @@
     >
       <el-table-column type='selection' width='50' label='序号' fixed />
       <el-table-column label='用户名称' width='200' prop='user.user_name' />
-      <el-table-column label='订单状态' width='120' prop='order_status' />
+      <el-table-column label='订单状态' width='120' prop='order_status'>
+        <template #default='scope'>
+          <el-tag type='primary' size='large'>{{ statusText(scope.row.order_status) }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label='订单地址' width='200' prop='shipping_address' />
       <el-table-column label='支付方式' width='120' prop='payment_method'>
         <template #default='scope'>
           <el-tag type='primary' v-if='scope.row.payment_method===1'>支付宝</el-tag>
-          <el-tag type='danger' v-else='scope.row.payment_method===1'>未支付</el-tag>
+          <el-tag type='danger' v-else>未支付</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label='订单编码' width='200' prop='order_number' />
+      <el-table-column label='订单编码' width='200' prop='order_number' sortable />
       <el-table-column label='收货姓名' width='120' prop='address_name' />
       <el-table-column label='手机号' width='170' prop='address_number' />
       <el-table-column label='价格' width='120' prop='order_price' />
       <el-table-column label='编辑' width='200'>
         <template #default='scope'>
-          <el-button size='large' type='primary' @click='handleEdit(scope.$index, scope.row)'>编辑</el-button>
-          <el-button size='large' type='danger' @click='delKind(scope.row)'>删除</el-button>
+          <el-button size='large' type='primary' @click='handleEdit(scope.$index, scope.row)'
+                     :disabled='scope.row.order_status!==1&&scope.row.order_status!==2||scope.row.payment_method!==1'>完成
+          </el-button>
+          <el-button size='large' type='primary' @click='showGood(scope.$index, scope.row)'>查看</el-button>
         </template>
       </el-table-column>
     </el-table>
   </el-card>
 
-  <!-- 编辑对话框 -->
-  <EditPet
-    :dialogFormVisible='dialogFormVisible'
-    @cancelDialog='cancelDialog'
-    :editData='editData'
-    @renderData='getData'
-  ></EditPet>
+  <el-drawer
+    v-model='drawer'
+    title='对应的订单商品'
+    direction='ltr'
+    :before-close='handleClose'
+  >
+    <div class='good-content' v-for='item in drawerData'>
+      <img :src='imagePrefix+item.good_image'>
+      <div class='text'>
+        <div class='name'>{{ item.good_name }}</div>
+        <div class='number'>数量:{{ item.good_number }}</div>
+        <div class='price'>价格:{{ item.good_price }}</div>
+        <div class='total'>价格:{{ item.total_price }}</div>
+      </div>
+    </div>
+
+
+  </el-drawer>
 </template>
 
 <script setup>
 import { delMessageBox } from '@/utils/messageBox.js'
-import EditPet from './components/EditPet.vue'
 import { successMessage, failMessage } from '@/utils/message'
-import { delPetAPI, getPetAPI, searchPetAPI } from '@/apis/pet/index.js'
-import { delOrderAPI, getOrderAPI, searchOrderAPI } from '@/apis/order/index.js'
+import { delOrderAPI, getOrderAPI, searchOrderAPI, searchOrderGoodAPI, successOrderAPI } from '@/apis/order/index.js'
+
+const drawerData = ref([])
 //实例
 const multipleTableRef = ref()
-
 //搜索框的数据
 const search = ref()
-
-const imagePrefix = ref(import.meta.env.VITE_API_URL + '/pet_uploads/')
+const drawer = ref(false)
+const imagePrefix = ref(import.meta.env.VITE_API_URL + '/good_uploads/')
 //获取种类
 const getData = async () => {
   const result = await getOrderAPI()
@@ -77,19 +93,14 @@ const getData = async () => {
     tableData.value = result.data
   }
 }
-
 //选中的数据
 const selectData = ref()
-
 //测试数据
 const tableData = ref([])
-
 //编辑框的显示
 const dialogFormVisible = ref(false)
-
 //编辑传递的数据
 const editData = ref({})
-
 //删除选中得数据
 const delSelectKind = async () => {
   const confirmDel = await delMessageBox()
@@ -104,21 +115,6 @@ const delSelectKind = async () => {
     }
   }
 }
-
-//删除单个种类
-const delKind = async (row) => {
-  const confirmDel = await delMessageBox()
-  if (confirmDel) {
-    const result = await delOrderAPI(row.order_id)
-    if (result.code === 2000) {
-      successMessage('删除成功')
-      getData()
-    } else {
-      failMessage(result.message)
-    }
-  }
-}
-
 //搜索框事件
 const searchBtn = async () => {
   if (!search.value) {
@@ -134,35 +130,62 @@ const searchBtn = async () => {
   }
 }
 
-//编辑事件
-const handleEdit = (index, row) => {
-  let obj = {
-    ...row,
-    user_id: row.user.user_id,
-    user_name: row.user.user_name,
-    pet_kind_id: row.pet_kind.pet_kind_id
+//完成事件
+const handleEdit = async (index, row) => {
+  try {
+    const confirmResult = await ElMessageBox.confirm('是否完成', 'Warning', {
+      confirmButtonText: '确认完成了吗',
+      cancelButtonText: '取消',
+      type: 'error'
+    })
+    if (!confirmResult) return
+    const result = await successOrderAPI(row.order_id)
+    if (result.code === 2000) {
+      successMessage('订单已完成')
+      getData()
+    }
+  } catch (e) {
+
   }
-  delete obj.user
-  delete obj.pet_kind
-  obj.pet_kind = row.pet_kind.pet_kind
-  editData.value = obj
-  dialogFormVisible.value = true
+
+
 }
 
 //添加
 const addKind = () => {
   dialogFormVisible.value = true
 }
-
 //取消对话框
 const cancelDialog = () => {
   dialogFormVisible.value = false
   editData.value = {}
 }
-
 //多选表格改变事件
 const selectChange = (val) => {
   selectData.value = val
+}
+const statusText = (status) => {
+  switch (status) {
+    case 1:
+      return '立即上门'
+    case 2:
+      return '预定上门'
+    case 3:
+      return '已取消'
+    case 4:
+      return '已完成'
+    case 5:
+      return '已完成评价'
+  }
+
+}
+const showGood = async (index, row) => {
+  drawer.value = true
+  const result = await searchOrderGoodAPI(row.order_id)
+  if (result.code === 2000) {
+    drawerData.value = result.data
+  }
+
 }
 onMounted(() => {
   getData()
@@ -202,6 +225,34 @@ onMounted(() => {
   width: 400px;
   font-size: 20px;
   margin-right: 20px;
+}
+
+
+.good-content {
+  margin-bottom: 10px;
+
+  img {
+    width: 150px;
+    height: 150px;
+    border-radius: 10px;
+  }
+
+  .text {
+    margin-left: 10px;
+
+    div {
+      margin-top: 20px;
+    }
+
+    name {
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+
+  }
+
+  display: flex;
 }
 </style>
 

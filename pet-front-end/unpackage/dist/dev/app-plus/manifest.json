@@ -216,7 +216,7 @@
       "child": [
         "lauchwebview"
       ],
-      "selected": 4
+      "selected": 0
     }
   },
   "launch_path": "__uniappview.html"

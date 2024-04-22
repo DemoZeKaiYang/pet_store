@@ -48,5 +48,5 @@ router.post('/admin/uploadUser', jwtMiddleware, upload.single('user_avatar'), ad
 
 // 修改密码
 router.post('/admin/updatePassword', jwtMiddleware, updatePassword)
-//暴漏数据
+
 module.exports = router

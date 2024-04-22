@@ -28,7 +28,7 @@
       <el-table-column type="selection" width="100" label="序号" fixed />
       <el-table-column label="分类名称" width="200" prop="good_category_name" />
       <el-table-column label="等级" width="150" prop="level" />
-      <el-table-column label="种类名称" width="200" prop="good_kind_name" />
+      <el-table-column label="种类名称" width="200" prop="good_kind_name" sortable />
       <el-table-column label="分类排序" width="150" prop="good_category_order" sortable />
       <el-table-column label="分类图片" prop="good_category_image" width="200">
         <template #default="scope">

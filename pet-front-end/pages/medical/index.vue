@@ -60,7 +60,7 @@ const gaodeParamePOI2 = ref({
   show_fields: `photos,business`,
   location: '',
   keywords: '宠物医院',
-  radius: 5000,
+  radius: 15000,
   output: 'json',
   key: 'f0a1569e5f07b655319d5429462b03a2',
 })

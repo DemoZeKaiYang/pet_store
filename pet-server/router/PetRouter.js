@@ -46,5 +46,4 @@ router.post('/admin/updatePet', jwtMiddleware, adminUpdatePet)
 router.post('/admin/delPet', jwtMiddleware, adminDelPet)
 router.post('/admin/searchPet', jwtMiddleware, adminSearchPet)
 router.post('/admin/uploadPet', jwtMiddleware, upload.single('pet_avatar'), adminUploadPet)
-//暴漏数据
 module.exports = router

@@ -1,7 +1,7 @@
 <template>
   <el-card class="top-edit">
     <el-button type="primary" size="large" style="font-size: 20px" @click="addKind">添加商品</el-button>
-    <el-button type="danger" size="large" style="font-size: 20px" @click="delSelectKind" disabled>删除选中</el-button>
+    <el-button type="danger" size="large" style="font-size: 20px" @click="delSelectKind" >删除选中</el-button>
     <!-- 搜索框 -->
     <el-input
       v-model.trim="search"
@@ -43,7 +43,7 @@
       <el-table-column label="编辑" width="200">
         <template #default="scope">
           <el-button size="large" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button size="large" type="danger" @click="delKind(scope.row)" disabled>删除</el-button>
+          <el-button size="large" type="danger" @click="delKind(scope.row)" >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -62,8 +62,8 @@
 import { delMessageBox } from '@/utils/messageBox.js'
 import EditDetail from './components/EditDetail.vue'
 import { successMessage, failMessage } from '@/utils/message'
-import { delGoodAPI, searchGoodAPI } from '@/apis/shop/good/index.js'
-import { getServiceAPI, searchPetAPI } from '@/apis/service/index.js'
+
+import { delServiceDetailAPI, getServiceAPI, searchServiceDetailAPI } from '@/apis/service/index.js'
 //实例
 const multipleTableRef = ref()
 
@@ -96,8 +96,8 @@ const getData = async () => {
 const delSelectKind = async () => {
   const confirmDel = await delMessageBox()
   if (confirmDel) {
-    const good_id_arr = selectData.value.map((item) => item.good_id)
-    const result = await delGoodAPI(good_id_arr)
+    const good_id_arr = selectData.value.map((item) => item.service_detail_id)
+    const result = await delServiceDetailAPI(good_id_arr)
     if (result.code === 2000) {
       successMessage('删除成功')
       getData()
@@ -111,7 +111,7 @@ const delSelectKind = async () => {
 const delKind = async (row) => {
   const confirmDel = await delMessageBox()
   if (confirmDel) {
-    const result = await delGoodAPI(row.good_id)
+    const result = await delServiceDetailAPI(row.service_detail_id)
     if (result.code === 2000) {
       successMessage('删除成功')
       getData()
@@ -127,7 +127,7 @@ const searchBtn = async () => {
     getData()
     return
   }
-  const result = await searchPetAPI(search.value)
+  const result = await searchServiceDetailAPI(search.value)
   if (result.code === 2000) {
     tableData.value = result.data
     successMessage('查询成功')
@@ -138,11 +138,9 @@ const searchBtn = async () => {
 
 //编辑事件
 const handleEdit = (index, row) => {
-  console.log(row)
   let obj = {
     ...row,
   }
-
   editData.value = obj
   dialogFormVisible.value = true
 }

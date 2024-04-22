@@ -43,6 +43,7 @@
   <!-- 商品页面 -->
   <view class="goods-list-image">
     <template v-for="(g, index) in good.good_images">
+
       <img
         :src="`${devUrl}/good_uploads/` + g.good_image_url"
         alt=""
@@ -70,7 +71,7 @@ import request from '@/utils/request'
 import { devUrl } from '@/config.js'
 import { useCarStore } from '@/stores/car.js'
 import { reqParams } from '@/utils/reqParams'
-
+import {getIdGoodAPI}from '@/apis/good.js'
 const store = useCarStore()
 
 const options = ref([
@@ -99,17 +100,11 @@ const gotoCar = () => {
   })
 }
 const getData = async () => {
-  const result = await request(
-    '/good',
-    {
-      good_id: goodId.value,
-    },
-    {
-      method: 'post',
-    }
-  )
+  const result = await getIdGoodAPI(goodId.value)
   if (result.code === 200) {
+  
     good.value = result.data
+      console.log(good.value);
   }
 }
 onLoad((query) => {

@@ -29,7 +29,13 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="宠物生辰 :" size="large" prop="pet_birthday">
-        <el-date-picker :disabled-date='disabledDate' v-model="formData.pet_birthday" type="date" placeholder="请选择宠物的生日" :size="size" />
+        <el-date-picker
+          :disabled-date="disabledDate"
+          v-model="formData.pet_birthday"
+          type="date"
+          placeholder="请选择宠物的生日"
+          :size="size"
+        />
       </el-form-item>
 
       <el-form-item label="宠物性别 :" size="large" prop="pet_sex">

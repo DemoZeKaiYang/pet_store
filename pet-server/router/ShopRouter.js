@@ -53,5 +53,4 @@ router.post('/admin/shop/updateCategory', jwtMiddleware, adminUpdateShopCategory
 router.post('/admin/shop/delCategory', jwtMiddleware, adminDelShopCategory)
 router.post('/admin/shop/searchCategory', jwtMiddleware, adminSearchShopCategory)
 router.post('/admin/shop/uploadCategory', jwtMiddleware, upload.single('good_category_image'), adminUploadShopCategory)
-//暴漏数据
 module.exports = router

@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import { useSocketStore } from '@/stores/socket'
+
 import Menu from './components/Menu.vue'
 import LayoutHeader from './components/LayoutHeader.vue'
 </script>

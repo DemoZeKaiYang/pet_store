@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useAdminStore } from '@/stores/admin'
+import {useRouter} from 'vue-router'
 
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -30,6 +31,14 @@ request.interceptors.response.use(
     return response.data
   },
   function (error) {
+    console.log(error)
+  if(error.response.status===401){
+    const adminStore = useAdminStore()
+    adminStore.delAdmin()
+    const router=useRouter()
+    router.push('/login')
+  }
+
     // 超出 2xx 范围的状态码都会触发该函数。
     // 对响应错误做点什么
     return Promise.reject(error)
