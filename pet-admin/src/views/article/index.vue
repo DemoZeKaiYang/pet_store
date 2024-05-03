@@ -65,7 +65,6 @@ const search = ref()
 //获取种类
 const getData = async () => {
   const result = await getArticleAPI()
-  console.log(result)
   if (result.code === 2000) {
     tableData.value = result.data
   }
@@ -89,7 +88,6 @@ const delSelectKind = async () => {
   if (confirmDel) {
     const adopt_arr = selectData.value.map((item) => item.article_id)
     const result = await delArticleAPI(adopt_arr)
-
     if (result.code === 2000) {
       successMessage('删除成功')
       getData()
@@ -130,7 +128,6 @@ const searchBtn = async () => {
 
 //编辑事件
 const handleEdit = (index, row) => {
-  console.log(row)
   let obj = {
     ...row
   }

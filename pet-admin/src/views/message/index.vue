@@ -22,7 +22,6 @@
             <div class="scroll-view">
               <div class="news-box" v-for="(item, index) in list" :key="index">
                 <!-- 头像 -->
-
                 <img
                   class="avatar"
                   :class="[item.message_type !== 1 ? 'is-me' : 'avatar-right']"
@@ -62,6 +61,7 @@
 import Socket from '@/request/websocket'
 const DEVURL = import.meta.env.VITE_API_URL
 import { useAdminStore } from '@/stores/admin'
+import { failMessage } from '@/utils/message'
 const adminStore = useAdminStore()
 const socket = ref(null)
 const users = ref([])
@@ -112,6 +112,10 @@ const getHistory = () => {
 }
 
 const sendMessage = () => {
+  if (textarea.value === '') {
+    failMessage('不能发送空白消息')
+    return
+  }
   socket.value.send(
     JSON.stringify({
       id: tabIndex.value,
@@ -168,7 +172,11 @@ const closeSocket = () => {
   )
   socket.value.close()
 }
-
+const removeTab = (name) => {
+  users.value = users.value.filter((item) => {
+    return item.user_id !== name
+  })
+}
 onMounted(() => {
   initWebSocket()
   onMessage()

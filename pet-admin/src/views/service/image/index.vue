@@ -1,52 +1,47 @@
 <template>
-  <el-card class='top-edit'>
-    <el-button type='primary' size='large' style='font-size: 20px' @click='add'>添加商品对应图片</el-button>
+  <el-card class="top-edit">
+    <el-button type="primary" size="large" style="font-size: 20px" @click="add">添加服务图片</el-button>
     <!-- 搜索框 -->
     <el-input
-      v-model.trim='search'
-      placeholder='请输入要搜素的服务名称'
-      size='large'
-      class='pet-search'
-      prefix-icon='Search'
+      v-model.trim="search"
+      placeholder="请输入要搜素的服务名称"
+      size="large"
+      class="pet-search"
+      prefix-icon="Search"
     />
-    <el-button type='primary' size='large' style='font-size: 20px' @click='searchBtn'>搜索</el-button>
+    <el-button type="primary" size="large" style="font-size: 20px" @click="searchBtn">搜索</el-button>
   </el-card>
   <!-- 内容 -->
-  <el-card class='contain'>
-    <div class='title'>
+  <el-card class="contain">
+    <div class="title">
       <h2>服务名称</h2>
-      <h2>轮播图</h2>
-      <h2>轮播图</h2>
-      <h2>轮播图</h2>
-      <h2>长图</h2>
-      <h2>长图</h2>
-      <h2>长图</h2>
+      <h2>图片</h2>
+      <h2>图片</h2>
+      <h2>图片</h2>
+      <h2>图片</h2>
+      <h2>图片</h2>
+      <h2>图片</h2>
       <h2>操作</h2>
     </div>
-    <div class='image-contain' v-for='(item1,index) in tableData' :key='index'>
-      <div class='image'>
+    <div class="image-contain" v-for="(item1, index) in tableData" :key="index">
+      <div class="image">
         <h2>{{ item1[0].service_detail.service_name }}</h2>
       </div>
-      <div class='image' v-for='item in item1' :key='item.service_image_id' @click='handlerEdit(item)'>
-        <img :src='imagePrefix+item.service_image_name'>
+      <div class="image" v-for="item in item1" :key="item.service_image_id" @click="handlerEdit(item)">
+        <img :src="imagePrefix + item.service_image_name" />
       </div>
-      <el-button type='danger' size='large' @click='handlerDel(item1[0].service_detail_id)'>删除</el-button>
+      <el-button type="danger" size="large" @click="handlerDel(item1[0].service_detail_id)">删除</el-button>
     </div>
   </el-card>
 
   <!-- 编辑对话框 -->
   <EditImage
-    :dialogFormVisible='dialogFormVisible'
-    @cancelDialog='cancelDialog'
-    :editData='editData'
-    @renderData='getData'
+    :dialogFormVisible="dialogFormVisible"
+    @cancelDialog="cancelDialog"
+    :editData="editData"
+    @renderData="getData"
   ></EditImage>
-  <AddImage
-    v-model='addDialogFormVisible'
-    @cancelAddDialog='cancelAddDialog'
-    @renderData='getData'
-  ></AddImage>
-
+  <AddImage v-model="addDialogFormVisible" @cancelAddDialog="cancelAddDialog" @renderData="getData"></AddImage>
 </template>
 
 <script setup>
@@ -103,10 +98,9 @@ const searchBtn = async () => {
 }
 //编辑事件
 const handlerEdit = (obj) => {
-
-  let newObj= { ...obj,service_name:obj.service_detail.service_name }
+  let newObj = { ...obj, service_name: obj.service_detail.service_name }
   delete newObj['service_detail']
-    editData.value=newObj
+  editData.value = newObj
   dialogFormVisible.value = true
 }
 //添加
@@ -127,7 +121,7 @@ onMounted(() => {
 })
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .contain {
   margin-top: 20px;
 
@@ -163,7 +157,6 @@ onMounted(() => {
   margin-right: 20px;
 }
 
-
 .contain {
   .title {
     display: flex;
@@ -176,7 +169,6 @@ onMounted(() => {
     }
   }
 }
-
 
 .image-contain {
   width: 100%;
@@ -202,6 +194,5 @@ onMounted(() => {
       border-radius: 10px;
     }
   }
-
 }
 </style>

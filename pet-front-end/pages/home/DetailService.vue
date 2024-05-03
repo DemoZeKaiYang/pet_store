@@ -117,7 +117,7 @@ const getServiceDetailData = async (service_id) => {
 }
 
 //显示评论
-const showEvaluate = ref(true)
+const showEvaluate = ref(false)
 
 //左侧按钮组事件
 const buttonClick = ({ index, content }) => {

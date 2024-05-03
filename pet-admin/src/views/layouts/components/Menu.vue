@@ -41,13 +41,6 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const curPath = ref('')
 const curOpened = ref()
-// const handleOpen = (key, keyPath) => {
-//   console.log(key, keyPath)
-// }
-// const handleClose = (key, keyPath) => {
-//   console.log(key, keyPath)
-// }
-
 watch(
   () => route.path,
   (newValue, oldValue) => {

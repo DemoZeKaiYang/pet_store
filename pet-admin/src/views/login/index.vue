@@ -3,46 +3,16 @@
     <!-- 登录 -->
     <div class="login">
       <h1 class="title">账户登录</h1>
-      <el-form
-        :model="formData"
-        :rules="rules"
-        ref="formRef"
-        show-message
-        inline-message
-        status-icon
-      >
+      <el-form :model="formData" :rules="rules" ref="formRef" show-message inline-message status-icon>
         <el-form-item prop="username">
-          <el-input
-            placeholder="用户名"
-            class="item"
-            v-model="formData.username"
-          ></el-input>
+          <el-input placeholder="用户名" class="item" v-model="formData.username"></el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input
-            placeholder="密码"
-            class="item"
-            v-model="formData.password"
-            type="password"
-          ></el-input>
+          <el-input placeholder="密码" class="item" v-model="formData.password" type="password"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button
-            type="primary"
-            @click="submitForm(formRef)"
-            size="large"
-            round
-            class="login-btn"
-            >登录</el-button
-          >
-          <el-button
-            @click="resetForm(formRef)"
-            class="login-btn"
-            size="large"
-            round
-            type="primary"
-            >重置</el-button
-          >
+          <el-button type="primary" @click="submitForm(formRef)" size="large" round class="login-btn">登录</el-button>
+          <el-button @click="resetForm(formRef)" class="login-btn" size="large" round type="primary">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -84,7 +54,7 @@ const submitForm = async (formEl) => {
         successMessage('登录成功')
         adminStore.updateAdmin(result.data)
         //跳转到主页面
-        router.push('/')
+        router.push('/pet/managerpet')
       } else {
         failMessage(result.message)
       }

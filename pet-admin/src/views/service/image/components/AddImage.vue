@@ -1,72 +1,68 @@
 <template>
-  <el-dialog :model-value='addDialogFormVisible' title='编辑商品' width='600' @close='cancelHandler'>
-    <el-form :model='formData' class='kind-form' :rules='rules' ref='formRef' show-message>
-      <el-form-item label='图片 :' size='large' prop='service_image_name'>
+  <el-dialog :model-value="addDialogFormVisible" title="编辑商品" width="600" @close="cancelHandler">
+    <el-form :model="formData" class="kind-form" :rules="rules" ref="formRef" show-message>
+      <el-form-item label="图片 :" size="large" prop="service_image_name">
         <el-upload
-          class='avatar-uploader'
-          :show-file-list='false'
-          accept='image/png, image/gif, image/jpg, image/jpeg'
-          :on-change='getFile'
-          :auto-upload='false'
+          class="avatar-uploader"
+          :show-file-list="false"
+          accept="image/png, image/gif, image/jpg, image/jpeg"
+          :on-change="getFile"
+          :auto-upload="false"
         >
-          <img v-if='formData.service_image_name' :src='imagePrefix + formData.service_image_name' class='avatar' />
-          <el-icon v-else class='avatar-uploader-icon'>
+          <img v-if="formData.service_image_name" :src="imagePrefix + formData.service_image_name" class="avatar" />
+          <el-icon v-else class="avatar-uploader-icon">
             <Plus />
           </el-icon>
         </el-upload>
       </el-form-item>
 
-      <el-form-item label='图片类型 :' size='large' prop='service_image_type'>
+      <el-form-item label="图片类型 :" size="large" prop="service_image_type">
         <el-input-number
-          v-model='formData.service_image_type'
-          autocomplete='off'
-          size='large'
-          style='width: 500px'
-          placeholder='0为轮播图，1为长图'
-          :min='0'
-          :max='1'
+          v-model="formData.service_image_type"
+          autocomplete="off"
+          size="large"
+          style="width: 500px"
+          placeholder="1为轮播图，2为长图"
+          :min="1"
+          :max="2"
         />
       </el-form-item>
-      <el-form-item label='图片顺序 :' size='large' prop='service_image_order'>
+      <el-form-item label="图片顺序 :" size="large" prop="service_image_order">
         <el-input-number
-          v-model.number='formData.service_image_order'
-          :min='1'
-          :max='3'
-          autocomplete='off'
-          size='large'
-          style='width: 500px'
-          placeholder='1起步'
-
-
+          v-model.number="formData.service_image_order"
+          :min="1"
+          :max="4"
+          autocomplete="off"
+          size="large"
+          style="width: 500px"
+          placeholder="1起步"
         />
       </el-form-item>
 
-      <el-form-item label='服务名称 :' size='large' prop='service_detail_name'>
+      <el-form-item label="服务名称 :" size="large" prop="service_detail_name">
         <el-select
-          v-model='formData.service_detail_name'
-          placeholder='请选择对应的商品分类'
-          size='large'
-          @change='optionsChange'
+          v-model="formData.service_detail_name"
+          placeholder="请选择对应的商品分类"
+          size="large"
+          @change="optionsChange"
         >
           <el-option
-            v-for='item in options'
-            :key='item.service_detail_id'
-            :label='item.service_name'
-            :value='item.service_name'
+            v-for="item in options"
+            :key="item.service_detail_id"
+            :label="item.service_name"
+            :value="item.service_name"
           />
         </el-select>
 
-        <el-form-item label='服务id:' size='large' class='item' prop='service_detail_id' v-show='false'>
-          <el-select v-model='formData.service_detail_id' placeholder='请选择种类' size='large' disabled></el-select>
+        <el-form-item label="服务id:" size="large" class="item" prop="service_detail_id" v-show="false">
+          <el-select v-model="formData.service_detail_id" placeholder="请选择种类" size="large" disabled></el-select>
         </el-form-item>
       </el-form-item>
     </el-form>
     <template #footer>
-      <div class='dialog-footer'>
-        <el-button @click='cancelHandler' size='large' class='edit-btn' round>取消</el-button>
-        <el-button type='primary' @click='confirm(formRef)' size='large' class='edit-btn' round>
-          添加
-        </el-button>
+      <div class="dialog-footer">
+        <el-button @click="cancelHandler" size="large" class="edit-btn" round>取消</el-button>
+        <el-button type="primary" @click="confirm(formRef)" size="large" class="edit-btn" round> 添加 </el-button>
       </div>
     </template>
   </el-dialog>
@@ -86,7 +82,7 @@ const formData = ref({
   service_image_order: '',
   service_detail_id: '',
   service_detail_name: '',
-  service_name:""
+  service_name: ''
 })
 
 //图片的地址
@@ -105,8 +101,7 @@ const rules = reactive({
   service_image_order: [{ required: true, message: '请输入图片顺序', trigger: 'change' }],
   service_image_name: [{ required: true, message: '请选择服务名称', trigger: 'change' }],
   service_detail_id: [{ required: true, message: '请选择服务ID', trigger: 'change' }]
-  }
-)
+})
 
 //取消
 const cancelHandler = () => {
@@ -143,7 +138,6 @@ const confirm = async (formEl) => {
       failMessage('失败,请填写数据')
     }
   })
-
 }
 
 //图片改变事件
@@ -155,7 +149,6 @@ const getFile = async (uploadFile, uploadFiles) => {
     formData.value.service_image_name = result.data.service_image_name
   }
 }
-
 
 const getGood = async () => {
   const result = await getAllServiceAPI()
@@ -176,7 +169,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang='scss'>
+<style scoped lang="scss">
 :deep(.el-form-item__label) {
   font-size: 18px;
 }

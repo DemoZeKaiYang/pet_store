@@ -8,27 +8,30 @@
       v-for="(adopt, index) in adoptInfo"
       @tap="gotoDetailAdopt(adopt.adopt_id)"
     >
-      <!-- 图片 -->
-      <img :src="imagePrefix + adopt.adopt_image" alt="" class="pet-img" />
-      <!-- 标题 -->
-      <view class="title"> {{ adopt.adopt_name }}，求领养~</view>
-      <!-- 品种，年龄，发布时间 -->
-      <view class="describe">
-        <!-- 宠物信息 -->
-        <view class=""
-          >{{ adopt.adopt_sex === 1 ? '男' : '女' }}|出生:{{ adopt.adopt_birthday }}</view
-        >
-        <view class="" style="overflow: hidden"> {{ adopt.adopt_description }} </view>
-      </view>
+      <template v-if="adopt.adopt_status === 1">
+        
+        <!-- 图片 -->
+        <img :src="imagePrefix + adopt.adopt_image" alt="" class="pet-img" />
+        <!-- 标题 -->
+        <view class="title"> {{ adopt.adopt_name }}，求领养~</view>
+        <!-- 品种，年龄，发布时间 -->
+        <view class="describe">
+          <!-- 宠物信息 -->
+          <view class=""
+            >{{ adopt.adopt_sex === 1 ? '男' : '女' }}|出生:{{ adopt.adopt_birthday }}</view
+          >
+          <view class="adopt-info" style="overflow: hidden"> {{ adopt.adopt_description }} </view>
+        </view>
+      </template>
     </view>
   </view>
   <view class="" v-show="selectKey === 2">
     <!--  proList: 条目数组数据  goProDetail:条目点击事件跳转（实现了点击条目数据传值）-->
     <!-- <WaterListView :proList="projectList" @click="goProDetail(1)" v-if="false"></WaterListView> -->
     <!--图文信息 -->
-    <ImageText ></ImageText>
+    <ImageText></ImageText>
   </view>
-  <uni-fab ref="fab" horizontal="right" vertical="bottom" :popMenu="false" @trigger="trigger" />
+  
 </template>
 
 <script setup>
@@ -39,7 +42,7 @@ import ImageText from './components/ImageText.vue'
 import { getAdoptAPI } from '@/apis/adopt.js'
 import { reqParams } from '../../utils/reqParams'
 
-const articleData=ref([])
+const articleData = ref([])
 const imagePrefix = ref(devUrl + '/pet_uploads/')
 const tabnav = ref([
   {
@@ -78,11 +81,15 @@ const gotoDetailAdopt = (adopt_id) => {
 
 onMounted(() => {
   getData()
-
 })
 </script>
 
 <style lang="scss" scoped>
+  .adopt-info{
+    height: 30rpx;
+    width: 40rpx;
+    
+  }
 page {
   background-color: #ffffff;
 }

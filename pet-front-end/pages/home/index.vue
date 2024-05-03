@@ -3,7 +3,7 @@
     <uni-notice-bar
       show-icon
       scrollable
-      text="uni-app 版正式发布，开发一次，同时发布iOS、Android、H5、微信小程序、支付宝小程序、百度小程序、头条小程序等7大平台。"
+      text="大家好！首先，感谢大家一直以来对宠物家园App的支持与厚爱。我们很高兴能够陪伴大家走过这段美好的时光，共同分享与宠物们相处的快乐与温馨。"
     />
     <view class="hot-service">
       <ServiceSelect
@@ -50,7 +50,7 @@
       </view>
     </uni-section>
     <!-- 服务类型 -->
-    <uni-section title="请选择服务宠物类型">
+    <uni-section title="请选择服务类型">
       <view class="type-service">
         <SelectType
           class="service-type"
@@ -106,7 +106,7 @@ const gotoDetail = () => {}
 //跳转的领养宠物
 const jumpAdopt=()=>{
   uni.switchTab({
-    url:'/pages/messages/index'
+    url:'/pages/adopt/index'
   })
 }
 

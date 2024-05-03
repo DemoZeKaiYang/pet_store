@@ -66,7 +66,6 @@
               <view class="nominal" style="color: #2979ff; margin-top: 10rpx">设为默认地址</view>
               <view class="input switch">
                 <switch
-
                   style="transform: scale(0.8)"
                   @change="switchChange"
                   :checked="formData.address_default == 1"
@@ -77,7 +76,7 @@
         </uni-forms>
       </view>
       <view class="save">
-        <view class="btn"  @tap="saveAddress">保存地址</view>
+        <view class="btn" @tap="saveAddress">保存地址</view>
       </view>
       <!-- 省市区选择 province city area初始省市区设置 show:是否显示  @sureSelectArea：确认事件 @hideShow：隐藏事件-->
       <SelectCit
@@ -96,7 +95,8 @@ import SelectCit from './components/SelectCity.vue'
 import { onReady, onLoad } from '@dcloudio/uni-app'
 import rules from './addressRules.js'
 import { useUserStore } from '@/stores/user.js'
-import { updateAddressApi } from '../../apis/address'
+import { updateAddressApi } from '@/apis/address'
+const pageAddress = ref('')
 const store = useUserStore()
 const formData = ref({
   address_name: '',
@@ -115,7 +115,6 @@ const isShow = ref(true)
 //保存地址
 const saveAddress = async () => {
   try {
-    
     await form.value.validate()
     const result = await updateAddressApi(formData.value)
     if (result.code === 200) {
@@ -123,6 +122,17 @@ const saveAddress = async () => {
         title: '修改成功',
       })
       uni.$emit('renderAddress')
+      if (pageAddress.value === 'OrderService') {
+        uni.$emit('renderAdd')
+      }
+      if (pageAddress.value === 'ComfirmAddress') {
+        uni.$emit('renderAdd')
+        uni.$emit('renderConfirmAddress')
+      }
+      if(pageAddress.value==='ConfirmOrder'){
+        uni.$emit('confirmOrderAddress',formData.value)
+      }
+
       uni.navigateBack({
         delta: 1,
         animationType: 'slide-out-left',
@@ -139,7 +149,6 @@ const saveAddress = async () => {
 }
 // 打开地址选择器
 const openPicker = () => {
-  console.log('执行打开地址选择器')
   show.value = true
 }
 const changeClick = (value, value2, value3) => {
@@ -147,7 +156,6 @@ const changeClick = (value, value2, value3) => {
 }
 const onhideShow = () => {
   show.value = false
-  console.log('执行了关闭地址选择器')
 }
 // 默认地址的回调
 const switchChange = (e) => {
@@ -159,6 +167,13 @@ const switchChange = (e) => {
   }
 }
 onLoad((query) => {
+  //获取从哪一个页面跳转过来的
+  let pages = getCurrentPages()
+  // 上一个页面是页面栈中的倒数第二个
+  let prevPage = pages[pages.length - 2]
+  pageAddress.value = prevPage.$page.fullPath.split('/')[3].split('?')[0]
+  
+  //编辑地址
   if (Object.keys(query).length !== 0) {
     let obj = {}
     for (let i in query) {

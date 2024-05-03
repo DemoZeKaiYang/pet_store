@@ -1,8 +1,8 @@
 <template>
   <view class="pay-page">
     <!-- 展示默认地址 -->
-    <view class="order_address" @tap="selectAddress">
-      <view class="address_box">
+    <view class="order_address" @tap="selectAddress"  v-if="showAddress">
+      <view class="address_box" >
         <view class="weizhi_icon">
           <icon-base type="dizhiguanli" :color="'#2979FF'" :size="50"></icon-base>
         </view>
@@ -29,7 +29,7 @@
       <view class="address-icon"
         ><u-icon name="plus-circle" color="#999" size="36rpx"></u-icon
       ></view>
-      <view class="address-text">添加收货地址</view>
+      <view class="address-text" @tap="jumpAddress">添加收货地址</view>
     </view>
     <!-- 商品信息 -->
     <view class="shopping-box">
@@ -117,7 +117,7 @@ import { devUrl } from '@/config.js'
 import { getDefaultAddressAPI } from '@/apis/address.js'
 import { useUserStore } from '@/stores/user'
 import { getCurrentTimeFormatted } from '@/utils/getNowTime.js'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad,onShow } from '@dcloudio/uni-app'
 import { confirmServiceAPI } from '@/apis/service.js'
 import { useServiceStore } from '@/stores/service.js'
 
@@ -133,11 +133,6 @@ const start = computed(() => {
   const date = String(now.getDate()).padStart(2, '0')
   return `${year}-${month}-${date}`
 })
-//日期时间的事件
-const changeLog = (e) => {
-  console.log('change事件:', e)
-}
-
 const userStore = useUserStore()
 
 const address = ref({})
@@ -178,7 +173,7 @@ const updateAddress = (obj) => {
 //确认订单
 const payHandler = async () => {
   // 校验地址
-  if (!address.value) return uni.showToast({ title: '请检查您的地址', icon: 'none' })
+  if (Object.keys(address.value).length===0) return uni.showToast({ title: '请检查您的地址', icon: 'none' })
 
   // 校验订单,校验不能为空
   if (Object.keys(serviceStore.service).length <= 0)
@@ -235,7 +230,22 @@ onLoad((query) => {
       datetimesingle.value = new Date()
     }
   }
+  uni.$on('confirmAddress',(item)=>{
+    address.value=item
+  })
+  uni.$on('renderAdd',getDefaultAddress)
 })
+
+
+const jumpAddress=()=>{
+  uni.navigateTo({
+    url: '/pages/my/EditAddress',
+  })
+}
+  
+// onShow(()=>{
+//   getDefaultAddress()
+// })
 </script>
 
 <style lang="scss" scoped>

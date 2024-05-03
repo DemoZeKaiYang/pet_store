@@ -1,7 +1,7 @@
 <template>
   <el-card class="top-edit">
-    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind">添加商品</el-button>
-    <el-button type="danger" size="large" style="font-size: 20px" @click="delSelectKind" >删除选中</el-button>
+    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind">添加服务</el-button>
+    <el-button type="danger" size="large" style="font-size: 20px" @click="delSelectKind">删除选中</el-button>
     <!-- 搜索框 -->
     <el-input
       v-model.trim="search"
@@ -39,11 +39,10 @@
         </template>
       </el-table-column>
 
-
       <el-table-column label="编辑" width="200">
         <template #default="scope">
           <el-button size="large" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button size="large" type="danger" @click="delKind(scope.row)" >删除</el-button>
+          <el-button size="large" type="danger" @click="delKind(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -139,7 +138,7 @@ const searchBtn = async () => {
 //编辑事件
 const handleEdit = (index, row) => {
   let obj = {
-    ...row,
+    ...row
   }
   editData.value = obj
   dialogFormVisible.value = true

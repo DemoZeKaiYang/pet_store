@@ -11,13 +11,7 @@
     <div class="right">
       <!-- 暗黑/明亮 -->
       <div class="change-subject">
-        <el-switch
-          v-model="theme"
-          class="black-switch"
-          inline-prompt
-          size="large"
-          @change="themeChange"
-        >
+        <el-switch v-model="theme" class="black-switch" inline-prompt size="large" @change="themeChange">
           <template #active-action>
             <Moon></Moon>
           </template>
@@ -32,10 +26,7 @@
         <!-- 头像 -->
         <div class="header-avatar" :class="hoverLoginOut">
           <span>admin</span>
-          <el-avatar
-            :size="50"
-            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-          />
+          <el-avatar :size="50" :src="imagePrefix + adminStore.admin.admin_avatar" />
           <el-icon size="20">
             <ArrowDown />
           </el-icon>
@@ -43,12 +34,10 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>Action 1</el-dropdown-item>
+            <!-- <el-dropdown-item>Action 1</el-dropdown-item>
             <el-dropdown-item>Action 2</el-dropdown-item>
-            <el-dropdown-item>Action 3</el-dropdown-item>
-            <el-dropdown-item divided @click="loginOut"
-              >退出登录</el-dropdown-item
-            >
+            <el-dropdown-item>Action 3</el-dropdown-item> -->
+            <el-dropdown-item divided @click="loginOut">退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -60,10 +49,11 @@
 import { useAdminStore } from '@/stores/admin'
 import { Sunny, Moon } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
+const imagePrefix = ref(import.meta.env.VITE_API_URL + '/uploads/')
 const router = useRouter()
 const route = useRoute()
 //暗黑主题切换按钮
-const theme = ref(false)
+const theme = ref(true)
 const adminStore = useAdminStore()
 //面包屑数组
 const breadList = ref([])
@@ -108,9 +98,7 @@ const hoverLoginOut = computed(() => {
 watch(
   () => route.path,
   (newValue, oldValue) => {
-    breadList.value = route.matched.filter(
-      (item) => item.meta && item.meta.title
-    )
+    breadList.value = route.matched.filter((item) => item.meta && item.meta.title)
   }
 )
 

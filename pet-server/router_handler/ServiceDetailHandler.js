@@ -15,10 +15,20 @@ const getServiceDetail = async (req, res) => {
       where: {
         service_id
       },
-      include: [{ model: serviceImageModel }, { model: serviceDetailCommentModel }]
+      include: [
+        {
+          model: serviceImageModel,
+          order: [
+            ['service_image_type', 'ASC'],
+            ['service_image_order', 'ASC']
+          ]
+        },
+        { model: serviceDetailCommentModel }
+      ]
     })
 
     const data = result[0].dataValues
+
     return res.json({ code: 2000, message: '获取数据成功', data })
   } catch (error) {
     console.log(error)

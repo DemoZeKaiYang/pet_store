@@ -17,7 +17,13 @@
         <el-input v-model="formData.adopt_name" autocomplete="off" />
       </el-form-item>
       <el-form-item label="宠物生辰 :" size="large" prop="adopt_birthday">
-        <el-date-picker :disabled-date='disabledDate' v-model="formData.adopt_birthday" type="date" placeholder="请选择宠物的生日" :size="size" />
+        <el-date-picker
+          :disabled-date="disabledDate"
+          v-model="formData.adopt_birthday"
+          type="date"
+          placeholder="请选择宠物的生日"
+          :size="size"
+        />
       </el-form-item>
       <el-form-item label="宠物领养 :" size="large" class="item" prop="adopt_status">
         <el-radio-group v-model="formData.adopt_status">
@@ -36,13 +42,13 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="宠物主人 :" size="large" prop="user_id">
-        <el-input v-model="formData.user_id" autocomplete="off"  />
+        <el-input v-model="formData.user_id" autocomplete="off" />
       </el-form-item>
       <el-form-item label="宠物品种 :" size="large" prop="adopt_var">
-        <el-input v-model="formData.adopt_var" autocomplete="off"  />
+        <el-input v-model="formData.adopt_var" autocomplete="off" />
       </el-form-item>
       <el-form-item label="宠物描述 :" size="large" class="item" prop="adopt_description">
-        <el-input v-model="formData.adopt_description"   type="textarea" autocomplete="off" />
+        <el-input v-model="formData.adopt_description" type="textarea" autocomplete="off" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -58,21 +64,21 @@
 
 <script setup>
 import { successMessage, failMessage } from '@/utils/message'
-import {   uploadPetAPI } from '@/apis/pet/index.js'
+import { uploadPetAPI } from '@/apis/pet/index.js'
 import { addAdoptAPI, updateAdoptAPI } from '@/apis/adopt/index.js'
 const props = defineProps(['dialogFormVisible', 'editData'])
 const emit = defineEmits(['cancelDialog', 'renderData'])
 const formData = ref({
-  adopt_id:"",
-  adopt_name:"",
-  adopt_birthday:"",
-  adopt_image:"",
-  adopt_status:null,
-  adopt_address:"",
-  adopt_description:"",
-  adopt_sex:null,
-  user_id:"",
-  adopt_var:""
+  adopt_id: '',
+  adopt_name: '',
+  adopt_birthday: '',
+  adopt_image: '',
+  adopt_status: null,
+  adopt_address: '',
+  adopt_description: '',
+  adopt_sex: null,
+  user_id: '',
+  adopt_var: ''
 })
 
 //是添加还是删除
@@ -93,7 +99,7 @@ const rules = reactive({
   adopt_sex: [{ required: true, message: '请选择宠物性别', trigger: 'change' }],
   adopt_status: [{ required: true, message: '请选择宠物状态', trigger: 'change' }],
   adopt_description: [{ required: true, message: '请输入宠物描述', trigger: 'blur' }], // 假设描述不是必填项
-  adopt_var: [{ required: true, message: '请输入宠物品种', trigger: 'blur' }], // 假设描述不是必填项
+  adopt_var: [{ required: true, message: '请输入宠物品种', trigger: 'blur' }] // 假设描述不是必填项
 })
 
 //取消
@@ -104,16 +110,16 @@ const cancelHandler = () => {
 }
 const resetFormData = () => {
   formData.value = {
-    adopt_id:"",
-    adopt_name:"",
-    adopt_birthday:"",
-    adopt_image:"",
-    adopt_status:null,
-    adopt_address:"",
-    adopt_description:"",
-    adopt_sex:null,
-    user_id:"",
-    adopt_var:""
+    adopt_id: '',
+    adopt_name: '',
+    adopt_birthday: '',
+    adopt_image: '',
+    adopt_status: null,
+    adopt_address: '',
+    adopt_description: '',
+    adopt_sex: null,
+    user_id: '',
+    adopt_var: ''
   }
   formRef.value.resetFields()
 }
@@ -177,9 +183,7 @@ watch(
 const disabledDate = (time) => {
   return time.getTime() > Date.now()
 }
-onMounted(() => {
-
-})
+onMounted(() => {})
 </script>
 
 <style scoped lang="scss">

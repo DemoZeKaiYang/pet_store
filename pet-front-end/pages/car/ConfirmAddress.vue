@@ -6,21 +6,22 @@
           <view class="name-tel"> {{ item.address_name }} {{ item.address_phone }} </view>
           <view class="address-box"> {{ item.address_area }}{{ item.address_details }} </view>
         </view>
-        <view class="right-edit" @tap="editAddess(item.id)"></view>
+        <view class="right-edit" @tap="editAddess(item)"></view>
       </view>
     </view>
     <view class="bottom-box">
-      <view class="add-btn" @tap="addAddess">继续付款</view>
+      <view class="add-btn" @tap="addAddess">添加地址</view>
     </view>
   </view>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad,onShow } from '@dcloudio/uni-app'
 import request from '@/utils/request'
 import { useUserStore } from '@/stores/user'
 import { getAddressApi } from '@/apis/address.js'
+import {reqParams} from '@/utils/reqParams.js'
 const useStore = useUserStore()
 const addressList = ref([])
 const getAddress = async () => {
@@ -28,12 +29,7 @@ const getAddress = async () => {
   if (result.code === 1000) {
     addressList.value = result.data
   }
-  console.log(result)
 }
-
-onLoad(() => {
-  getAddress()
-})
 //确认地址
 const selectTap = (item) => {
   uni.$emit('confirmAddress', item)
@@ -41,12 +37,19 @@ const selectTap = (item) => {
     delta: 1,
   })
 }
-const editAddess = (id) => {
-  console.log('edit item id:' + id)
+const editAddess = (item) => {
+  const url = reqParams('/pages/my/EditAddress', item)
+  uni.navigateTo({url})
 }
 const addAddess = () => {
-  console.log('tap add new Address')
+  uni.navigateTo({
+    url:'/pages/my/EditAddress'
+  })
 }
+  
+onShow(() => {
+  getAddress()
+})
 </script>
 
 <style lang="scss" scoped>

@@ -1,6 +1,6 @@
 <template>
   <el-card class="top-edit">
-    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind" disabled>添加种类</el-button>
+    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind" disabled>添加宠物</el-button>
     <el-button type="danger" size="large" style="font-size: 20px" @click="delSelectKind">删除选中</el-button>
     <!-- 搜索框 -->
     <el-input
@@ -56,7 +56,6 @@
 </template>
 
 <script setup>
-import { getShopCategoryAPI } from '@/apis/shop/good_category/index.js'
 import { delMessageBox } from '@/utils/messageBox.js'
 import EditPet from './components/EditPet.vue'
 import { successMessage, failMessage } from '@/utils/message'
@@ -138,11 +137,11 @@ const handleEdit = (index, row) => {
     ...row,
     user_id: row.user.user_id,
     user_name: row.user.user_name,
-    pet_kind_id: row.pet_kind.pet_kind_id,
+    pet_kind_id: row.pet_kind.pet_kind_id
   }
   delete obj.user
   delete obj.pet_kind
-  obj.pet_kind=row.pet_kind.pet_kind
+  obj.pet_kind = row.pet_kind.pet_kind
   console.log(obj)
   editData.value = obj
   dialogFormVisible.value = true

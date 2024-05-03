@@ -1,11 +1,10 @@
 <template>
-  <el-dialog :model-value="dialogFormVisible" title="编辑种类" width="600" @close="cancelHandler">
+  <el-dialog :model-value="dialogFormVisible" title="编辑分类" width="600" @close="cancelHandler">
     <el-form :model="formData" class="kind-form" :rules="rules" ref="formRef" show-message>
       <el-form-item label="分类图片 :" size="large" prop="good_category_image">
         <el-upload
           class="avatar-uploader"
           :show-file-list="false"
-
           accept="image/png, image/gif, image/jpg, image/jpeg"
           :on-change="getFile"
           :auto-upload="false"

@@ -1,11 +1,11 @@
 <template>
   <el-card class="top-edit">
-    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind">添加种类</el-button>
+    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind">添加分类</el-button>
     <el-button type="danger" size="large" style="font-size: 20px" @click="delSelectKind">删除选中</el-button>
     <!-- 搜索框 -->
     <el-input
       v-model.trim="search"
-      placeholder="请输入要搜素的种类名称"
+      placeholder="请输入要搜素的商品分类名称"
       size="large"
       class="pet-search"
       prefix-icon="Search"

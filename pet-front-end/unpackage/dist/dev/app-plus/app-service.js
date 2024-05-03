@@ -3540,7 +3540,7 @@ This will fail in production if not fixed.`);
       };
       const jumpAdopt = () => {
         uni.switchTab({
-          url: "/pages/messages/index"
+          url: "/pages/adopt/index"
         });
       };
       vue.onMounted(() => {
@@ -3553,7 +3553,7 @@ This will fail in production if not fixed.`);
           vue.createVNode(_component_uni_notice_bar, {
             "show-icon": "",
             scrollable: "",
-            text: "uni-app 版正式发布，开发一次，同时发布iOS、Android、H5、微信小程序、支付宝小程序、百度小程序、头条小程序等7大平台。"
+            text: "大家好！首先，感谢大家一直以来对宠物家园App的支持与厚爱。我们很高兴能够陪伴大家走过这段美好的时光，共同分享与宠物们相处的快乐与温馨。"
           }),
           vue.createElementVNode("view", { class: "hot-service" }, [
             vue.createVNode(ServiceSelect, {
@@ -3618,7 +3618,7 @@ This will fail in production if not fixed.`);
             /* STABLE */
           }),
           vue.createCommentVNode(" 服务类型 "),
-          vue.createVNode(_component_uni_section, { title: "请选择服务宠物类型" }, {
+          vue.createVNode(_component_uni_section, { title: "请选择服务类型" }, {
             default: vue.withCtx(() => [
               vue.createElementVNode("view", { class: "type-service" }, [
                 (vue.openBlock(true), vue.createElementBlock(
@@ -19831,6 +19831,7 @@ ${i3}
   const _sfc_main$x = {
     __name: "EditAddress",
     setup(__props) {
+      const pageAddress = vue.ref("");
       const store = useUserStore();
       const formData = vue.ref({
         address_name: "",
@@ -19853,6 +19854,16 @@ ${i3}
               title: "修改成功"
             });
             uni.$emit("renderAddress");
+            if (pageAddress.value === "OrderService") {
+              uni.$emit("renderAdd");
+            }
+            if (pageAddress.value === "ComfirmAddress") {
+              uni.$emit("renderAdd");
+              uni.$emit("renderConfirmAddress");
+            }
+            if (pageAddress.value === "ConfirmOrder") {
+              uni.$emit("confirmOrderAddress", formData.value);
+            }
             uni.navigateBack({
               delta: 1,
               animationType: "slide-out-left",
@@ -19864,11 +19875,10 @@ ${i3}
             });
           }
         } catch (e2) {
-          formatAppLog("log", "at pages/my/EditAddress.vue:137", e2);
+          formatAppLog("log", "at pages/my/EditAddress.vue:147", e2);
         }
       };
       const openPicker = () => {
-        formatAppLog("log", "at pages/my/EditAddress.vue:142", "执行打开地址选择器");
         show.value = true;
       };
       const changeClick = (value, value2, value3) => {
@@ -19876,7 +19886,6 @@ ${i3}
       };
       const onhideShow = () => {
         show.value = false;
-        formatAppLog("log", "at pages/my/EditAddress.vue:150", "执行了关闭地址选择器");
       };
       const switchChange = (e2) => {
         if (e2.detail.value) {
@@ -19886,6 +19895,9 @@ ${i3}
         }
       };
       onLoad((query) => {
+        let pages2 = getCurrentPages();
+        let prevPage = pages2[pages2.length - 2];
+        pageAddress.value = prevPage.$page.fullPath.split("/")[3].split("?")[0];
         if (Object.keys(query).length !== 0) {
           let obj = {};
           for (let i2 in query) {
@@ -20636,7 +20648,7 @@ ${i3}
           formatAppLog("log", "at pages/home/DetailService.vue:115", serviceDetail.value);
         }
       };
-      const showEvaluate = vue.ref(true);
+      const showEvaluate = vue.ref(false);
       const buttonClick = ({ index, content }) => {
         serviceStore.updateService({
           service_name: serviceDetail.value.service_name,
@@ -21521,23 +21533,25 @@ ${i3}
         if (result.code === 1e3) {
           addressList.value = result.data;
         }
-        formatAppLog("log", "at pages/car/ConfirmAddress.vue:31", result);
       };
-      onLoad(() => {
-        getAddress();
-      });
       const selectTap = (item) => {
         uni.$emit("confirmAddress", item);
         uni.navigateBack({
           delta: 1
         });
       };
-      const editAddess = (id) => {
-        formatAppLog("log", "at pages/car/ConfirmAddress.vue:45", "edit item id:" + id);
+      const editAddess = (item) => {
+        const url = reqParams("/pages/my/EditAddress", item);
+        uni.navigateTo({ url });
       };
       const addAddess = () => {
-        formatAppLog("log", "at pages/car/ConfirmAddress.vue:48", "tap add new Address");
+        uni.navigateTo({
+          url: "/pages/my/EditAddress"
+        });
       };
+      onShow(() => {
+        getAddress();
+      });
       return (_ctx, _cache) => {
         return vue.openBlock(), vue.createElementBlock("view", { class: "container" }, [
           vue.createElementVNode("view", { class: "address-list" }, [
@@ -21570,7 +21584,7 @@ ${i3}
                   ], 10, ["onClick"]),
                   vue.createElementVNode("view", {
                     class: "right-edit",
-                    onClick: ($event) => editAddess(item.id)
+                    onClick: ($event) => editAddess(item)
                   }, null, 8, ["onClick"])
                 ]);
               }),
@@ -21582,7 +21596,7 @@ ${i3}
             vue.createElementVNode("view", {
               class: "add-btn",
               onClick: addAddess
-            }, "继续付款")
+            }, "添加地址")
           ])
         ]);
       };
@@ -26020,9 +26034,6 @@ ${i3}
         const date = String(now2.getDate()).padStart(2, "0");
         return `${year}-${month}-${date}`;
       });
-      const changeLog = (e2) => {
-        formatAppLog("log", "at pages/home/OrderService.vue:138", "change事件:", e2);
-      };
       const userStore = useUserStore();
       const address = vue.ref({});
       const showAddress = vue.ref(true);
@@ -26052,7 +26063,7 @@ ${i3}
         });
       };
       const payHandler = async () => {
-        if (!address.value)
+        if (Object.keys(address.value).length === 0)
           return uni.showToast({ title: "请检查您的地址", icon: "none" });
         if (Object.keys(serviceStore.service).length <= 0)
           return uni.showToast({ title: "请检查您选择的服务", icon: "none" });
@@ -26107,14 +26118,24 @@ ${i3}
             datetimesingle.value = /* @__PURE__ */ new Date();
           }
         }
+        uni.$on("confirmAddress", (item) => {
+          address.value = item;
+        });
+        uni.$on("renderAdd", getDefaultAddress);
       });
+      const jumpAddress = () => {
+        uni.navigateTo({
+          url: "/pages/my/EditAddress"
+        });
+      };
       return (_ctx, _cache) => {
         const _component_icon_base = resolveEasycom(vue.resolveDynamicComponent("icon-base"), __easycom_0$b);
         const _component_u_icon = vue.resolveComponent("u-icon");
         const _component_uni_datetime_picker = resolveEasycom(vue.resolveDynamicComponent("uni-datetime-picker"), __easycom_1);
         return vue.openBlock(), vue.createElementBlock("view", { class: "pay-page" }, [
           vue.createCommentVNode(" 展示默认地址 "),
-          vue.createElementVNode("view", {
+          showAddress.value ? (vue.openBlock(), vue.createElementBlock("view", {
+            key: 0,
             class: "order_address",
             onClick: selectAddress
           }, [
@@ -26166,9 +26187,9 @@ ${i3}
                 ])
               ])
             ])
-          ]),
+          ])) : vue.createCommentVNode("v-if", true),
           !showAddress.value ? (vue.openBlock(), vue.createElementBlock("view", {
-            key: 0,
+            key: 1,
             class: "address-box"
           }, [
             vue.createElementVNode("view", { class: "address-icon" }, [
@@ -26178,7 +26199,10 @@ ${i3}
                 size: "36rpx"
               })
             ]),
-            vue.createElementVNode("view", { class: "address-text" }, "添加收货地址")
+            vue.createElementVNode("view", {
+              class: "address-text",
+              onClick: jumpAddress
+            }, "添加收货地址")
           ])) : vue.createCommentVNode("v-if", true),
           vue.createCommentVNode(" 商品信息 "),
           vue.createElementVNode("view", { class: "shopping-box" }, [
@@ -26233,10 +26257,10 @@ ${i3}
                 type: "datetime",
                 modelValue: datetimesingle.value,
                 "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => datetimesingle.value = $event),
-                onChange: changeLog,
+                onChange: _ctx.changeLog,
                 start: vue.unref(start),
                 disabled: !isReserve.value
-              }, null, 8, ["modelValue", "start", "disabled"])
+              }, null, 8, ["modelValue", "onChange", "start", "disabled"])
             ])
           ]),
           vue.createCommentVNode(" 订单信息 "),
@@ -26394,7 +26418,6 @@ ${i3}
           order_number: orderNumber.value,
           order_price: carStore.sumPrice
         };
-        formatAppLog("log", "at pages/car/ConfirmOrder.vue:174", obj.goodList);
         const result = await confirmOrder(obj);
         if (result.code === 2e3) {
           orderStore.updateOrder(result.data);
@@ -26412,6 +26435,9 @@ ${i3}
           return uni.showToast({ title: "确认订单失败,请联系客服", icon: "none" });
         }
       };
+      const addAddress = () => {
+        uni.navigateTo({ url: "/pages/my/EditAddress" });
+      };
       vue.onMounted(() => {
         orderTime.value = getCurrentTimeFormatted();
         getOrderNum();
@@ -26419,13 +26445,15 @@ ${i3}
       });
       onLoad(() => {
         uni.$on("confirmAddress", updateAddress);
+        uni.$on("confirmOrderAddress", getDefaultAddress);
       });
       return (_ctx, _cache) => {
         const _component_icon_base = resolveEasycom(vue.resolveDynamicComponent("icon-base"), __easycom_0$b);
         const _component_u_icon = vue.resolveComponent("u-icon");
         return vue.openBlock(), vue.createElementBlock("view", { class: "pay-page" }, [
           vue.createCommentVNode(" 展示默认地址 "),
-          vue.createElementVNode("view", {
+          showAddress.value ? (vue.openBlock(), vue.createElementBlock("view", {
+            key: 0,
             class: "order_address",
             onClick: selectAddress
           }, [
@@ -26477,10 +26505,11 @@ ${i3}
                 ])
               ])
             ])
-          ]),
+          ])) : vue.createCommentVNode("v-if", true),
           !showAddress.value ? (vue.openBlock(), vue.createElementBlock("view", {
-            key: 0,
-            class: "address-box"
+            key: 1,
+            class: "address-box",
+            onClick: addAddress
           }, [
             vue.createElementVNode("view", { class: "address-icon" }, [
               vue.createVNode(_component_u_icon, {
@@ -27177,9 +27206,9 @@ ${i3}
         if (result.code === 1e3) {
           addressList.value = result.data;
         }
-        formatAppLog("log", "at pages/home/ComfirmAddress.vue:31", result);
+        formatAppLog("log", "at pages/home/ComfirmAddress.vue:32", result);
       };
-      onLoad(() => {
+      onShow(() => {
         getAddress();
       });
       const selectTap = (item) => {
@@ -27188,11 +27217,14 @@ ${i3}
           delta: 1
         });
       };
-      const editAddess = (id) => {
-        formatAppLog("log", "at pages/home/ComfirmAddress.vue:45", "edit item id:" + id);
+      const editAddress = (item) => {
+        const url = reqParams("/pages/my/EditAddress", item);
+        uni.navigateTo({ url });
       };
       const addAddess = () => {
-        formatAppLog("log", "at pages/home/ComfirmAddress.vue:48", "tap add new Address");
+        uni.navigateTo({
+          url: "/pages/my/EditAddress"
+        });
       };
       return (_ctx, _cache) => {
         return vue.openBlock(), vue.createElementBlock("view", { class: "container" }, [
@@ -27226,7 +27258,7 @@ ${i3}
                   ], 10, ["onClick"]),
                   vue.createElementVNode("view", {
                     class: "right-edit",
-                    onClick: ($event) => editAddess(item.id)
+                    onClick: ($event) => editAddress(item)
                   }, null, 8, ["onClick"])
                 ]);
               }),
@@ -27238,7 +27270,7 @@ ${i3}
             vue.createElementVNode("view", {
               class: "add-btn",
               onClick: addAddess
-            }, "继续付款")
+            }, "添加地址")
           ])
         ]);
       };
@@ -27273,10 +27305,19 @@ ${i3}
                 onClick: ($event) => gotoDetailArticle(item.article_id)
               }, [
                 vue.createElementVNode("view", { class: "left" }, [
-                  vue.createElementVNode("rich-text", {
-                    nodes: item.article_content,
-                    class: "top"
-                  }, null, 8, ["nodes"]),
+                  vue.createElementVNode(
+                    "h2",
+                    null,
+                    vue.toDisplayString(item.article_title),
+                    1
+                    /* TEXT */
+                  ),
+                  vue.createElementVNode("view", { class: "top" }, [
+                    vue.createElementVNode("rich-text", {
+                      nodes: item.article_content,
+                      style: { "overflow": "hidden" }
+                    }, null, 8, ["nodes"])
+                  ]),
                   vue.createElementVNode("view", { class: "bto" }, [
                     vue.createElementVNode(
                       "view",
@@ -27347,9 +27388,6 @@ ${i3}
       const ontype = (e2) => {
         selectKey.value = e2.type;
       };
-      const trigger = () => {
-        formatAppLog("log", "at pages/adopt/index.vue:64", 1);
-      };
       const getData = async () => {
         const result = await getAdoptAPI();
         if (result.code === 2e3) {
@@ -27365,7 +27403,6 @@ ${i3}
       });
       return (_ctx, _cache) => {
         const _component_tab_nav = resolveEasycom(vue.resolveDynamicComponent("tab-nav"), __easycom_0$3);
-        const _component_uni_fab = resolveEasycom(vue.resolveDynamicComponent("uni-fab"), __easycom_1$5);
         return vue.openBlock(), vue.createElementBlock(
           vue.Fragment,
           null,
@@ -27389,41 +27426,49 @@ ${i3}
                       class: "pet-adopt",
                       onClick: ($event) => gotoDetailAdopt(adopt.adopt_id)
                     }, [
-                      vue.createCommentVNode(" 图片 "),
-                      vue.createElementVNode("img", {
-                        src: imagePrefix.value + adopt.adopt_image,
-                        alt: "",
-                        class: "pet-img"
-                      }, null, 8, ["src"]),
-                      vue.createCommentVNode(" 标题 "),
-                      vue.createElementVNode(
-                        "view",
-                        { class: "title" },
-                        vue.toDisplayString(adopt.adopt_name) + "，求领养~",
-                        1
-                        /* TEXT */
-                      ),
-                      vue.createCommentVNode(" 品种，年龄，发布时间 "),
-                      vue.createElementVNode("view", { class: "describe" }, [
-                        vue.createCommentVNode(" 宠物信息 "),
-                        vue.createElementVNode(
-                          "view",
-                          { class: "" },
-                          vue.toDisplayString(adopt.adopt_sex === 1 ? "男" : "女") + "|出生:" + vue.toDisplayString(adopt.adopt_birthday),
-                          1
-                          /* TEXT */
-                        ),
-                        vue.createElementVNode(
-                          "view",
-                          {
-                            class: "",
-                            style: { "overflow": "hidden" }
-                          },
-                          vue.toDisplayString(adopt.adopt_description),
-                          1
-                          /* TEXT */
-                        )
-                      ])
+                      adopt.adopt_status === 1 ? (vue.openBlock(), vue.createElementBlock(
+                        vue.Fragment,
+                        { key: 0 },
+                        [
+                          vue.createCommentVNode(" 图片 "),
+                          vue.createElementVNode("img", {
+                            src: imagePrefix.value + adopt.adopt_image,
+                            alt: "",
+                            class: "pet-img"
+                          }, null, 8, ["src"]),
+                          vue.createCommentVNode(" 标题 "),
+                          vue.createElementVNode(
+                            "view",
+                            { class: "title" },
+                            vue.toDisplayString(adopt.adopt_name) + "，求领养~",
+                            1
+                            /* TEXT */
+                          ),
+                          vue.createCommentVNode(" 品种，年龄，发布时间 "),
+                          vue.createElementVNode("view", { class: "describe" }, [
+                            vue.createCommentVNode(" 宠物信息 "),
+                            vue.createElementVNode(
+                              "view",
+                              { class: "" },
+                              vue.toDisplayString(adopt.adopt_sex === 1 ? "男" : "女") + "|出生:" + vue.toDisplayString(adopt.adopt_birthday),
+                              1
+                              /* TEXT */
+                            ),
+                            vue.createElementVNode(
+                              "view",
+                              {
+                                class: "adopt-info",
+                                style: { "overflow": "hidden" }
+                              },
+                              vue.toDisplayString(adopt.adopt_description),
+                              1
+                              /* TEXT */
+                            )
+                          ])
+                        ],
+                        64
+                        /* STABLE_FRAGMENT */
+                      )) : vue.createCommentVNode("v-if", true)
                     ], 8, ["onClick"]);
                   }),
                   256
@@ -27448,20 +27493,7 @@ ${i3}
               /* NEED_PATCH */
             ), [
               [vue.vShow, selectKey.value === 2]
-            ]),
-            vue.createVNode(
-              _component_uni_fab,
-              {
-                ref: "fab",
-                horizontal: "right",
-                vertical: "bottom",
-                popMenu: false,
-                onTrigger: trigger
-              },
-              null,
-              512
-              /* NEED_PATCH */
-            )
+            ])
           ],
           64
           /* STABLE_FRAGMENT */
@@ -28523,7 +28555,7 @@ ${i3}
         const day = String(now2.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
       };
-      const evaData = vue.reactive({
+      const evaData = vue.ref({
         service_comment_avatar: userStore.user.user_avatar,
         service_comment_name: userStore.user.user_name,
         service_comment_star: 0,
@@ -28534,20 +28566,18 @@ ${i3}
       });
       const evaluateHandler = (service_id, service_order_id) => {
         popup.value.open("center");
-        evaData.service_id = service_id;
-        evaData.service_comment_date = getCurrentTime();
-        evaData.service_order_id = service_order_id;
+        evaData.value.service_id = service_id;
+        evaData.value.service_comment_date = getCurrentTime();
+        evaData.value.service_order_id = service_order_id;
       };
       const evaService = async () => {
-        const result = await evalServiceAPI(evaData);
-        formatAppLog("log", "at pages/my/ServiceOrder.vue:163", result);
+        const result = await evalServiceAPI(evaData.value);
         if (result.code === 2e3) {
           uni.showToast({
             title: "评价成功"
           });
           getData();
-          popup.value.close();
-          evaData = {
+          evaData.value = {
             service_comment_avatar: userStore.user.user_avatar,
             service_comment_name: userStore.user.user_name,
             service_comment_star: 0,
@@ -28556,6 +28586,7 @@ ${i3}
             service_comment_content: "",
             service_order: ""
           };
+          popup.value.close();
           return;
         }
         uni.showToast({
@@ -28667,7 +28698,7 @@ ${i3}
                   vue.createElementVNode("view", { class: "top" }, [
                     vue.createElementVNode("view", { class: "avatar" }, [
                       vue.createElementVNode("img", {
-                        src: imagePrefix.value + evaData.service_comment_avatar,
+                        src: imagePrefix.value + evaData.value.service_comment_avatar,
                         alt: ""
                       }, null, 8, ["src"])
                     ]),
@@ -28675,14 +28706,14 @@ ${i3}
                       vue.createElementVNode(
                         "view",
                         { class: "name" },
-                        "用户名:" + vue.toDisplayString(evaData.service_comment_name),
+                        "用户名:" + vue.toDisplayString(evaData.value.service_comment_name),
                         1
                         /* TEXT */
                       ),
                       vue.createElementVNode("view", { class: "star" }, [
                         vue.createVNode(_component_uni_rate, {
-                          modelValue: evaData.service_comment_star,
-                          "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => evaData.service_comment_star = $event)
+                          modelValue: evaData.value.service_comment_star,
+                          "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => evaData.value.service_comment_star = $event)
                         }, null, 8, ["modelValue"])
                       ])
                     ])
@@ -28690,8 +28721,8 @@ ${i3}
                   vue.createElementVNode("view", { class: "bottom" }, [
                     vue.createVNode(_component_uni_easyinput, {
                       type: "textarea",
-                      modelValue: evaData.service_comment_content,
-                      "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => evaData.service_comment_content = $event),
+                      modelValue: evaData.value.service_comment_content,
+                      "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => evaData.value.service_comment_content = $event),
                       placeholder: "请输入内容"
                     }, null, 8, ["modelValue"]),
                     vue.createElementVNode("button", {
@@ -28714,11 +28745,11 @@ ${i3}
     }
   };
   const PagesMyServiceOrder = /* @__PURE__ */ _export_sfc(_sfc_main$4, [["__scopeId", "data-v-7e038925"], ["__file", "D:/graduationProject/pet-front-end/pages/my/ServiceOrder.vue"]]);
-  const _imports_0 = "/assets/person_default.a5d78641.png";
   const _sfc_main$3 = {
     __name: "DetailAdopt",
     setup(__props) {
       const adoptId = vue.ref("");
+      const imagePrefix = vue.ref(devUrl + "/pet_uploads/");
       const buttonGroup = vue.ref([
         {
           text: "在线咨询",
@@ -28748,7 +28779,7 @@ ${i3}
       };
       const getData = async (adopt_id) => {
         const result = await getAdoptOneAPI(adopt_id);
-        formatAppLog("log", "at pages/adopt/DetailAdopt.vue:83", result);
+        formatAppLog("log", "at pages/adopt/DetailAdopt.vue:88", result);
         if (result.code === 2e3) {
           info.value = result.data;
         }
@@ -28765,104 +28796,98 @@ ${i3}
       });
       return (_ctx, _cache) => {
         const _component_uni_goods_nav = resolveEasycom(vue.resolveDynamicComponent("uni-goods-nav"), __easycom_0$6);
-        return vue.openBlock(), vue.createElementBlock(
-          vue.Fragment,
-          null,
-          [
-            vue.createElementVNode("view", { class: "top" }, [
-              vue.createElementVNode("image", {
-                src: _imports_0,
-                mode: ""
-              })
-            ]),
-            vue.createElementVNode("view", { class: "main" }, [
-              vue.createElementVNode(
-                "h2",
-                { class: "header-adopt" },
-                vue.toDisplayString(info.value.adopt_name),
-                1
-                /* TEXT */
-              ),
-              vue.createElementVNode("view", { class: "one" }, [
-                vue.createElementVNode("view", { class: "name" }, [
-                  vue.createTextVNode("姓名："),
-                  vue.createElementVNode(
-                    "text",
-                    { style: { "color": "black" } },
-                    vue.toDisplayString(info.value.adopt_name),
-                    1
-                    /* TEXT */
-                  )
-                ]),
-                vue.createElementVNode("view", { class: "sex" }, [
-                  vue.createTextVNode("出生："),
-                  vue.createElementVNode(
-                    "text",
-                    { style: { "color": "black" } },
-                    vue.toDisplayString(info.value.adopt_birthday),
-                    1
-                    /* TEXT */
-                  )
-                ])
+        return vue.openBlock(), vue.createElementBlock("view", null, [
+          vue.createElementVNode("view", { class: "top" }, [
+            vue.createElementVNode("image", {
+              src: imagePrefix.value + info.value.adopt_image,
+              mode: "scaleToFill"
+            }, null, 8, ["src"])
+          ]),
+          vue.createElementVNode("view", { class: "main" }, [
+            vue.createElementVNode(
+              "h2",
+              { class: "header-adopt" },
+              vue.toDisplayString(info.value.adopt_name),
+              1
+              /* TEXT */
+            ),
+            vue.createElementVNode("view", { class: "one" }, [
+              vue.createElementVNode("view", { class: "name" }, [
+                vue.createTextVNode("姓名："),
+                vue.createElementVNode(
+                  "text",
+                  { style: { "color": "black" } },
+                  vue.toDisplayString(info.value.adopt_name),
+                  1
+                  /* TEXT */
+                )
               ]),
-              vue.createElementVNode("view", { class: "one" }, [
-                vue.createElementVNode("view", { class: "name" }, [
-                  vue.createTextVNode("品种："),
-                  vue.createElementVNode(
-                    "text",
-                    { style: { "color": "black" } },
-                    vue.toDisplayString(info.value.adopt_var),
-                    1
-                    /* TEXT */
-                  )
-                ]),
-                vue.createElementVNode("view", { class: "sex" }, [
-                  vue.createTextVNode("性别："),
-                  vue.createElementVNode(
-                    "text",
-                    { style: { "color": "black" } },
-                    vue.toDisplayString(info.value.adopt_sex ? "男" : "女"),
-                    1
-                    /* TEXT */
-                  )
-                ])
-              ]),
-              vue.createElementVNode("view", { class: "one" }, [
-                vue.createElementVNode("view", { class: "address" }, [
-                  vue.createTextVNode("地区： "),
-                  vue.createElementVNode(
-                    "text",
-                    { style: { "color": "black" } },
-                    vue.toDisplayString(info.value.adopt_address),
-                    1
-                    /* TEXT */
-                  )
-                ])
+              vue.createElementVNode("view", { class: "sex" }, [
+                vue.createTextVNode("出生："),
+                vue.createElementVNode(
+                  "text",
+                  { style: { "color": "black" } },
+                  vue.toDisplayString(info.value.adopt_birthday),
+                  1
+                  /* TEXT */
+                )
               ])
             ]),
-            vue.createElementVNode("view", { class: "describe" }, [
-              vue.createElementVNode("h3", { class: "" }, "宠物描述"),
-              vue.createElementVNode(
-                "view",
-                { class: "detail" },
-                vue.toDisplayString(info.value.adopt_description),
-                1
-                /* TEXT */
-              )
+            vue.createElementVNode("view", { class: "one" }, [
+              vue.createElementVNode("view", { class: "name" }, [
+                vue.createTextVNode("品种："),
+                vue.createElementVNode(
+                  "text",
+                  { style: { "color": "black" } },
+                  vue.toDisplayString(info.value.adopt_var),
+                  1
+                  /* TEXT */
+                )
+              ]),
+              vue.createElementVNode("view", { class: "sex" }, [
+                vue.createTextVNode("性别："),
+                vue.createElementVNode(
+                  "text",
+                  { style: { "color": "black" } },
+                  vue.toDisplayString(info.value.adopt_sex ? "男" : "女"),
+                  1
+                  /* TEXT */
+                )
+              ])
             ]),
-            vue.createElementVNode("view", { class: "operation" }, [
-              vue.createVNode(_component_uni_goods_nav, {
-                fill: true,
-                "button-group": buttonGroup.value,
-                onClick: _ctx.onClick,
-                onButtonClick: buttonClick,
-                options: options.value
-              }, null, 8, ["button-group", "onClick", "options"])
+            vue.createElementVNode("view", { class: "one" }, [
+              vue.createElementVNode("view", { class: "address" }, [
+                vue.createTextVNode("地区： "),
+                vue.createElementVNode(
+                  "text",
+                  { style: { "color": "black" } },
+                  vue.toDisplayString(info.value.adopt_address),
+                  1
+                  /* TEXT */
+                )
+              ])
             ])
-          ],
-          64
-          /* STABLE_FRAGMENT */
-        );
+          ]),
+          vue.createElementVNode("view", { class: "describe" }, [
+            vue.createElementVNode("h3", { class: "" }, "宠物描述"),
+            vue.createElementVNode(
+              "view",
+              { class: "detail" },
+              vue.toDisplayString(info.value.adopt_description),
+              1
+              /* TEXT */
+            )
+          ]),
+          vue.createElementVNode("view", { class: "operation" }, [
+            vue.createVNode(_component_uni_goods_nav, {
+              fill: true,
+              "button-group": buttonGroup.value,
+              onClick: _ctx.onClick,
+              onButtonClick: buttonClick,
+              options: options.value
+            }, null, 8, ["button-group", "onClick", "options"])
+          ])
+        ]);
       };
     }
   };

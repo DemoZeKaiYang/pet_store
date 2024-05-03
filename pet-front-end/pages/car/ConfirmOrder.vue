@@ -1,7 +1,7 @@
 <template>
   <view class="pay-page">
     <!-- 展示默认地址 -->
-    <view class="order_address" @tap="selectAddress">
+    <view class="order_address" @tap="selectAddress" v-if="showAddress">
       <view class="address_box">
         <view class="weizhi_icon">
           <icon-base type="dizhiguanli" :color="'#2979FF'" :size="50"></icon-base>
@@ -25,7 +25,7 @@
       </view>
     </view>
 
-    <view class="address-box" v-if="!showAddress">
+    <view class="address-box" v-if="!showAddress" @tap="addAddress">
       <view class="address-icon"
         ><u-icon name="plus-circle" color="#999" size="36rpx"></u-icon
       ></view>
@@ -103,7 +103,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { useCarStore } from '@/stores/car.js'
 import { devUrl } from '@/config.js'
 import request from '@/utils/request'
@@ -148,6 +148,7 @@ const selectAddress = () => {
 //修改地址
 const updateAddress = (obj) => {
   address.value = obj
+  
 }
 
 //确认订单
@@ -171,10 +172,8 @@ const payHandler = async () => {
     order_number: orderNumber.value,
     order_price: carStore.sumPrice,
   }
-  console.log(obj.goodList);
   const result = await confirmOrder(obj)
   if (result.code === 2000) {
-    
     //对后端返回的订单存储到orderStore中
     orderStore.updateOrder(result.data)
 
@@ -194,7 +193,9 @@ const payHandler = async () => {
     return uni.showToast({ title: '确认订单失败,请联系客服', icon: 'none' })
   }
 }
-
+const addAddress = () => {
+  uni.navigateTo({ url: '/pages/my/EditAddress' })
+}
 //支付处理
 onMounted(() => {
   orderTime.value = getCurrentTimeFormatted()
@@ -203,6 +204,7 @@ onMounted(() => {
 })
 onLoad(() => {
   uni.$on('confirmAddress', updateAddress)
+  uni.$on('confirmOrderAddress', getDefaultAddress)
 })
 </script>
 

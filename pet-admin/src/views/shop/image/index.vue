@@ -15,17 +15,12 @@
   <el-card class='contain'>
     <div class='title'>
       <h2>商品名称</h2>
-      <h2>轮播图1</h2>
-      <h2>轮播图2</h2>
-      <h2>轮播图3</h2>
-      <h2>长图1</h2>
-      <h2>长图2</h2>
-      <h2>长图3</h2>
+      <h2>图片</h2>
       <h2>操作</h2>
     </div>
     <div class='image-contain' v-for='(item1,index) in tableData' :key='index'>
       <div class='image'>
-        <h2>{{ item1[0].good.good_name }}</h2>
+        <h2>{{ item1.good_name }}</h2>
       </div>
       <div class='image' v-for='item in item1' :key='item.good_image_id' @click='handlerEdit(item)'>
         <img :src='imagePrefix+item.good_image_url'>

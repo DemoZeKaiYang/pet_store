@@ -28,7 +28,7 @@
 
       <!-- 富文本 -->
       <el-form-item label="文章内容 :" size="large" prop="article_content">
-        <div style="border: 1px solid #ccc">
+        <div style="border: 1px solid #ccc" v-if="dialogFormVisible">
           <Toolbar
             style="border-bottom: 1px solid #ccc"
             :editor="editorRef"
@@ -64,6 +64,8 @@ import { addArticleAPI, updateArticleAPI, uploadArticleAPI } from '@/apis/articl
 import { useAdminStore } from '@/stores/admin'
 const props = defineProps(['dialogFormVisible', 'editData'])
 //富文本
+// 编辑器实例，必须用 shallowRef
+const editorRef = shallowRef()
 const adminStore = useAdminStore()
 const emit = defineEmits(['cancelDialog', 'renderData'])
 const toolbarConfig = {}
@@ -84,9 +86,6 @@ const editorConfig = {
 
 //富文本
 
-// 编辑器实例，必须用 shallowRef
-const editorRef = shallowRef()
-
 const formData = ref({
   article_id: '',
   article_content: '',
@@ -102,9 +101,6 @@ const isAdd = ref(true)
 
 //实例
 const formRef = ref()
-
-//宠物种类
-const options = ref([])
 //校验规则
 const rules = reactive({
   article_content: [{ required: true, message: '请输入文章内容', trigger: 'blur' }],
@@ -116,7 +112,6 @@ const rules = reactive({
 //取消
 const cancelHandler = () => {
   resetFormData()
-  formRef.value.resetFields()
   emit('cancelDialog')
 }
 const resetFormData = () => {
@@ -127,6 +122,7 @@ const resetFormData = () => {
     article_image: '',
     article_title: ''
   }
+  formRef.value.resetFields()
 }
 
 //确认
@@ -167,7 +163,6 @@ const getFile = async (uploadFile, uploadFiles) => {
   const fd = new FormData()
   fd.append('article_image', uploadFile.raw)
   const result = await uploadArticleAPI(fd)
-  console.log(result)
   if (result.errno === 0) {
     formData.value.article_image = result.data.url
   }

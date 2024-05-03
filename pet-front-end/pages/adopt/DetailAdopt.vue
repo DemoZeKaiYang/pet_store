@@ -1,45 +1,48 @@
 <template>
-  <view class="top">
-    <image src="../home/components/person_default.png" mode=""></image>
-  </view>
-  <view class="main">
-    <h2 class="header-adopt">{{ info.adopt_name }}</h2>
-    <view class="one">
-      <view class="name"
-        >姓名：<text style="color: black">{{ info.adopt_name }}</text>
+  <view  >
+    <view class="top">
+      <image :src="imagePrefix+info.adopt_image" mode="scaleToFill" ></image>
+    </view>
+    <view class="main">
+      <h2 class="header-adopt">{{ info.adopt_name }}</h2>
+      <view class="one">
+        <view class="name"
+          >姓名：<text style="color: black">{{ info.adopt_name }}</text>
+        </view>
+        <view class="sex"
+          >出生：<text style="color: black">{{ info.adopt_birthday }}</text>
+        </view>
       </view>
-      <view class="sex"
-        >出生：<text style="color: black">{{ info.adopt_birthday }}</text>
+      <view class="one">
+        <view class="name"
+          >品种：<text style="color: black">{{ info.adopt_var }}</text>
+        </view>
+        <view class="sex"
+          >性别：<text style="color: black">{{ info.adopt_sex ? '男' : '女' }}</text>
+        </view>
+      </view>
+      <view class="one">
+        <view class="address"
+          >地区： <text style="color: black">{{ info.adopt_address }}</text>
+        </view>
       </view>
     </view>
-    <view class="one">
-      <view class="name"
-        >品种：<text style="color: black">{{ info.adopt_var }}</text>
-      </view>
-      <view class="sex"
-        >性别：<text style="color: black">{{ info.adopt_sex ? '男' : '女' }}</text>
-      </view>
+    <view class="describe">
+      <h3 class="">宠物描述</h3>
+      <view class="detail">{{ info.adopt_description }}</view>
     </view>
-    <view class="one">
-      <view class="address"
-        >地区： <text style="color: black">{{ info.adopt_address }}</text>
-      </view>
+    
+    <view class="operation">
+      <uni-goods-nav
+        :fill="true"
+        :button-group="buttonGroup"
+        @click="onClick"
+        @buttonClick="buttonClick"
+        :options="options"
+      />
     </view>
   </view>
-  <view class="describe">
-    <h3 class="">宠物描述</h3>
-    <view class="detail">{{ info.adopt_description }}</view>
-  </view>
-
-  <view class="operation">
-    <uni-goods-nav
-      :fill="true"
-      :button-group="buttonGroup"
-      @click="onClick"
-      @buttonClick="buttonClick"
-      :options="options"
-    />
-  </view>
+ 
 </template>
 
 <script setup>
@@ -47,7 +50,9 @@ import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { getAdoptOneAPI } from '@/apis/adopt.js'
 import { reqParams } from '../../utils/reqParams'
+import { devUrl } from '@/config';
 const adoptId = ref('')
+const imagePrefix=ref(devUrl+'/pet_uploads/')
 const buttonGroup = ref([
   {
     text: '在线咨询',
@@ -101,6 +106,12 @@ onLoad((query) => {
 <style scoped lang="scss">
 page {
   background-color: #f3f5f9;
+}
+
+.top{
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .main {
   margin: 0 25rpx;

@@ -41,7 +41,7 @@ const getServiceOrder = async (req, res) => {
   if (!req.query.user_id) return res.json({ code: 2001, message: '获取服务订单失败,没有传递用户id问题' })
 
   try {
-    const result = await serviceOrderModel.findAll({ where: { user_id: req.query.user_id } })
+    const result = await serviceOrderModel.findAll({ where: { user_id: req.query.user_id }, order: [['service_time', 'DESC']] })
     const dataArr = result.map((item) => {
       return {
         ...item.dataValues,

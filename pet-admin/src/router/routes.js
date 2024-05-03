@@ -90,7 +90,6 @@ const routes = [
               title: '地址管理'
             }
           }
-
         ]
       },
       {
@@ -140,7 +139,7 @@ const routes = [
             meta: {
               title: '商品图片'
             }
-          },
+          }
         ]
       },
       {
@@ -165,14 +164,16 @@ const routes = [
             meta: {
               title: '服务图片'
             }
-
           }
-
         ]
       }
     ]
   },
-
+  {
+    path: '',
+    name: '',
+    redirect: { name: 'managerpet' }
+  },
   {
     path: '/login',
     name: 'login',
@@ -180,6 +181,11 @@ const routes = [
     meta: {
       title: '登录'
     }
+  },
+  {
+    path: '/:catchAll(.*)',
+    name: 'not-found',
+    component: () => import('@/views/404.vue')
   }
 ]
 

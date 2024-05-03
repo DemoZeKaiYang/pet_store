@@ -11,7 +11,6 @@
 </template>
 
 <script setup>
-
 import Menu from './components/Menu.vue'
 import LayoutHeader from './components/LayoutHeader.vue'
 </script>

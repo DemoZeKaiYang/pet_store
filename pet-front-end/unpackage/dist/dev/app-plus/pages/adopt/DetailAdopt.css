@@ -598,6 +598,11 @@
 body[data-v-277421ac] {
   background-color: #f3f5f9;
 }
+.top[data-v-277421ac] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .main[data-v-277421ac] {
   margin: 0 0.78125rem;
   border-radius: 20px;

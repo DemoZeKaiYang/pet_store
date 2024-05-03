@@ -2,7 +2,10 @@
   <view class="">
     <view class="total" v-for="item in articleData" @click="gotoDetailArticle(item.article_id)">
       <view class="left">
-        <rich-text :nodes="item.article_content" class="top"></rich-text>
+        <h2>{{item.article_title}}</h2>
+        <view class="top">
+          <rich-text :nodes="item.article_content" style="overflow: hidden"></rich-text>
+        </view>
         <view class="bto">
           <view class="timer"> {{ item.article_date }} </view>
         </view>
@@ -28,7 +31,7 @@ const getArticleData = async () => {
 }
 const gotoDetailArticle = async (article_id) => {
   const url = reqParams('/pages/adopt/DetailArticle', { article_id })
-  uni.navigateTo({url})
+  uni.navigateTo({ url })
 }
 onMounted(() => {
   getArticleData()
@@ -36,8 +39,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-// 740
-// 440
+
 .total {
   background-color: #ffffff;
   padding: 20rpx;
@@ -47,11 +49,12 @@ onMounted(() => {
 
   .left {
     width: 410rpx;
+    overflow: hidden;
     .top {
-      height: 160rpx;
-      width: 500rpx;
-      height: 500rpx;
+      height: 100rpx;
+      width: 400rpx;
       overflow: hidden;
+      box-sizing: border-box;
     }
     .bto {
       display: flex;

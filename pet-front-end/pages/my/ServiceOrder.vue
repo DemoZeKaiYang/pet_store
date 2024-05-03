@@ -140,7 +140,7 @@ const getCurrentTime = () => {
   return `${year}-${month}-${day}`
 }
 
-const evaData = reactive({
+const evaData = ref({
   service_comment_avatar: userStore.user.user_avatar,
   service_comment_name: userStore.user.user_name,
   service_comment_star: 0,
@@ -151,23 +151,22 @@ const evaData = reactive({
 })
 const evaluateHandler = (service_id, service_order_id) => {
   popup.value.open('center')
-  evaData.service_id = service_id
-  evaData.service_comment_date = getCurrentTime()
-  evaData.service_order_id = service_order_id
+  evaData.value.service_id = service_id
+  evaData.value.service_comment_date = getCurrentTime()
+  evaData.value.service_order_id = service_order_id
 }
 //发请求评论
 
 //修改服务订单状态，添加评论
 const evaService = async () => {
-  const result = await evalServiceAPI(evaData)
-  console.log(result)
+  const result = await evalServiceAPI(evaData.value)
+  
   if (result.code === 2000) {
     uni.showToast({
       title: '评价成功',
     })
     getData()
-    popup.value.close()
-    evaData = {
+    evaData.value = {
       service_comment_avatar: userStore.user.user_avatar,
       service_comment_name: userStore.user.user_name,
       service_comment_star: 0,
@@ -176,6 +175,8 @@ const evaService = async () => {
       service_comment_content: '',
       service_order: '',
     }
+    popup.value.close()
+
     return
   }
   uni.showToast({

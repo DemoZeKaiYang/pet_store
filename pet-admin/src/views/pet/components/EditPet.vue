@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :model-value="dialogFormVisible" title="编辑种类" width="600" @close="cancelHandler">
+  <el-dialog :model-value="dialogFormVisible" title="编辑宠物" width="600" @close="cancelHandler">
     <el-form :model="formData" class="kind-form" :rules="rules" ref="formRef" show-message>
       <el-form-item label="宠物头像 :" size="large" prop="pet_avatar">
         <el-upload

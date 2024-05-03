@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :model-value="dialogFormVisible" title="编辑商品" width="1500" @close="cancelHandler">
+  <el-dialog :model-value="dialogFormVisible" title="编辑服务" width="1500" @close="cancelHandler">
     <el-form :model="formData" class="kind-form" :rules="rules" ref="formRef" show-message>
       <el-form-item label="服务名称 :" size="large" class="item" prop="service_name">
         <el-input v-model="formData.service_name" autocomplete="off" />
@@ -14,10 +14,9 @@
           style="width: 500px"
           min="1"
         />
-
       </el-form-item>
       <el-form-item label="服务描述 :" size="large" class="item" prop="service_detail_describe">
-        <el-input v-model="formData.service_detail_describe" autocomplete="off" type='textarea' />
+        <el-input v-model="formData.service_detail_describe" autocomplete="off" type="textarea" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -33,18 +32,18 @@
 
 <script setup>
 import { successMessage, failMessage } from '@/utils/message'
-import { updateServiceDetailAPI ,addServiceDetailAPI} from '@/apis/service/index.js'
+import { updateServiceDetailAPI, addServiceDetailAPI } from '@/apis/service/index.js'
 
 const props = defineProps(['dialogFormVisible', 'editData'])
 const emit = defineEmits(['cancelDialog', 'renderData'])
 
 //
 const formData = ref({
-  service_detail_id:"",
-  service_detail_describe:"",
-  service_price:0,
-  service_name:"",
-  service_id:''
+  service_detail_id: '',
+  service_detail_describe: '',
+  service_price: 0,
+  service_name: '',
+  service_id: ''
 })
 
 //是添加还是删除
@@ -56,13 +55,11 @@ const imagePrefix = ref(import.meta.env.VITE_API_URL + '/service_uploads/')
 //实例
 const formRef = ref()
 
-
-
 //校验规则
 const rules = reactive({
   service_detail_describe: [{ required: true, message: '请输入服务描述', trigger: 'blur' }],
   service_price: [{ required: true, message: '请输入服务价格', trigger: 'blur' }],
-  service_name: [{ required: true, message: '请输入服务名称', trigger: 'blur' }],
+  service_name: [{ required: true, message: '请输入服务名称', trigger: 'blur' }]
 })
 
 //取消
@@ -73,11 +70,11 @@ const cancelHandler = () => {
 
 const resetFormData = () => {
   formData.value = {
-    service_detail_id:"",
-    service_detail_describe:"",
-    service_price:0,
-    service_name:"",
-    service_id:''
+    service_detail_id: '',
+    service_detail_describe: '',
+    service_price: 0,
+    service_name: '',
+    service_id: ''
   }
   formRef.value.resetFields()
 }
@@ -126,22 +123,18 @@ watch(
   }
 )
 
-onMounted(() => {
-
-})
+onMounted(() => {})
 </script>
 
 <style scoped lang="scss">
-.image-contain{
+.image-contain {
   display: flex;
   justify-content: space-evenly;
-  .detail-image{
+  .detail-image {
     display: flex;
     flex-direction: column;
-
   }
 }
-
 
 :deep(.el-form-item__label) {
   font-size: 18px;
