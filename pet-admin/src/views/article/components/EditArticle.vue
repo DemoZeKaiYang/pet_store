@@ -74,7 +74,7 @@ const editorConfig = {
 
   MENU_CONF: {
     uploadImage: {
-      server: 'http://192.168.6.4:9000/admin/uploadArticle',
+      server: import.meta.env.VITE_API_URL + '/admin/uploadArticle',
       // 上传图片的配置
       fieldName: 'article_image',
       headers: {

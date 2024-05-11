@@ -1732,8 +1732,8 @@ if (uni.restoreGlobal) {
     }
   };
   const SelectItem = /* @__PURE__ */ _export_sfc(_sfc_main$16, [["__scopeId", "data-v-72203b0b"], ["__file", "D:/graduationProject/pet-front-end/pages/home/components/SelectItem.vue"]]);
-  const devUrl = "http://192.168.6.4:9000";
-  const WEBSOCKETURL = "ws://192.168.6.4:9000/chat";
+  const devUrl = "http://192.168.6.6:9000";
+  const WEBSOCKETURL = "ws://192.168.6.6:9000/chat";
   const _sfc_main$15 = {
     __name: "SelectType",
     props: ["title", "imgurl"],
@@ -2101,8 +2101,8 @@ if (uni.restoreGlobal) {
       return true;
     }
   }
-  function checkNotFocusedError(error2) {
-    if (error2 instanceof Error && error2.message.toLowerCase().includes("document is not focused")) {
+  function checkNotFocusedError(error) {
+    if (error instanceof Error && error.message.toLowerCase().includes("document is not focused")) {
       toastMessage('You need to activate the "Emulate a focused page" setting in the "Rendering" panel of devtools.', "warn");
       return true;
     }
@@ -2114,11 +2114,11 @@ if (uni.restoreGlobal) {
     try {
       await navigator.clipboard.writeText(JSON.stringify(pinia.state.value));
       toastMessage("Global state copied to clipboard.");
-    } catch (error2) {
-      if (checkNotFocusedError(error2))
+    } catch (error) {
+      if (checkNotFocusedError(error))
         return;
       toastMessage(`Failed to serialize the state. Check the console for more details.`, "error");
-      console.error(error2);
+      console.error(error);
     }
   }
   async function actionGlobalPasteState(pinia) {
@@ -2127,11 +2127,11 @@ if (uni.restoreGlobal) {
     try {
       pinia.state.value = JSON.parse(await navigator.clipboard.readText());
       toastMessage("Global state pasted from clipboard.");
-    } catch (error2) {
-      if (checkNotFocusedError(error2))
+    } catch (error) {
+      if (checkNotFocusedError(error))
         return;
       toastMessage(`Failed to deserialize the state from clipboard. Check the console for more details.`, "error");
-      console.error(error2);
+      console.error(error);
     }
   }
   async function actionGlobalSaveState(pinia) {
@@ -2139,9 +2139,9 @@ if (uni.restoreGlobal) {
       saveAs(new Blob([JSON.stringify(pinia.state.value)], {
         type: "text/plain;charset=utf-8"
       }), "pinia-state.json");
-    } catch (error2) {
+    } catch (error) {
       toastMessage(`Failed to export the state as JSON. Check the console for more details.`, "error");
-      console.error(error2);
+      console.error(error);
     }
   }
   let fileInput;
@@ -2178,9 +2178,9 @@ if (uni.restoreGlobal) {
       const { text, file } = result;
       pinia.state.value = JSON.parse(text);
       toastMessage(`Global state imported from "${file.name}".`);
-    } catch (error2) {
+    } catch (error) {
       toastMessage(`Failed to export the state as JSON. Check the console for more details.`, "error");
-      console.error(error2);
+      console.error(error);
     }
   }
   function formatDisplay(display) {
@@ -2402,8 +2402,8 @@ if (uni.restoreGlobal) {
                 value: store._getters.reduce((getters, key) => {
                   try {
                     getters[key] = store[key];
-                  } catch (error2) {
-                    getters[key] = error2;
+                  } catch (error) {
+                    getters[key] = error;
                   }
                   return getters;
                 }, {})
@@ -2530,7 +2530,7 @@ Only state can be modified.`);
             }
           });
         });
-        onError((error2) => {
+        onError((error) => {
           activeAction = void 0;
           api.addTimelineEvent({
             layerId: MUTATIONS_LAYER_ID,
@@ -2543,7 +2543,7 @@ Only state can be modified.`);
                 store: formatDisplay(store.$id),
                 action: formatDisplay(name),
                 args,
-                error: error2
+                error
               },
               groupId
             }
@@ -2960,17 +2960,17 @@ Only state can be modified.`);
         let ret;
         try {
           ret = action.apply(this && this.$id === $id ? this : store, args);
-        } catch (error2) {
-          triggerSubscriptions(onErrorCallbackList, error2);
-          throw error2;
+        } catch (error) {
+          triggerSubscriptions(onErrorCallbackList, error);
+          throw error;
         }
         if (ret instanceof Promise) {
           return ret.then((value) => {
             triggerSubscriptions(afterCallbackList, value);
             return value;
-          }).catch((error2) => {
-            triggerSubscriptions(onErrorCallbackList, error2);
-            return Promise.reject(error2);
+          }).catch((error) => {
+            triggerSubscriptions(onErrorCallbackList, error);
+            return Promise.reject(error);
           });
         }
         triggerSubscriptions(afterCallbackList, ret);
@@ -11420,21 +11420,21 @@ ${i3}
                 type: "maoliang",
                 title: "猫咪主粮",
                 icColor: "#fff",
-                onClick: _cache[1] || (_cache[1] = ($event) => selectType("563c3b0e-9362-467b-8937-924694e258c2"))
+                onClick: _cache[1] || (_cache[1] = ($event) => selectType("44f4caf1-1fc0-41d4-9199-b44e33bd7c63"))
               }),
               vue.createVNode(CategorySelect, {
                 bgColor: "#2979FF",
                 type: "lingshi",
                 title: "肉类零食",
                 icColor: "#fff",
-                onClick: _cache[2] || (_cache[2] = ($event) => selectType("32240347-9250-424e-b07b-83388d772c08"))
+                onClick: _cache[2] || (_cache[2] = ($event) => selectType("ddaa2cf0-9b48-4baa-8478-bdee6ffc0307"))
               }),
               vue.createVNode(CategorySelect, {
                 bgColor: "#2979FF",
                 type: "guantou",
                 title: "罐头湿粮",
                 icColor: "#fff",
-                onClick: _cache[3] || (_cache[3] = ($event) => selectType("1a5382dd-990e-4c71-891d-b617831e8931"))
+                onClick: _cache[3] || (_cache[3] = ($event) => selectType("72593b88-55a9-4283-919f-e7a4930b21bb"))
               }),
               vue.createVNode(CategorySelect, {
                 bgColor: "#2979FF",
@@ -27539,11 +27539,12 @@ ${i3}
           });
           if (response.data && response.data.status === "1" && response.data.count > 0) {
             hospitals.value = response.data.pois;
+            formatAppLog("log", "at pages/medical/index.vue:97", hospitals.value);
           } else {
             uni.showToast({ title: "未找到附近宠物医院", icon: "none" });
           }
         } catch (e2) {
-          formatAppLog("error", "at pages/medical/index.vue:99", "查询宠物医院出错", error);
+          formatAppLog("error", "at pages/medical/index.vue:102", "查询宠物医院出错", e2);
           uni.showToast({ title: "查询出错", icon: "none" });
         }
       };
@@ -27554,49 +27555,6 @@ ${i3}
           gaodeParamePOI2.value.sortrule = "distance";
         }
         getAddress();
-      };
-      const handlerGotoGaode = (item) => {
-        const updateLocation = item.location.split(",");
-        const location2 = updateLocation[1] + "," + updateLocation[0];
-        const origin = baidulocation.value;
-        const coord_type = "gcj02";
-        const title = address.value;
-        const content = item.name;
-        const slat = baidulocation.value.split(",")[0];
-        const slon = baidulocation.value.split(",")[1];
-        let hasBaiduMap = plus.runtime.isApplicationExist({
-          pname: "com.baidu.BaiduMap",
-          action: "baidumap://"
-        });
-        let hasAmap = plus.runtime.isApplicationExist({
-          pname: "com.autonavi.minimap",
-          action: "androidamap://"
-        });
-        let urlBaiduMap = `baidumap://map/direction?origin=name:${title}|latlng:${origin}&destination=name:${content}|latlng:${location2}&coord_type=${coord_type}&src=chongwujiayuan`;
-        let urlAmap = `androidamap://route/plan/?slat=${slat}&slon=${slon}sname=${title}&dlat=${updateLocation[1]}&dlon=${updateLocation[0]}&dname=${content}sourceApplication=chongwujiayuan&dev=0`;
-        if (hasAmap && hasBaiduMap) {
-          plus.nativeUI.actionSheet(
-            {
-              title: "选择地图应用",
-              cancel: "取消",
-              buttons: [{ title: "百度地图" }, { title: "高德地图" }]
-            },
-            function(e2) {
-              switch (e2.index) {
-                case 1:
-                  plus.runtime.openURL(urlBaiduMap);
-                  break;
-                case 2:
-                  plus.runtime.openURL(urlAmap);
-                  break;
-              }
-            }
-          );
-        } else if (hasAmap) {
-          plus.runtime.openURL(urlAmap);
-        } else if (hasBaiduMap) {
-          plus.runtime.openURL(urlBaiduMap);
-        }
       };
       vue.onMounted(() => {
         getAddress();
@@ -27628,7 +27586,6 @@ ${i3}
               vue.createElementVNode("view", { class: "search" })
             ]),
             vue.createElementVNode("view", { class: "set-search" }, [
-              vue.createCommentVNode(` :class="{ active: parame.sortrule === 'weight'?true:false }" `),
               vue.createElementVNode("view", {
                 class: "commend",
                 onClick: _cache[0] || (_cache[0] = ($event) => handlerChange(1))
@@ -27640,7 +27597,6 @@ ${i3}
                   color: "#919191"
                 })
               ]),
-              vue.createCommentVNode(`  :class="{ active: parame.sortrule === 'distance' }" `),
               vue.createElementVNode("view", {
                 class: "distance",
                 onClick: _cache[1] || (_cache[1] = ($event) => handlerChange(2))
@@ -27660,15 +27616,16 @@ ${i3}
                 vue.renderList(hospitals.value, (item, index) => {
                   return vue.openBlock(), vue.createElementBlock("view", {
                     class: "hospital",
-                    onClick: ($event) => handlerGotoGaode(item)
+                    onClick: ($event) => _ctx.handlerGotoGaode(item)
                   }, [
                     vue.createElementVNode("view", { class: "left" }, [
                       vue.createCommentVNode(" 医院图片 "),
-                      vue.createElementVNode("img", {
+                      item.photos ? (vue.openBlock(), vue.createElementBlock("img", {
+                        key: 0,
                         src: item.photos[0].url,
                         alt: "",
                         class: "hospital-image"
-                      }, null, 8, ["src"])
+                      }, null, 8, ["src"])) : vue.createCommentVNode("v-if", true)
                     ]),
                     vue.createCommentVNode(" 医院信息 "),
                     vue.createElementVNode("view", { class: "right" }, [
@@ -29347,7 +29304,8 @@ ${i3}
     "/pages/category/productdetail",
     "/pages/home/DetailService",
     "/pages/detail/detail",
-    "/pages/community/PublishContent"
+    "/pages/community/PublishContent",
+    "/pages/medical/index"
   ];
   const loginPage = "/pages/login/login";
   function initPermission() {

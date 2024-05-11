@@ -28,7 +28,7 @@
       <el-table-column type="selection" width="80" label="序号" fixed />
       <el-table-column label="文章标题" width="200" prop="article_title" />
       <el-table-column label="文章日期" width="200" prop="article_date" />
-      <el-table-column label="文章内容" width="600" prop="article_content" />
+      <el-table-column label="文章内容" width="600" prop="article_content" show-overflow-tooltip="true" />
       <el-table-column label="文章封面" prop="article_image" width="200">
         <template #default="scope">
           <el-image style="width: 100px; height: 100px" :src="scope.row.article_image" :fit="fill" />

@@ -8,7 +8,7 @@ applyModel.belongsTo(adoptModel, { foreignKey: 'adopt_id' })
 const getApply = async (req, res) => {
   try {
     const result = await applyModel.findAll({
-      include: [{ model: userModel }]
+      include: [{ model: userModel }, { model: adoptModel }]
     })
     const data = result.map((item) => item.dataValues)
     return res.json({ code: 2000, message: '获取成功', data })
@@ -23,7 +23,7 @@ const AdminSearchAdopt = async (req, res) => {
 
   try {
     const result = await adoptModel.findAll({ where: { adopt_name: { [Op.like]: `%${req.body.search}%` } } })
-    console.log(result)
+
     const arr = result.map((item) => item.dataValues)
     return res.json({ code: 2000, message: '获取成功', data: arr })
   } catch (error) {

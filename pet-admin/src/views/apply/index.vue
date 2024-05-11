@@ -78,7 +78,7 @@
 </template>
 
 <script setup>
-import { delMessageBox } from '@/utils/messageBox.js'
+import { rejectMessageBox, accessMessageBox } from '@/utils/messageBox.js'
 
 import { successMessage, failMessage } from '@/utils/message'
 import { searchAdoptAPI } from '@/apis/adopt/index.js'
@@ -127,7 +127,7 @@ const searchBtn = async () => {
 
 //编辑事件
 const handleEdit = async (index, row) => {
-  const confirmResult = await delMessageBox()
+  const confirmResult = await accessMessageBox()
   if (confirmResult) {
     const result = await updateApplyAPI({ apply_id: row.apply_id, status: '允许', adopt_id: row.adopt.adopt_id })
     if (result.code === 2000) {
@@ -154,7 +154,7 @@ const selectChange = (val) => {
 }
 const delKind = async (row) => {
   try {
-    const confirmResult = await delMessageBox()
+    const confirmResult = await rejectMessageBox()
     if (confirmResult) {
       const result = await updateApplyAPI({ apply_id: row.apply_id, status: '拒绝' })
       if (result.code === 2000) {

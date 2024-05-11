@@ -2,6 +2,7 @@ const goodImageModel = require('../model/GoodImageModel')
 const goodModel = require('../model/GoodModel')
 const { v4: uuidv4 } = require('uuid')
 const { Op } = require('sequelize')
+const goodCategoriesModel = require('../model/GoodCategoriesModel')
 goodImageModel.belongsTo(goodModel, { foreignKey: 'good_id' })
 const adminGetGoodImage = async (req, res) => {
   try {

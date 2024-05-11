@@ -1,45 +1,45 @@
 <template>
-  <el-card class='top-edit'>
-    <el-button type='primary' size='large' style='font-size: 20px' @click='addKind' disabled>添加用户</el-button>
-    <el-button type='danger' size='large' style='font-size: 20px' @click='delSelectKind' disabled>删除选中</el-button>
+  <el-card class="top-edit">
+    <el-button type="primary" size="large" style="font-size: 20px" @click="addKind" disabled>添加用户</el-button>
+    <el-button type="danger" size="large" style="font-size: 20px" @click="delSelectKind" disabled>删除选中</el-button>
     <!-- 搜索框 -->
     <el-input
-      v-model.trim='search'
-      placeholder='请输入要搜素的用户名称'
-      size='large'
-      class='pet-search'
-      prefix-icon='Search'
+      v-model.trim="search"
+      placeholder="请输入要搜素的用户名称"
+      size="large"
+      class="pet-search"
+      prefix-icon="Search"
     />
-    <el-button type='primary' size='large' style='font-size: 20px' @click='searchBtn'>搜索</el-button>
+    <el-button type="primary" size="large" style="font-size: 20px" @click="searchBtn">搜索</el-button>
   </el-card>
   <!-- 内容 -->
-  <el-card class='contain'>
+  <el-card class="contain">
     <el-table
-      ref='multipleTableRef'
-      :data='tableData'
-      style='width: 100%'
-      size='large'
-      :border='true'
+      ref="multipleTableRef"
+      :data="tableData"
+      style="width: 100%"
+      size="large"
+      :border="true"
       stripe
-      class='kind-table'
-      @selection-change='selectChange'
-      height='600'
+      class="kind-table"
+      @selection-change="selectChange"
+      height="600"
     >
-      <el-table-column type='selection' width='100' label='序号' fixed />
-      <el-table-column label='用户名称' width='200' prop='user_name' />
-      <el-table-column label='用户电话' width='120' prop='user_phone' />
-      <el-table-column label='用户生日' width='200' prop='user_birthday' />
-      <el-table-column label='用户个性签名' width='400' prop='user_signature' />
-      <el-table-column label='用户头像' prop='pet_avatar' width='200'>
-        <template #default='scope'>
-          <el-image style='width: 100px; height: 100px' :src='imagePrefix + scope.row.user_avatar' :fit='fill' />
+      <el-table-column type="selection" width="100" label="序号" fixed />
+      <el-table-column label="用户名称" width="200" prop="user_name" />
+      <el-table-column label="用户电话" width="120" prop="user_phone" />
+      <el-table-column label="用户生日" width="200" prop="user_birthday" />
+      <el-table-column label="用户个性签名" width="400" prop="user_signature" show-overflow-tooltip="true" />
+      <el-table-column label="用户头像" prop="pet_avatar" width="200">
+        <template #default="scope">
+          <el-image style="width: 100px; height: 100px" :src="imagePrefix + scope.row.user_avatar" :fit="fill" />
         </template>
       </el-table-column>
-      <el-table-column label='编辑' width='300'>
-        <template #default='scope'>
-          <el-button size='large' type='primary' @click='handleEdit(scope.$index, scope.row)'>编辑</el-button>
-          <el-button size='large' type='danger' @click='openDrawer(scope.row)'>修改密码</el-button>
-          <el-button size='large' type='info' disabled>删除</el-button>
+      <el-table-column label="编辑" width="300">
+        <template #default="scope">
+          <el-button size="large" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-button size="large" type="danger" @click="openDrawer(scope.row)">修改密码</el-button>
+          <el-button size="large" type="info" disabled>删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -47,38 +47,31 @@
 
   <!-- 编辑对话框 -->
   <EditUser
-    :dialogFormVisible='dialogFormVisible'
-    @cancelDialog='cancelDialog'
-    :editData='editData'
-    @renderData='getData'
+    :dialogFormVisible="dialogFormVisible"
+    @cancelDialog="cancelDialog"
+    :editData="editData"
+    @renderData="getData"
   ></EditUser>
 
-
   <!--  修改密码-->
-  <el-drawer
-    v-model='drawer'
-    title='修改密码'
-    direction='rtl'
-    :before-close='handlerClose'
-  >
-    <el-form :model='passwordForm' :rules='passwordRules' ref='pwdForm' :inline-message='true'>
-      <el-form-item label='旧密码' prop='old_password'>
-        <el-input v-model='passwordForm.old_password' size='large' autocomplete='off' show-password />
+  <el-drawer v-model="drawer" title="修改密码" direction="rtl" :before-close="handlerClose">
+    <el-form :model="passwordForm" :rules="passwordRules" ref="pwdForm" :inline-message="true">
+      <el-form-item label="旧密码" prop="old_password">
+        <el-input v-model="passwordForm.old_password" size="large" autocomplete="off" show-password />
       </el-form-item>
-      <el-form-item label='新密码' prop='new_password'>
-        <el-input v-model='passwordForm.new_password' size='large' autocomplete='off' show-password />
+      <el-form-item label="新密码" prop="new_password">
+        <el-input v-model="passwordForm.new_password" size="large" autocomplete="off" show-password />
       </el-form-item>
-      <el-form-item label='再次输入密码' prop='again_password'>
-        <el-input v-model='passwordForm.again_password' size='large' autocomplete='off' show-password />
+      <el-form-item label="再次输入密码" prop="again_password">
+        <el-input v-model="passwordForm.again_password" size="large" autocomplete="off" show-password />
       </el-form-item>
-      <el-button size='large' type='primary' @click='updatePassword'>修改密码</el-button>
-      <el-button size='large' type='primary'>取消修改</el-button>
+      <el-button size="large" type="primary" @click="updatePassword">修改密码</el-button>
+      <el-button size="large" type="primary">取消修改</el-button>
     </el-form>
   </el-drawer>
 </template>
 
 <script setup>
-
 import EditUser from './components/EditUser.vue'
 import { successMessage, failMessage } from '@/utils/message'
 
@@ -105,7 +98,6 @@ const editData = ref({})
 
 // 抽屉的显示
 const drawer = ref(false)
-
 
 //密码的表单
 const passwordForm = ref({
@@ -134,7 +126,7 @@ const updatePassword = async () => {
       if (result.code === 2000) {
         successMessage('修改成功')
         resetPasswordForm()
-        drawer.value=false
+        drawer.value = false
         return
       }
       if (result.code === 2002) return failMessage('修改失败，原密码错误')
@@ -143,10 +135,9 @@ const updatePassword = async () => {
   })
 }
 
-const handlerClose=()=>{
+const handlerClose = () => {
   resetPasswordForm()
-  drawer.value=false
-
+  drawer.value = false
 }
 const resetPasswordForm = () => {
   pwdForm.value.resetFields()
@@ -164,7 +155,6 @@ const getData = async () => {
     tableData.value = result.data
   }
 }
-
 
 //搜索框事件
 const searchBtn = async () => {
@@ -206,12 +196,9 @@ const selectChange = (val) => {
   selectData.value = val
 }
 
-
 // 密码的校验规则
 const passwordRules = reactive({
-  old_password: [
-    { required: true, message: '请输入原密码', trigger: 'blur' }
-  ],
+  old_password: [{ required: true, message: '请输入原密码', trigger: 'blur' }],
   new_password: [
     { required: true, message: '请输入新密码', trigger: 'blur' },
     {
@@ -249,7 +236,7 @@ onMounted(() => {
 })
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .contain {
   margin-top: 20px;
 

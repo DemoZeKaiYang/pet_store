@@ -30,7 +30,13 @@
       <el-table-column label="宠物出生" width="120" prop="adopt_birthday" />
       <el-table-column label="领养状态" width="120" prop="adopt_status" />
       <el-table-column label="宠物地区" width="200" prop="adopt_address" />
-      <el-table-column label="宠物描述" width="150" prop="adopt_description" class="description" />
+      <el-table-column
+        label="宠物描述"
+        width="150"
+        prop="adopt_description"
+        class="description"
+        show-overflow-tooltip="true"
+      />
       <el-table-column label="宠物性别" width="120" prop="adopt_sex" />
       <el-table-column label="领养用户" width="120" prop="user_id" />
       <el-table-column label="品种" width="120" prop="adopt_var" />

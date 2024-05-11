@@ -16,21 +16,21 @@
       type="maoliang"
       title="猫咪主粮"
       icColor="#fff"
-      @tap="selectType('563c3b0e-9362-467b-8937-924694e258c2')"
+      @tap="selectType('44f4caf1-1fc0-41d4-9199-b44e33bd7c63')"
     ></CategorySelect>
     <CategorySelect
       bgColor="#2979FF"
       type="lingshi"
       title="肉类零食"
       icColor="#fff"
-      @tap="selectType('32240347-9250-424e-b07b-83388d772c08')"
+      @tap="selectType('ddaa2cf0-9b48-4baa-8478-bdee6ffc0307')"
     ></CategorySelect>
     <CategorySelect
       bgColor="#2979FF"
       type="guantou"
       title="罐头湿粮"
       icColor="#fff"
-      @tap="selectType('1a5382dd-990e-4c71-891d-b617831e8931')"
+      @tap="selectType('72593b88-55a9-4283-919f-e7a4930b21bb')"
     ></CategorySelect>
 
     <CategorySelect

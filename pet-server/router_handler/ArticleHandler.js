@@ -4,8 +4,7 @@ const { v4: uuidv4 } = require('uuid')
 const articleModel = require('../model/ArticleModel')
 const { Op } = require('sequelize')
 addressModel.belongsTo(userModel, { foreignKey: 'user_id' })
-
-
+const { url } = require('../config')
 const getArticleAdmin = async (req, res) => {
   try {
     const result = await articleModel.findAll()
@@ -16,7 +15,6 @@ const getArticleAdmin = async (req, res) => {
     return res.json({ code: 2001, message: '获取数据失败' })
   }
 }
-
 
 //搜索文章标题
 const AdminSearchArticle = async (req, res) => {
@@ -81,10 +79,12 @@ const AdminDelArticle = async (req, res) => {
 const AdminUpdateArticle = async (req, res) => {
   try {
     const result = await articleModel.update(req.body, { where: { article_id: req.body.article_id } })
-    return result.length >= 0 ? res.json({ code: 2000, message: '修改成功' }) : res.json({
-      code: 2004,
-      message: '修改失败'
-    })
+    return result.length >= 0
+      ? res.json({ code: 2000, message: '修改成功' })
+      : res.json({
+          code: 2004,
+          message: '修改失败'
+        })
   } catch (error) {
     console.log(error)
     return res.json({ code: 2001, message: '修改失败' })
@@ -93,25 +93,23 @@ const AdminUpdateArticle = async (req, res) => {
 const uploadArticle = async (req, res) => {
   if (!req.file.filename) {
     return res.json({
-      'errno': 1, // 只要不等于 0 就行
-      'message': '上传图片失败'
+      errno: 1, // 只要不等于 0 就行
+      message: '上传图片失败'
     })
   }
 
   return res.json({
-    'errno': 0, // 注意：值是数字，不能是字符串
-    'data': {
-      url: 'http://192.168.6.4:9000/article_uploads/' + req.file.filename // 图片 src ，必须
+    errno: 0, // 注意：值是数字，不能是字符串
+    data: {
+      url: url + '/article_uploads/' + req.file.filename // 图片 src ，必须
     }
   })
 }
 
-
-const  getArticleContent=async(req,res)=>{
-
+const getArticleContent = async (req, res) => {
   try {
-    const {article_id}=req.body
-    const result = await articleModel.findAll({where:{article_id}})
+    const { article_id } = req.body
+    const result = await articleModel.findAll({ where: { article_id } })
     const arr = result.map((item) => item.dataValues)
     return res.json({ code: 2000, message: '获取数据成功', data: arr })
   } catch (error) {

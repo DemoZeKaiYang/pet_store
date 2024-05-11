@@ -10,11 +10,11 @@
     <view class="search"> </view>
   </view>
   <view class="set-search">
-    <!-- :class="{ active: parame.sortrule === 'weight'?true:false }" -->
+
     <view class="commend" @tap="handlerChange(1)">
       综合推荐 <uni-icons type="arrow-down" size="16" color="#919191"></uni-icons>
     </view>
-    <!--  :class="{ active: parame.sortrule === 'distance' }" -->
+
     <view class="distance" @tap="handlerChange(2)">
       距离优先 <uni-icons type="arrow-down" size="16" color="#919191"></uni-icons>
     </view>
@@ -24,7 +24,7 @@
     <view class="hospital" v-for="(item, index) in hospitals" @tap="handlerGotoGaode(item)">
       <view class="left">
         <!-- 医院图片 -->
-        <img :src="item.photos[0].url" alt="" class="hospital-image" />
+        <img :src="item.photos[0].url" alt="" class="hospital-image"  v-if="item.photos"/>
       </view>
       <!-- 医院信息 -->
       <view class="right">
@@ -75,6 +75,7 @@ const getAddress = async () => {
 
     if (!location) return
     const { latitude, longitude } = location
+    
     baidulocation.value = `${latitude},${longitude}`
     gaodelocation.value=`${longitude},${latitude}`
     address.value =
@@ -90,13 +91,15 @@ const getAddress = async () => {
       method: 'GET',
       data: gaodeParamePOI2.value,
     })
+
     if (response.data && response.data.status === '1' && response.data.count > 0) {
       hospitals.value = response.data.pois // 假设返回的数据结构中有 pois 字段包含医院信息
+       console.log(hospitals.value);
     } else {
       uni.showToast({ title: '未找到附近宠物医院', icon: 'none' })
     }
   } catch (e) {
-    console.error('查询宠物医院出错', error)
+    console.error('查询宠物医院出错', e)
     uni.showToast({ title: '查询出错', icon: 'none' })
   }
 }
@@ -126,6 +129,7 @@ const handlerGotoGaode = (item) => {
   const title=address.value
   // 终点名称
   const content=item.name
+  
   const slat=baidulocation.value.split(',')[0]
   const slon=baidulocation.value.split(',')[1]
   let hasBaiduMap = plus.runtime.isApplicationExist({
@@ -144,7 +148,7 @@ const handlerGotoGaode = (item) => {
 
   if (hasAmap && hasBaiduMap) {
     plus.nativeUI.actionSheet(
-      {
+       {
         title: '选择地图应用',
         cancel: '取消',
         buttons: [{ title: '百度地图' }, { title: '高德地图' }],

@@ -27,7 +27,7 @@
     >
       <el-table-column type="selection" width="100" label="序号" fixed />
       <el-table-column label="服务名称" width="120" prop="service_name" />
-      <el-table-column label="服务描述" width="400" prop="service_detail_describe" />
+      <el-table-column label="服务描述" width="400" prop="service_detail_describe" show-overflow-tooltip="true" />
       <el-table-column label="服务价格" width="150" prop="service_price" />
       <el-table-column label="封面图片" prop="service_images" width="500">
         <template #default="scope">

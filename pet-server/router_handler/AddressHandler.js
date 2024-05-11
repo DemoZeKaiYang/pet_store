@@ -166,8 +166,16 @@ const AdminUpdateAddress = async (req, res) => {
     return res.json({ code: 2002, message: '传递的数据有误' })
   }
   try {
-    const result = await addressModel.update(req.body, { where: { address_id: req.body.address_id } })
-    return result.length >= 0 ? res.json({ code: 2000, message: '修改成功' }) : res.json({ code: 2004, message: '修改失败' })
+    console.log(req.body)
+    //修改默认地址
+    if (req.body.address_default === 1) {
+      await addressModel.update({ address_default: 0 }, { where: { user_id: req.body.user_id } })
+      const result = await addressModel.update(req.body, { where: { address_id: req.body.address_id } })
+      return result.length >= 0 ? res.json({ code: 2000, message: '修改成功' }) : res.json({ code: 2004, message: '修改失败' })
+    } else {
+      const result = await addressModel.update(req.body, { where: { address_id: req.body.address_id } })
+      return result.length >= 0 ? res.json({ code: 2000, message: '修改成功' }) : res.json({ code: 2004, message: '修改失败' })
+    }
   } catch (error) {
     console.log(error)
     return res.json({ code: 2001, message: '修改失败' })

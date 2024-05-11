@@ -1,6 +1,6 @@
 const whiteList = ['/pages/login/login', '/pages/login/register', , '/pages/home/index', '/pages/shop/index',
   '/pages/category/index', '/pages/category/categoryproductlist', '/pages/category/productdetail',
-  '/pages/home/DetailService', '/pages/detail/detail', '/pages/community/PublishContent'
+  '/pages/home/DetailService', '/pages/detail/detail', '/pages/community/PublishContent','/pages/medical/index'
 ]
 
 

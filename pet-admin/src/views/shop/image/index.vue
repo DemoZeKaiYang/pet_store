@@ -1,47 +1,42 @@
 <template>
-  <el-card class='top-edit'>
-    <el-button type='primary' size='large' style='font-size: 20px' @click='add'>添加商品对应图片</el-button>
+  <el-card class="top-edit">
+    <el-button type="primary" size="large" style="font-size: 20px" @click="add">添加商品对应图片</el-button>
     <!-- 搜索框 -->
     <el-input
-      v-model.trim='search'
-      placeholder='请输入要搜素的商品名称'
-      size='large'
-      class='pet-search'
-      prefix-icon='Search'
+      v-model.trim="search"
+      placeholder="请输入要搜素的商品名称"
+      size="large"
+      class="pet-search"
+      prefix-icon="Search"
     />
-    <el-button type='primary' size='large' style='font-size: 20px' @click='searchBtn'>搜索</el-button>
+    <el-button type="primary" size="large" style="font-size: 20px" @click="searchBtn">搜索</el-button>
   </el-card>
   <!-- 内容 -->
-  <el-card class='contain'>
-    <div class='title'>
+  <el-card class="contain">
+    <div class="title">
       <h2>商品名称</h2>
       <h2>图片</h2>
       <h2>操作</h2>
     </div>
-    <div class='image-contain' v-for='(item1,index) in tableData' :key='index'>
-      <div class='image'>
-        <h2>{{ item1.good_name }}</h2>
+    <div class="image-contain" v-for="(item1, index) in tableData" :key="index">
+      <div class="image">
+        <h2>{{ item1[0].good.good_name }}</h2>
       </div>
-      <div class='image' v-for='item in item1' :key='item.good_image_id' @click='handlerEdit(item)'>
-        <img :src='imagePrefix+item.good_image_url'>
+      <div class="image" v-for="item in item1" :key="item.good_image_id" @click="handlerEdit(item)">
+        <img :src="imagePrefix + item.good_image_url" />
       </div>
-      <el-button type='danger' size='large' @click='handlerDel(item1[0].good_image_id)'>删除</el-button>
+      <el-button type="danger" size="large" @click="handlerDel(item1[0].good_image_id)">删除</el-button>
     </div>
   </el-card>
 
   <!-- 编辑对话框 -->
   <EditImage
-    :dialogFormVisible='dialogFormVisible'
-    @cancelDialog='cancelDialog'
-    :editData='editData'
-    @renderData='getData'
+    :dialogFormVisible="dialogFormVisible"
+    @cancelDialog="cancelDialog"
+    :editData="editData"
+    @renderData="getData"
   ></EditImage>
-  <AddImage
-    v-model='addDialogFormVisible'
-    @cancelAddDialog='cancelAddDialog'
-    @renderData='getData'
-  ></AddImage>
-
+  <AddImage v-model="addDialogFormVisible" @cancelAddDialog="cancelAddDialog" @renderData="getData"></AddImage>
 </template>
 
 <script setup>
@@ -49,7 +44,7 @@ import { delMessageBox } from '@/utils/messageBox.js'
 import EditImage from './components/EditImage.vue'
 import AddImage from './components/AddImage.vue'
 import { successMessage, failMessage } from '@/utils/message'
-import { delGoodAPI, searchGoodAPI } from '@/apis/shop/good/index.js'
+
 import { delGoodImageAPI, getGoodImageAPI, searchGoodImageAPI } from '@/apis/shop/good_image/index.js'
 //搜索框的数据
 const search = ref()
@@ -91,6 +86,7 @@ const searchBtn = async () => {
   const result = await searchGoodImageAPI(search.value)
   if (result.code === 2000) {
     tableData.value = result.data
+    console.log(tableData.value)
     successMessage('查询成功')
   } else {
     failMessage(result.message)
@@ -119,7 +115,7 @@ onMounted(() => {
 })
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .contain {
   margin-top: 20px;
 
@@ -155,7 +151,6 @@ onMounted(() => {
   margin-right: 20px;
 }
 
-
 .contain {
   .title {
     display: flex;
@@ -168,7 +163,6 @@ onMounted(() => {
     }
   }
 }
-
 
 .image-contain {
   width: 100%;
@@ -183,7 +177,7 @@ onMounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-
+    overflow: hidden;
     :hover {
       cursor: pointer;
     }
@@ -194,6 +188,5 @@ onMounted(() => {
       border-radius: 10px;
     }
   }
-
 }
 </style>
